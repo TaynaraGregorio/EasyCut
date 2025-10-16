@@ -264,7 +264,20 @@
         <div class="logo">EasyCut</div>
         <button class="btn btn-loja" onclick="window.location.href='CadastroBarbearia.html'">Cadastrar como Loja</button>
         <button class="btn btn-cliente" onclick="window.location.href='CadastroCliente.html'">Cadastrar como Cliente</button>
-        <a href="login.html" class="login-link">Já possui cadastro? Faça login</a>
-    </div>
-</body>
-</html>
+        <a href="Login.html" class="login-link">Já possui cadastro? Faça login</a>
+    <script>
+        // Verificar se usuário já está logado
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            
+            if (currentUser.email) {
+                // Usuário já logado, redirecionar para dashboard apropriado
+                const userType = currentUser.tipo || 'cliente';
+                if (userType === 'barbearia') {
+                    window.location.href = 'BarbeariaDashboard.html';
+                } else {
+                    window.location.href = 'ClienteDashboard.html';
+                }
+            }
+        });
+    </script>

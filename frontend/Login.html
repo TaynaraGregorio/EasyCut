@@ -512,14 +512,29 @@
         </div>
         
         <div class="back-link">
-            <a href="TelaInicial.html">
+            <a href="TelaInicial.html" onclick="return confirmVoltarLogin()">
                 <span>←</span>
                 <span>Voltar para início</span>
             </a>
         </div>
     </div>
 
+    <!-- EmailJS Script -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="assets/email-service-real.js"></script>
+    <script src="assets/emailjs-config.js"></script>
     <script>
+        // Função para confirmar se o usuário quer voltar para a página inicial
+        function confirmVoltarLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (email || password) {
+                return confirm('Você tem certeza que deseja voltar para a página inicial? Os dados preenchidos serão perdidos.');
+            }
+            return true;
+        }
+
         // Toggle password visibility
         function togglePassword() {
             const passwordInput = document.getElementById('password');
@@ -582,7 +597,7 @@
         }
         
         // Handle form submission
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const email = document.getElementById('email').value;
@@ -599,22 +614,36 @@
                 return;
             }
             
-            // Simulate login process
+            // Show loading state
             setLoading(true);
             
-            setTimeout(() => {
-                // Simulate API call
-                if (email === 'admin@easycut.com' && password === '123456') {
+            try {
+                // Authenticate user using email service
+                const result = emailService.authenticateUser(email, password);
+                
+                if (result.success) {
+                    // Save user data
+                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                    
                     showSuccess('Login realizado com sucesso! Redirecionando...');
                     setTimeout(() => {
-                        // Redirect to dashboard or main page
-                        window.location.href = 'TelaInicial.html';
+                        // Redirect based on user type
+                        const userType = result.user.tipo || 'cliente';
+                        if (userType === 'barbearia') {
+                            window.location.href = 'BarbeariaDashboard.html';
+                        } else {
+                            window.location.href = 'ClienteDashboard.html';
+                        }
                     }, 1500);
                 } else {
-                    showError('Email ou senha incorretos. Tente novamente.');
+                    showError(result.message);
                 }
+            } catch (error) {
+                console.error('Erro no login:', error);
+                showError('Erro ao fazer login. Tente novamente.');
+            } finally {
                 setLoading(false);
-            }, 2000);
+            }
         });
         
         // Email validation
@@ -624,13 +653,31 @@
         }
         
         // Forgot password
-        function showForgotPassword() {
+        async function showForgotPassword() {
             const email = document.getElementById('email').value;
-            if (email && isValidEmail(email)) {
-                showSuccess('Instruções de recuperação enviadas para: ' + email);
-            } else {
+            if (!email || !isValidEmail(email)) {
                 showError('Por favor, insira um email válido primeiro.');
                 document.getElementById('email').focus();
+                return;
+            }
+            
+            try {
+                const result = await emailService.sendPasswordResetEmail(email);
+                
+                if (result.success) {
+                    showSuccess('Email de recuperação enviado! Verifique sua caixa de entrada.');
+                    
+                    // Para testes, mostrar o link de recuperação
+                    if (result.token) {
+                        console.log('🔗 Link de recuperação para testes:', 
+                            `${window.location.origin}/frontend/RedefinirSenha.html?token=${result.token}`);
+                    }
+                } else {
+                    showError(result.message);
+                }
+            } catch (error) {
+                console.error('Erro ao enviar email de recuperação:', error);
+                showError('Erro ao enviar email de recuperação. Tente novamente.');
             }
         }
         
@@ -670,7 +717,10 @@
         });
     </script>
     
-    <!-- Script de integração com backend -->
-    <script src="http://localhost:5000/static/easycut-api.js"></script>
+    <!-- Scripts de teste e configuração -->
+    <script src="assets/server-test.js"></script>
+    <script src="assets/url-detector.js"></script>
+    
+    <!-- Script de integração com backend removido - usando localStorage -->
 </body>
 </html>

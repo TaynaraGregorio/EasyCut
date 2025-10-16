@@ -26,11 +26,6 @@ class PhoneValidator:
         self.cell_regex = re.compile(
             r'^(\+55\s?)?(\(?[1-9]{2}\)?)\s?([0-9]{5})\-?([0-9]{4})$'
         )
-        
-        # Regex para telefone fixo brasileiro (8 dígitos)
-        self.landline_regex = re.compile(
-            r'^(\+55\s?)?(\(?[1-9]{2}\)?)\s?([0-9]{4})\-?([0-9]{4})$'
-        )
     
     def clean_phone_number(self, phone: str) -> str:
         """
@@ -196,8 +191,7 @@ class PhoneValidator:
             
             type_mapping = {
                 phonenumbers.PhoneNumberType.MOBILE: "Celular",
-                phonenumbers.PhoneNumberType.FIXED_LINE: "Fixo",
-                phonenumbers.PhoneNumberType.FIXED_LINE_OR_MOBILE: "Fixo ou Celular",
+                phonenumbers.PhoneNumberType.FIXED_LINE_OR_MOBILE: "Celular",
                 phonenumbers.PhoneNumberType.TOLL_FREE: "0800",
                 phonenumbers.PhoneNumberType.PREMIUM_RATE: "Tarifa Premium",
                 phonenumbers.PhoneNumberType.SHARED_COST: "Custo Compartilhado",
@@ -318,8 +312,6 @@ if __name__ == "__main__":
     # Lista de telefones para teste
     test_phones = [
         "(11) 99999-9999",      # Celular válido
-        "(11) 9999-9999",       # Celular válido (formato antigo)
-        "(11) 1234-5678",       # Fixo válido
         "11999999999",          # Sem formatação
         "+55 11 99999-9999",   # Internacional
         "(21) 98765-4321",      # Rio de Janeiro

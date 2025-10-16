@@ -82,6 +82,13 @@ class FormValidator:
         else:
             validated_data['senha'] = senha
         
+        # Validar aceite dos termos de uso
+        aceitar_termos = form_data.get('aceitarTermos', False)
+        if not aceitar_termos:
+            errors.append("Você deve aceitar os Termos de Uso para continuar")
+        else:
+            validated_data['aceitarTermos'] = True
+        
         return {
             'is_valid': len(errors) == 0,
             'errors': errors,
@@ -144,16 +151,6 @@ class FormValidator:
                 validated_data['whatsapp_e164'] = self.phone_validator.get_whatsapp_format(whatsapp)
                 validated_data['whatsapp_tipo'] = whatsapp_result['phone_type']
         
-        # Validar telefone comercial (opcional)
-        telefone = form_data.get('telefone', '').strip()
-        if telefone:
-            telefone_result = self.phone_validator.validate_phone_for_form(telefone)
-            if not telefone_result['is_valid']:
-                warnings.append(f"Telefone comercial inválido: {telefone_result['message']}")
-            else:
-                validated_data['telefone'] = telefone_result['formatted_phone']
-                validated_data['telefone_tipo'] = telefone_result['phone_type']
-        
         # Validar email
         email = form_data.get('email', '').strip()
         if not email:
@@ -177,6 +174,13 @@ class FormValidator:
             errors.append("Senhas não coincidem")
         else:
             validated_data['senha'] = senha
+        
+        # Validar aceite dos termos de uso
+        aceitar_termos = form_data.get('aceitarTermos', False)
+        if not aceitar_termos:
+            errors.append("Você deve aceitar os Termos de Uso para continuar")
+        else:
+            validated_data['aceitarTermos'] = True
         
         return {
             'is_valid': len(errors) == 0,

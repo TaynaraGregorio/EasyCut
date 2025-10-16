@@ -112,6 +112,101 @@
             margin-top: 8px;
         }
         
+        /* Botão de Favoritos */
+        .favorite-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+        
+        .favorite-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            transform: scale(1.1);
+        }
+        
+        .favorite-btn.favorited {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        
+        .favorite-btn.favorited:hover {
+            background: rgba(239, 68, 68, 0.4);
+            transform: scale(1.1);
+        }
+        
+        .favorite-icon {
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .favorite-btn.favorited .favorite-icon {
+            animation: heartBeat 0.6s ease;
+        }
+        
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.2); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Toast de notificação */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(16, 185, 129, 0.9);
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            backdrop-filter: blur(10px);
+            max-width: 300px;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.error {
+            background: rgba(239, 68, 68, 0.9);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .toast-icon {
+            font-size: 1.2rem;
+        }
+        
+        .toast-message {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
         /* Seções de Informação */
         .info-section {
             margin-bottom: 24px;
@@ -541,6 +636,17 @@
             .time-slots {
                 grid-template-columns: repeat(3, 1fr);
             }
+            
+            .favorite-btn {
+                top: 15px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+            }
+            
+            .favorite-icon {
+                font-size: 1.3rem;
+            }
         }
         
         @media (max-width: 480px) {
@@ -557,6 +663,29 @@
             }
             .time-slots {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .favorite-btn {
+                top: 10px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+            }
+            
+            .favorite-icon {
+                font-size: 1.1rem;
+            }
+            
+            .toast {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                transform: translateY(-100px);
+            }
+            
+            .toast.show {
+                transform: translateY(0);
             }
         }
     </style>
@@ -580,6 +709,7 @@
         </div>
     </div>
 
+    <script src="assets/email-service-real.js"></script>
     <script>
         class BarbeariaDetalhes {
             constructor() {
@@ -648,6 +778,9 @@
             displayBarbeariaDetails(barbearia) {
                 this.barbeariaContent.innerHTML = `
                     <div class="barbearia-header">
+                        <button class="favorite-btn" id="favoriteBtn" onclick="barbeariaDetalhes.toggleFavorite()" title="Adicionar aos favoritos">
+                            <span class="favorite-icon">🤍</span>
+                        </button>
                         <img src="${barbearia.photos?.[0] || 'https://via.placeholder.com/100x100/3b82f6/ffffff?text=B'}" 
                              alt="${barbearia.name}" class="barbearia-image">
                         <div class="barbearia-info">
@@ -752,6 +885,9 @@
                 setTimeout(() => {
                     this.setupDatePicker();
                 }, 100);
+                
+                // Verificar se a barbearia está nos favoritos
+                this.checkFavoriteStatus();
             }
 
             displayMockBarbearia() {
@@ -1151,7 +1287,7 @@
                 }
             }
 
-            confirmSchedule() {
+            async confirmSchedule() {
                 if (!this.selectedServices.length || !this.selectedDate || !this.selectedTime) {
                     alert('Por favor, selecione pelo menos um serviço, uma data e um horário.');
                     return;
@@ -1160,6 +1296,7 @@
                 const scheduleData = {
                     barbeariaId: this.barbeariaId,
                     barbeariaName: this.barbeariaData.name,
+                    barbeariaAddress: this.barbeariaData.address,
                     services: this.selectedServices,
                     date: this.selectedDate,
                     time: this.selectedTime,
@@ -1168,12 +1305,17 @@
 
                 // Salvar no localStorage para simular agendamento
                 const existingAppointments = JSON.parse(localStorage.getItem('appointments') || '[]');
-                existingAppointments.push({
-                    id: Date.now(),
+                const appointmentId = Date.now();
+                const newAppointment = {
+                    id: appointmentId,
                     ...scheduleData,
                     status: 'pending'
-                });
+                };
+                existingAppointments.push(newAppointment);
                 localStorage.setItem('appointments', JSON.stringify(existingAppointments));
+
+                // Enviar email de confirmação de agendamento
+                await this.sendAppointmentConfirmationEmail(newAppointment);
 
                 const totalPrice = this.calculateTotalPrice();
                 const formattedDate = new Date(this.selectedDate).toLocaleDateString('pt-BR');
@@ -1188,6 +1330,48 @@
                 document.getElementById('timeSlotsContainer').style.display = 'none';
                 document.getElementById('selectedServicesSummary').style.display = 'none';
                 this.updateScheduleButton();
+            }
+            
+            /**
+             * Envia email de confirmação de agendamento
+             */
+            async sendAppointmentConfirmationEmail(appointmentData) {
+                try {
+                    // Obter dados do usuário logado
+                    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                    
+                    if (!currentUser.email) {
+                        console.log('⚠️ Usuário não logado, email não será enviado');
+                        return;
+                    }
+
+                    const appointmentEmailData = {
+                        id: appointmentData.id,
+                        clienteEmail: currentUser.email,
+                        clienteNome: currentUser.nomeCompleto || currentUser.nomeBarbearia || 'Cliente',
+                        barbeariaName: appointmentData.barbeariaName,
+                        barbeariaAddress: appointmentData.barbeariaAddress,
+                        data: new Date(appointmentData.date).toLocaleDateString('pt-BR'),
+                        horario: appointmentData.time,
+                        servicos: appointmentData.services,
+                        precoTotal: `R$ ${appointmentData.totalPrice.toFixed(2)}`
+                    };
+
+                    // Enviar email usando o EmailService
+                    const result = await emailService.sendAppointmentConfirmationEmail(appointmentEmailData);
+                    
+                    if (result.success) {
+                        console.log('✅ Email de agendamento enviado com sucesso!');
+                        if (result.simulation) {
+                            console.log('📧 [SIMULAÇÃO] Email de agendamento enviado para:', appointmentEmailData.clienteEmail);
+                        }
+                    } else {
+                        console.error('❌ Erro ao enviar email de agendamento:', result.message);
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao processar envio de email de agendamento:', error);
+                }
             }
 
             getServicePrices() {
@@ -1335,6 +1519,85 @@
                 if (modal) {
                     modal.remove();
                 }
+            }
+            
+            // Métodos para gerenciar favoritos
+            checkFavoriteStatus() {
+                const favorites = this.getFavorites();
+                const favoriteBtn = document.getElementById('favoriteBtn');
+                const favoriteIcon = favoriteBtn.querySelector('.favorite-icon');
+                
+                if (favorites.includes(this.barbeariaId)) {
+                    favoriteBtn.classList.add('favorited');
+                    favoriteIcon.textContent = '❤️';
+                    favoriteBtn.title = 'Remover dos favoritos';
+                } else {
+                    favoriteBtn.classList.remove('favorited');
+                    favoriteIcon.textContent = '🤍';
+                    favoriteBtn.title = 'Adicionar aos favoritos';
+                }
+            }
+            
+            toggleFavorite() {
+                const favorites = this.getFavorites();
+                const favoriteBtn = document.getElementById('favoriteBtn');
+                const favoriteIcon = favoriteBtn.querySelector('.favorite-icon');
+                
+                if (favorites.includes(this.barbeariaId)) {
+                    // Remover dos favoritos
+                    const index = favorites.indexOf(this.barbeariaId);
+                    favorites.splice(index, 1);
+                    favoriteBtn.classList.remove('favorited');
+                    favoriteIcon.textContent = '🤍';
+                    favoriteBtn.title = 'Adicionar aos favoritos';
+                    this.showToast('Barbearia removida dos favoritos', 'error');
+                } else {
+                    // Adicionar aos favoritos
+                    favorites.push(this.barbeariaId);
+                    favoriteBtn.classList.add('favorited');
+                    favoriteIcon.textContent = '❤️';
+                    favoriteBtn.title = 'Remover dos favoritos';
+                    this.showToast('Barbearia adicionada aos favoritos!', 'success');
+                }
+                
+                // Salvar no localStorage
+                localStorage.setItem('favoriteBarbearias', JSON.stringify(favorites));
+            }
+            
+            getFavorites() {
+                return JSON.parse(localStorage.getItem('favoriteBarbearias') || '[]');
+            }
+            
+            showToast(message, type = 'success') {
+                // Remover toast existente se houver
+                const existingToast = document.querySelector('.toast');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+                
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <div class="toast-content">
+                        <span class="toast-icon">${type === 'success' ? '✅' : '❌'}</span>
+                        <span class="toast-message">${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(toast);
+                
+                // Mostrar toast
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 100);
+                
+                // Remover toast após 3 segundos
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 300);
+                }, 3000);
             }
         }
 

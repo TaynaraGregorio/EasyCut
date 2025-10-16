@@ -312,11 +312,221 @@
             font-size: 0.9rem;
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
-        .info-text {
+        .menu-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .menu-toggle:hover {
+            background: rgba(30, 41, 59, 1);
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .menu-line {
+            width: 20px;
+            height: 2px;
+            background: #e2e8f0;
+            border-radius: 1px;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-toggle.active .menu-line:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .menu-toggle.active .menu-line:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .menu-toggle.active .menu-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+        
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .menu-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 350px;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+        
+        .menu-panel.active {
+            right: 0;
+        }
+        
+        .menu-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        .menu-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .menu-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .menu-user-details h3 {
+            margin: 0;
+            color: #e2e8f0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .menu-user-details p {
+            margin: 4px 0 0 0;
             color: #94a3b8;
             font-size: 0.9rem;
-            margin-top: 4px;
-            font-style: italic;
+        }
+        
+        .menu-content {
+            padding: 20px;
+        }
+        
+        .menu-section {
+            margin-bottom: 24px;
+        }
+        
+        .menu-section h4 {
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #e2e8f0;
+            text-decoration: none;
+        }
+        
+        .menu-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            transform: translateX(4px);
+        }
+        
+        .menu-item-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        
+        .menu-item-text {
+            flex: 1;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        
+        .menu-item-badge {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .menu-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 16px 0;
+        }
+        
+        .menu-logout {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+        
+        .menu-logout:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        /* Responsividade do menu */
+        @media (max-width: 480px) {
+            .menu-panel {
+                width: 100%;
+                right: -100%;
+            }
+            
+            .menu-toggle {
+                top: 15px;
+                right: 15px;
+                width: 36px;
+                height: 36px;
+            }
+            
+            .menu-line {
+                width: 18px;
+            }
         }
         
         /* Filtros */
@@ -642,9 +852,16 @@
 </head>
 <body>
     <div class="container">
-        <a href="../TelaInicial.html" class="back-link">
+        <!-- Menu Hambúrguer -->
+        <div class="menu-toggle" id="menuToggle">
+            <div class="menu-line"></div>
+            <div class="menu-line"></div>
+            <div class="menu-line"></div>
+        </div>
+        
+        <button class="back-link" onclick="handleBackButton()" style="background: none; border: none; color: inherit; font: inherit; cursor: pointer; text-decoration: none;">
             ← Voltar
-        </a>
+        </button>
         
         <div class="header">
             <div class="logo">EasyCut</div>
@@ -694,11 +911,13 @@
                 </div>
                 
                 <div class="filter-group">
-                    <label>Nível de preço</label>
-                    <select id="maxPriceLevel">
-                        <option value="">Qualquer</option>
-                        <option value="1">$ - Mais barato</option>
-                        <option value="4">$$$$ - Mais caro</option>
+                    <label>Ordenar por</label>
+                    <select id="priceSort">
+                        <option value="">Sem ordenação</option>
+                        <option value="cheap">💰 Mais barato primeiro</option>
+                        <option value="expensive">💎 Mais caro primeiro</option>
+                        <option value="rating">⭐ Melhor avaliação</option>
+                        <option value="distance">📍 Mais próximo</option>
                     </select>
                 </div>
                 
@@ -731,6 +950,26 @@
         </div>
     </div>
 
+    <!-- Menu Overlay -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    
+    <!-- Menu Panel -->
+    <div class="menu-panel" id="menuPanel">
+        <div class="menu-header">
+            <div class="menu-user-info">
+                <div class="menu-avatar" id="userAvatar">U</div>
+                <div class="menu-user-details">
+                    <h3 id="userName">Usuário</h3>
+                    <p id="userType">Cliente</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="menu-content" id="menuContent">
+            <!-- Conteúdo será preenchido dinamicamente -->
+        </div>
+    </div>
+
     <script>
         class BarbeariasFinder {
             constructor() {
@@ -745,12 +984,23 @@
                 this.availableServices = [];
                 this.searchTimeout = null;
                 this.isLocationRequested = false;
+                this.allBarbearias = []; // Armazenar todas as barbearias para filtragem
+                
+                // Elementos do menu
+                this.menuToggle = document.getElementById('menuToggle');
+                this.menuOverlay = document.getElementById('menuOverlay');
+                this.menuPanel = document.getElementById('menuPanel');
+                this.menuContent = document.getElementById('menuContent');
+                this.userAvatar = document.getElementById('userAvatar');
+                this.userName = document.getElementById('userName');
+                this.userType = document.getElementById('userType');
+                this.isMenuOpen = false;
                 
                 // Elementos dos filtros
                 this.toggleFilters = document.getElementById('toggleFilters');
                 this.filtersContent = document.getElementById('filtersContent');
                 this.minRating = document.getElementById('minRating');
-                this.maxPriceLevel = document.getElementById('maxPriceLevel');
+                this.priceSort = document.getElementById('priceSort');
                 this.servicesFilter = document.getElementById('servicesFilter');
                 this.maxDistance = document.getElementById('maxDistance');
                 this.distanceValue = document.getElementById('distanceValue');
@@ -833,6 +1083,251 @@
 
                 // Carregar serviços disponíveis
                 this.loadAvailableServices();
+                
+                // Event listeners do menu
+                this.setupMenuEventListeners();
+                
+                // Detectar tipo de usuário e configurar menu
+                this.detectUserType();
+            }
+
+            // ===== MÉTODOS DO MENU =====
+            
+            setupMenuEventListeners() {
+                // Toggle do menu
+                this.menuToggle.addEventListener('click', () => {
+                    this.toggleMenu();
+                });
+                
+                // Fechar menu ao clicar no overlay
+                this.menuOverlay.addEventListener('click', () => {
+                    this.closeMenu();
+                });
+                
+                // Fechar menu com ESC
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.isMenuOpen) {
+                        this.closeMenu();
+                    }
+                });
+            }
+            
+            toggleMenu() {
+                if (this.isMenuOpen) {
+                    this.closeMenu();
+                } else {
+                    this.openMenu();
+                }
+            }
+            
+            openMenu() {
+                this.isMenuOpen = true;
+                this.menuToggle.classList.add('active');
+                this.menuOverlay.classList.add('active');
+                this.menuPanel.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            closeMenu() {
+                this.isMenuOpen = false;
+                this.menuToggle.classList.remove('active');
+                this.menuOverlay.classList.remove('active');
+                this.menuPanel.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            
+            detectUserType() {
+                // Detectar tipo de usuário baseado nos dados salvos
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                const userType = currentUser.tipo || 'cliente';
+                const userName = currentUser.nomeCompleto || currentUser.nomeBarbearia || 'Usuário';
+                
+                this.userType.textContent = userType === 'barbearia' ? 'Barbearia' : 'Cliente';
+                this.userName.textContent = userName;
+                this.userAvatar.textContent = userName.charAt(0).toUpperCase();
+                
+                this.renderMenuContent(userType);
+            }
+            
+            renderMenuContent(userType) {
+                if (userType === 'barbearia') {
+                    this.renderBarbeariaMenu();
+                } else {
+                    this.renderClienteMenu();
+                }
+            }
+            
+            renderClienteMenu() {
+                this.menuContent.innerHTML = `
+                    <div class="menu-section">
+                        <h4>Meu Perfil</h4>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('editProfile')">
+                            <div class="menu-item-icon">👤</div>
+                            <div class="menu-item-text">Editar Perfil</div>
+                        </div>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('changePassword')">
+                            <div class="menu-item-icon">🔒</div>
+                            <div class="menu-item-text">Alterar Senha</div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h4>Agendamentos</h4>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('myAppointments')">
+                            <div class="menu-item-icon">📅</div>
+                            <div class="menu-item-text">Meus Agendamentos</div>
+                            <div class="menu-item-badge">3</div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h4>Favoritos</h4>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('favorites')">
+                            <div class="menu-item-icon">❤️</div>
+                            <div class="menu-item-text">Barbearias Favoritas</div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-divider"></div>
+                    
+                    <div class="menu-section">
+                        <div class="menu-item menu-logout" onclick="barbeariasFinder.handleMenuClick('logout')">
+                            <div class="menu-item-icon">🚪</div>
+                            <div class="menu-item-text">Sair</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            renderBarbeariaMenu() {
+                this.menuContent.innerHTML = `
+                    <div class="menu-section">
+                        <h4>Gerenciar Barbearia</h4>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('editProfile')">
+                            <div class="menu-item-icon">🏪</div>
+                            <div class="menu-item-text">Editar Perfil</div>
+                        </div>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('manageServices')">
+                            <div class="menu-item-icon">✂️</div>
+                            <div class="menu-item-text">Gerenciar Serviços</div>
+                        </div>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('manageLocation')">
+                            <div class="menu-item-icon">📍</div>
+                            <div class="menu-item-text">Localização</div>
+                        </div>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('manageContacts')">
+                            <div class="menu-item-icon">📞</div>
+                            <div class="menu-item-text">Contatos</div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h4>Agendamentos</h4>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('appointments')">
+                            <div class="menu-item-icon">📅</div>
+                            <div class="menu-item-text">Agendamentos</div>
+                            <div class="menu-item-badge">12</div>
+                        </div>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('schedule')">
+                            <div class="menu-item-icon">⏰</div>
+                            <div class="menu-item-text">Horários</div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h4>Relatórios</h4>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('reports')">
+                            <div class="menu-item-icon">📊</div>
+                            <div class="menu-item-text">Relatórios</div>
+                        </div>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('reviews')">
+                            <div class="menu-item-icon">⭐</div>
+                            <div class="menu-item-text">Avaliações</div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-divider"></div>
+                    
+                    <div class="menu-section">
+                        <div class="menu-item menu-logout" onclick="barbeariasFinder.handleMenuClick('logout')">
+                            <div class="menu-item-icon">🚪</div>
+                            <div class="menu-item-text">Sair</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            handleMenuClick(action) {
+                this.closeMenu();
+                
+                switch (action) {
+                    case 'editProfile':
+                        this.handleEditProfile();
+                        break;
+                    case 'changePassword':
+                        this.showComingSoon('Alterar Senha');
+                        break;
+                    case 'myAppointments':
+                        this.showComingSoon('Meus Agendamentos');
+                        break;
+                    case 'favorites':
+                        this.showComingSoon('Barbearias Favoritas');
+                        break;
+                    case 'manageServices':
+                        this.showComingSoon('Gerenciar Serviços');
+                        break;
+                    case 'manageLocation':
+                        this.showComingSoon('Gerenciar Localização');
+                        break;
+                    case 'manageContacts':
+                        this.showComingSoon('Gerenciar Contatos');
+                        break;
+                    case 'appointments':
+                        this.showComingSoon('Agendamentos');
+                        break;
+                    case 'schedule':
+                        this.showComingSoon('Gerenciar Horários');
+                        break;
+                    case 'reports':
+                        this.showComingSoon('Relatórios');
+                        break;
+                    case 'reviews':
+                        this.showComingSoon('Avaliações');
+                        break;
+                    case 'logout':
+                        this.handleLogout();
+                        break;
+                    default:
+                        console.log('Ação não implementada:', action);
+                }
+            }
+            
+            handleEditProfile() {
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                const userType = currentUser.tipo || 'cliente';
+                
+                if (userType === 'barbearia') {
+                    window.location.href = 'EditarPerfilBarbearia.html';
+                } else {
+                    window.location.href = 'EditarPerfilCliente.html';
+                }
+            }
+            
+            showComingSoon(feature) {
+                alert(`🚧 ${feature} - Em breve!\n\nEsta funcionalidade está sendo desenvolvida e estará disponível em breve.`);
+            }
+            
+            handleLogout() {
+                if (confirm('Tem certeza que deseja sair?')) {
+                    // Limpar dados do usuário
+                    localStorage.removeItem('currentUser');
+                    localStorage.removeItem('userType');
+                    localStorage.removeItem('userName');
+                    localStorage.removeItem('userToken');
+                    
+                    // Redirecionar para tela inicial
+                    window.location.href = '../TelaInicial.html';
+                }
             }
 
             // Método com debounce para otimizar chamadas de API
@@ -1327,58 +1822,22 @@
             }
 
             async loadRealBarbearias() {
-                try {
-                    const response = await fetch('http://localhost:5001/api/barbearias/nearby', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            latitude: this.currentLocation.lat,
-                            longitude: this.currentLocation.lng,
-                            radius: parseFloat(this.maxDistance.value),
-                            filters: this.currentFilters
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        this.displayBarbearias(data.barbearias);
-                    } else {
-                        throw new Error(data.message);
-                    }
-
-                } catch (error) {
-                    console.error('Erro na API:', error);
-                    // Fallback para dados mock
-                    const barbearias = this.getMockBarbearias();
-                    this.displayBarbearias(barbearias);
-                }
+                // Usar dados mock diretamente (sem tentar conectar com API)
+                console.log('Carregando barbearias mock...');
+                const barbearias = this.getMockBarbearias();
+                this.displayBarbearias(barbearias);
             }
 
             async loadAvailableServices() {
-                try {
-                    const response = await fetch('http://localhost:5001/api/barbearias/services');
-                    const data = await response.json();
-
-                    if (data.success) {
-                        // Filtrar apenas os serviços solicitados
-                        this.availableServices = data.services.filter(service => 
-                            service.toLowerCase().includes('corte') || 
-                            service.toLowerCase().includes('barba') || 
-                            service.toLowerCase().includes('sobrancelha')
-                        );
-                        this.renderServicesFilter();
-                    }
-                } catch (error) {
-                    console.error('Erro ao carregar serviços:', error);
-                    // Usar apenas os serviços solicitados
-                    this.availableServices = [
-                        "Corte masculino", "Barba", "Sobrancelha"
-                    ];
-                    this.renderServicesFilter();
-                }
+                // Usar serviços mock diretamente (sem tentar conectar com API)
+                console.log('Carregando serviços mock...');
+                this.availableServices = [
+                    "Corte masculino", "Barba", "Sobrancelha", "Design de sobrancelhas", 
+                    "Barboterapia", "Massagem facial", "Tratamentos capilares", 
+                    "Progressivas", "Relaxamento", "Pigmentação", "Limpeza de pele", 
+                    "Toalha quente", "Massagem", "Tratamentos"
+                ];
+                this.renderServicesFilter();
             }
 
             renderServicesFilter() {
@@ -1410,12 +1869,13 @@
             applyCurrentFilters() {
                 this.currentFilters = {
                     min_rating: this.minRating.value ? parseFloat(this.minRating.value) : null,
-                    max_price_level: this.maxPriceLevel.value ? parseInt(this.maxPriceLevel.value) : null,
+                    sort_by: this.priceSort.value,
                     services: this.getSelectedServices(),
                     max_distance: parseFloat(this.maxDistance.value)
                 };
 
-                this.loadBarbearias();
+                // Aplicar filtros aos dados atuais
+                this.applyFiltersToCurrentData();
             }
 
             getSelectedServices() {
@@ -1425,7 +1885,7 @@
 
             clearAllFilters() {
                 this.minRating.value = '';
-                this.maxPriceLevel.value = '';
+                this.priceSort.value = '';
                 this.maxDistance.value = '5';
                 this.distanceValue.textContent = '5 km';
 
@@ -1437,7 +1897,140 @@
                 });
 
                 this.currentFilters = {};
-                this.loadBarbearias();
+                this.applyFiltersToCurrentData();
+            }
+
+            // Método para aplicar filtros aos dados atuais
+            applyFiltersToCurrentData() {
+                if (this.allBarbearias.length === 0) {
+                    return;
+                }
+
+                let filteredBarbearias = [...this.allBarbearias];
+
+                // Filtro por avaliação mínima
+                if (this.currentFilters.min_rating) {
+                    filteredBarbearias = filteredBarbearias.filter(barbearia => 
+                        barbearia.rating >= this.currentFilters.min_rating
+                    );
+                }
+
+                // Filtro por serviços
+                if (this.currentFilters.services && this.currentFilters.services.length > 0) {
+                    filteredBarbearias = filteredBarbearias.filter(barbearia => {
+                        return this.currentFilters.services.some(service => 
+                            barbearia.services.some(barbeariaService => 
+                                barbeariaService.toLowerCase().includes(service.toLowerCase())
+                            )
+                        );
+                    });
+                }
+
+                // Filtro por distância
+                if (this.currentFilters.max_distance) {
+                    filteredBarbearias = filteredBarbearias.filter(barbearia => {
+                        const distance = parseFloat(barbearia.distance.replace(' km', ''));
+                        return distance <= this.currentFilters.max_distance;
+                    });
+                }
+
+                // Ordenação por preço
+                if (this.currentFilters.sort_by) {
+                    filteredBarbearias = this.sortBarbeariasByPrice(filteredBarbearias, this.currentFilters.sort_by);
+                }
+
+                this.displayBarbearias(filteredBarbearias);
+                
+                // Mostrar contador de resultados
+                this.showResultsCount(filteredBarbearias.length, this.allBarbearias.length);
+                
+                // Mostrar indicador de ordenação se ativo
+                this.showSortIndicator();
+            }
+
+            // Método para mostrar indicador de ordenação
+            showSortIndicator() {
+                // Remover indicador anterior se existir
+                const existingIndicator = document.querySelector('.sort-indicator');
+                if (existingIndicator) {
+                    existingIndicator.remove();
+                }
+
+                if (this.currentFilters.sort_by) {
+                    const sortTexts = {
+                        'cheap': '💰 Ordenado por: Mais barato primeiro',
+                        'expensive': '💎 Ordenado por: Mais caro primeiro',
+                        'rating': '⭐ Ordenado por: Melhor avaliação',
+                        'distance': '📍 Ordenado por: Mais próximo'
+                    };
+
+                    const indicatorDiv = document.createElement('div');
+                    indicatorDiv.className = 'sort-indicator';
+                    indicatorDiv.style.cssText = `
+                        text-align: center;
+                        margin: 8px 0;
+                        padding: 8px 12px;
+                        background: rgba(16, 185, 129, 0.1);
+                        border: 1px solid rgba(16, 185, 129, 0.3);
+                        border-radius: 6px;
+                        color: #6ee7b7;
+                        font-size: 0.85rem;
+                        font-weight: 500;
+                    `;
+                    indicatorDiv.textContent = sortTexts[this.currentFilters.sort_by];
+                    
+                    // Inserir antes da lista de barbearias
+                    this.barbeariasList.parentNode.insertBefore(indicatorDiv, this.barbeariasList);
+                }
+            }
+
+            // Método para ordenar barbearias
+            sortBarbeariasByPrice(barbearias, sortType) {
+                return barbearias.sort((a, b) => {
+                    switch (sortType) {
+                        case 'cheap':
+                            return a.price_level - b.price_level; // Mais barato primeiro
+                        case 'expensive':
+                            return b.price_level - a.price_level; // Mais caro primeiro
+                        case 'rating':
+                            return b.rating - a.rating; // Melhor avaliação primeiro
+                        case 'distance':
+                            const distanceA = parseFloat(a.distance.replace(' km', ''));
+                            const distanceB = parseFloat(b.distance.replace(' km', ''));
+                            return distanceA - distanceB; // Mais próximo primeiro
+                        default:
+                            return 0;
+                    }
+                });
+            }
+
+            // Método para mostrar contador de resultados
+            showResultsCount(filteredCount, totalCount) {
+                // Remover contador anterior se existir
+                const existingCounter = document.querySelector('.results-counter');
+                if (existingCounter) {
+                    existingCounter.remove();
+                }
+
+                if (filteredCount !== totalCount) {
+                    const counterDiv = document.createElement('div');
+                    counterDiv.className = 'results-counter';
+                    counterDiv.style.cssText = `
+                        text-align: center;
+                        margin: 16px 0;
+                        padding: 12px;
+                        background: rgba(59, 130, 246, 0.1);
+                        border: 1px solid rgba(59, 130, 246, 0.3);
+                        border-radius: 8px;
+                        color: #60a5fa;
+                        font-size: 0.9rem;
+                        font-weight: 500;
+                    `;
+                    counterDiv.textContent = `Mostrando ${filteredCount} de ${totalCount} barbearias`;
+                    
+                    // Inserir antes da lista de barbearias
+                    this.barbeariasList.parentNode.insertBefore(counterDiv, this.barbeariasList);
+                }
             }
 
             getMockBarbearias() {
@@ -1449,7 +2042,8 @@
                         services: ['Design de sobrancelhas', 'Barboterapia', 'Pigmentação', 'Relaxamento', 'Progressivas', 'Limpeza de pele', 'Massagem facial', 'Toalha quente'],
                         hours: '08:00 às 18:00',
                         distance: '0.8 km',
-                        rating: 4.8
+                        rating: 4.8,
+                        price_level: 3
                     },
                     {
                         id: 2,
@@ -1458,7 +2052,8 @@
                         services: ['Corte masculino', 'Barba', 'Sobrancelha', 'Relaxamento'],
                         hours: '09:00 às 19:00',
                         distance: '1.2 km',
-                        rating: 4.6
+                        rating: 4.6,
+                        price_level: 2
                     },
                     {
                         id: 3,
@@ -1467,7 +2062,8 @@
                         services: ['Corte', 'Barba', 'Design de sobrancelhas', 'Massagem', 'Tratamentos'],
                         hours: '08:30 às 17:30',
                         distance: '2.1 km',
-                        rating: 4.9
+                        rating: 4.9,
+                        price_level: 4
                     },
                     {
                         id: 4,
@@ -1476,12 +2072,36 @@
                         services: ['Corte masculino', 'Barba', 'Sobrancelha', 'Relaxamento', 'Progressivas'],
                         hours: '07:00 às 20:00',
                         distance: '3.5 km',
-                        rating: 4.4
+                        rating: 4.4,
+                        price_level: 2
+                    },
+                    {
+                        id: 5,
+                        name: 'Elite Barber',
+                        image: 'https://via.placeholder.com/50x50/ef4444/ffffff?text=EB',
+                        services: ['Corte masculino', 'Barba', 'Design de sobrancelhas', 'Massagem facial', 'Tratamentos capilares'],
+                        hours: '09:00 às 18:00',
+                        distance: '4.2 km',
+                        rating: 4.7,
+                        price_level: 3
+                    },
+                    {
+                        id: 6,
+                        name: 'Barbearia Popular',
+                        image: 'https://via.placeholder.com/50x50/22c55e/ffffff?text=BP',
+                        services: ['Corte masculino', 'Barba', 'Sobrancelha'],
+                        hours: '08:00 às 19:00',
+                        distance: '1.8 km',
+                        rating: 4.2,
+                        price_level: 1
                     }
                 ];
             }
 
             displayBarbearias(barbearias) {
+                // Armazenar todas as barbearias para filtragem
+                this.allBarbearias = barbearias;
+                
                 this.barbeariasList.innerHTML = barbearias.map(barbearia => `
                     <div class="barbearia-card" onclick="barbeariasFinder.selectBarbearia(${barbearia.id})">
                         <div class="barbearia-header">
@@ -1489,7 +2109,7 @@
                             <div class="barbearia-info">
                                 <h3>${barbearia.name}</h3>
                                 <div class="barbearia-meta">
-                                    ⭐ ${barbearia.rating} • ${barbearia.distance}
+                                    ⭐ ${barbearia.rating} • ${barbearia.distance} • ${this.getPriceLevelText(barbearia.price_level)}
                                 </div>
                             </div>
                             <div class="barbearia-hours">${barbearia.hours}</div>
@@ -1501,6 +2121,20 @@
                         </div>
                     </div>
                 `).join('');
+                
+                // Mostrar contador de resultados
+                this.showResultsCount(barbearias.length, barbearias.length);
+            }
+
+            // Método para converter nível de preço em texto
+            getPriceLevelText(priceLevel) {
+                const priceLevels = {
+                    1: '$ - Econômico',
+                    2: '$$ - Moderado', 
+                    3: '$$$ - Caro',
+                    4: '$$$$ - Premium'
+                };
+                return priceLevels[priceLevel] || '$$ - Moderado';
             }
 
             selectBarbearia(barbeariaId) {
@@ -1536,6 +2170,53 @@
                 setTimeout(() => {
                     successDiv.remove();
                 }, 3000);
+            }
+        }
+
+        // Função global para o botão voltar
+        function handleBackButton() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            
+            if (currentUser.email) {
+                // Usuário logado, voltar para dashboard apropriado
+                const userType = currentUser.tipo || 'cliente';
+                if (userType === 'barbearia') {
+                    window.location.href = 'BarbeariaDashboard.html';
+                } else {
+                    window.location.href = 'ClienteDashboard.html';
+                }
+            } else {
+                // Usuário não logado, voltar para tela inicial
+                window.location.href = '../TelaInicial.html';
+            }
+        }
+
+        // Função global para o botão voltar
+        function handleBackButton() {
+            console.log('handleBackButton chamada - voltando para página anterior');
+            
+            // Usar history.back() para voltar para a página anterior
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // Se não há histórico, redirecionar baseado no tipo de usuário
+                console.log('Sem histórico, redirecionando baseado no tipo de usuário');
+                
+                try {
+                    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                    const userType = localStorage.getItem('userType');
+                    
+                    const detectedUserType = currentUser.tipo || userType || 'cliente';
+                    
+                    if (detectedUserType === 'barbearia') {
+                        window.location.href = 'BarbeariaDashboard.html';
+                    } else {
+                        window.location.href = 'ClienteDashboard.html';
+                    }
+                } catch (error) {
+                    console.error('Erro no fallback:', error);
+                    window.location.href = 'TelaInicial.html';
+                }
             }
         }
 

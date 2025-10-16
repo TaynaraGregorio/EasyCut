@@ -9,9 +9,6 @@ class PhoneValidatorFrontend {
         // Regex para celular brasileiro (9 dígitos)
         this.cellRegex = /^(\+55\s?)?(\(?[1-9]{2}\)?)\s?([0-9]{5})\-?([0-9]{4})$/;
         
-        // Regex para telefone fixo brasileiro (8 dígitos)
-        this.landlineRegex = /^(\+55\s?)?(\(?[1-9]{2}\)?)\s?([0-9]{4})\-?([0-9]{4})$/;
-        
         // DDDs válidos do Brasil
         this.validDDDs = [
             '11', '12', '13', '14', '15', '16', '17', '18', '19', // SP
@@ -70,11 +67,8 @@ class PhoneValidatorFrontend {
             number = number.substring(2);
         }
         
-        // Formata conforme o tamanho
-        if (number.length === 10) {
-            // Telefone fixo: (XX) XXXX-XXXX
-            return number.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
-        } else if (number.length === 11) {
+        // Formata conforme o tamanho (apenas celulares)
+        if (number.length === 11) {
             // Celular: (XX) XXXXX-XXXX
             return number.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
         }
@@ -138,9 +132,7 @@ class PhoneValidatorFrontend {
     getPhoneType(phone) {
         const cleaned = this.cleanPhone(phone);
         
-        if (cleaned.length === 10) {
-            return 'Fixo';
-        } else if (cleaned.length === 11) {
+        if (cleaned.length === 11) {
             return 'Celular';
         }
         
@@ -281,8 +273,6 @@ if (typeof window !== 'undefined') {
         // Exemplo de teste
         const testPhones = [
             '(11) 99999-9999',
-            '(11) 9999-9999',
-            '(11) 1234-5678',
             '11999999999',
             '+55 11 99999-9999',
             'telefone-invalido'

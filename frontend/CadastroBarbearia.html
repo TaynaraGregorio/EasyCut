@@ -168,6 +168,65 @@
         .strength-weak { color: #ef4444; }
         .strength-medium { color: #f59e0b; }
         .strength-strong { color: #10b981; }
+        
+        /* Estilos para checkbox customizado */
+        .checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            margin-bottom: 0 !important;
+        }
+        
+        .checkbox-label input[type="checkbox"] {
+            display: none;
+        }
+        
+        .checkmark {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            background: rgba(30, 41, 59, 0.5);
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .checkbox-label input[type="checkbox"]:checked + .checkmark {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border-color: #3b82f6;
+        }
+        
+        .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .checkbox-label:hover .checkmark {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .terms-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .terms-link:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
         /* Tablets e telas médias */
         @media (max-width: 1024px) {
             .container {
@@ -317,7 +376,7 @@
 </head>
 <body>
     <div class="container">
-        <a href="../TelaInicial.html" class="back-link">
+        <a href="javascript:history.back()" class="back-link" onclick="return confirmVoltar()">
             ← Voltar
         </a>
         
@@ -345,15 +404,9 @@
             </div>
 
             <!-- Contato -->
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="telefone">Telefone Comercial</label>
-                    <input type="tel" id="telefone" name="telefone" placeholder="(11) 1234-5678">
-                </div>
-                <div class="form-group">
-                    <label for="whatsapp">WhatsApp <span class="required">*</span></label>
-                    <input type="tel" id="whatsapp" name="whatsapp" placeholder="(11) 99999-9999" required>
-                </div>
+            <div class="form-group">
+                <label for="whatsapp">WhatsApp <span class="required">*</span></label>
+                <input type="tel" id="whatsapp" name="whatsapp" placeholder="(11) 99999-9999" required>
             </div>
 
             <div class="form-group">
@@ -374,12 +427,46 @@
                 </div>
             </div>
 
+            <!-- Termos de Uso -->
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="aceitarTermos" name="aceitarTermos" required>
+                    <span class="checkmark"></span>
+                    Li e aceito os <a href="TermosDeUso.html?from=barbearia" target="_blank" class="terms-link">Termos de Uso</a> <span class="required">*</span>
+                </label>
+            </div>
+
             <button type="submit" class="btn btn-primary">Cadastrar Barbearia</button>
             <button type="button" class="btn btn-secondary" onclick="window.location.href='../TelaInicial.html'">Cancelar</button>
         </form>
     </div>
 
+    <!-- EmailJS Script -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="assets/no-server-fix.js"></script>
+    <script src="assets/email-service-real.js"></script>
+    <script src="assets/emailjs-config.js"></script>
     <script>
+        // Função para confirmar se o usuário quer voltar
+        function confirmVoltar() {
+            const form = document.getElementById('cadastroForm');
+            const formData = new FormData(form);
+            let hasData = false;
+            
+            // Verifica se há dados preenchidos no formulário
+            for (let [key, value] of formData.entries()) {
+                if (value && value.trim() !== '') {
+                    hasData = true;
+                    break;
+                }
+            }
+            
+            if (hasData) {
+                return confirm('Você tem certeza que deseja voltar? Os dados preenchidos serão perdidos.');
+            }
+            return true;
+        }
+
         // Validação de CNPJ/CPF usando CPFCNPJValidatorFrontend
         function formatCNPJCPF(value) {
             const numbers = value.replace(/\D/g, '');
@@ -490,13 +577,6 @@
         });
 
 
-        document.getElementById('telefone').addEventListener('input', function(e) {
-            e.target.value = formatPhone(e.target.value);
-        });
-
-        document.getElementById('telefone').addEventListener('blur', function(e) {
-            validatePhoneInput(e.target);
-        });
 
         document.getElementById('whatsapp').addEventListener('input', function(e) {
             e.target.value = formatPhone(e.target.value);
@@ -511,14 +591,14 @@
         });
 
         // Validação do formulário
-        document.getElementById('cadastroForm').addEventListener('submit', function(e) {
+        document.getElementById('cadastroForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const senha = document.getElementById('senha').value;
             const confirmarSenha = document.getElementById('confirmarSenha').value;
-            const telefone = document.getElementById('telefone').value;
             const whatsapp = document.getElementById('whatsapp').value;
             const cnpjCpf = document.getElementById('cnpjCpf').value;
+            const aceitarTermos = document.getElementById('aceitarTermos').checked;
             
             // Validação do CNPJ/CPF
             if (!validateCNPJCPFInput(document.getElementById('cnpjCpf'))) {
@@ -527,11 +607,6 @@
             }
             
             // Validação dos telefones
-            if (telefone && !validatePhoneInput(document.getElementById('telefone'))) {
-                alert('Por favor, digite um telefone comercial válido.');
-                return;
-            }
-            
             if (!validatePhoneInput(document.getElementById('whatsapp'))) {
                 alert('Por favor, digite um WhatsApp válido.');
                 return;
@@ -547,9 +622,62 @@
                 return;
             }
             
-            // Aqui você pode adicionar a lógica para enviar os dados
-            alert('Cadastro realizado com sucesso!');
-            window.location.href = '../TelaInicial.html';
+            // Validação dos termos de uso
+            if (!aceitarTermos) {
+                alert('Você deve aceitar os Termos de Uso para continuar.');
+                return;
+            }
+            
+            // Coletar dados do formulário
+            const formData = new FormData(this);
+            const userData = {
+                nomeBarbearia: formData.get('nomeBarbearia'),
+                cnpjCpf: formData.get('cnpjCpf'),
+                responsavel: formData.get('responsavel'),
+                whatsapp: formData.get('whatsapp'),
+                email: formData.get('email'),
+                senha: formData.get('senha'),
+                tipo: 'barbearia'
+            };
+            
+            // Mostrar loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
+            
+            try {
+                // Enviar email de confirmação
+                const result = await emailService.sendConfirmationEmail(userData);
+                
+                if (result.success) {
+                    alert('Cadastro realizado! Verifique seu email para confirmar a conta.\n\n' + result.message);
+                    
+                    // Para testes, mostrar o link de confirmação
+                    if (result.token) {
+                        console.log('🔗 Link de confirmação para testes:', 
+                            `${window.location.origin}/frontend/ConfirmarEmail.html?token=${result.token}&type=confirmation`);
+                    }
+                    
+                    // Limpar formulário
+                    this.reset();
+                    document.getElementById('passwordStrength').textContent = '';
+                    
+                    // Redirecionar para login após 3 segundos
+                    setTimeout(() => {
+                        window.location.href = 'Login.html';
+                    }, 3000);
+                } else {
+                    alert('Erro ao enviar email de confirmação: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Erro no cadastro:', error);
+                alert('Erro ao processar cadastro. Tente novamente.');
+            } finally {
+                // Restaurar botão
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
         });
     </script>
 </body>
