@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>EasyCut - Termos de Uso</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 40px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 20px;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+        
+        .title {
+            color: #e2e8f0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1rem;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+        
+        .back-link:hover {
+            color: #3b82f6;
+        }
+        
+        .content {
+            color: #e2e8f0;
+        }
+        
+        .content h2 {
+            color: #3b82f6;
+            font-size: 1.4rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3b82f6;
+            padding-left: 15px;
+        }
+        
+        .content h3 {
+            color: #10b981;
+            font-size: 1.2rem;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        
+        .content p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        .content ul, .content ol {
+            margin-bottom: 15px;
+            padding-left: 25px;
+        }
+        
+        .content li {
+            margin-bottom: 8px;
+        }
+        
+        .highlight {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .warning {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .contact-info {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .contact-info h3 {
+            color: #10b981;
+            margin-bottom: 10px;
+        }
+        
+        .contact-info p {
+            margin-bottom: 5px;
+        }
+        
+        .contact-info a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+                border-radius: 16px;
+            }
+            
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .title {
+                font-size: 1.5rem;
+            }
+            
+            .content h2 {
+                font-size: 1.2rem;
+            }
+            
+            .content h3 {
+                font-size: 1.1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                margin: 5px;
+                padding: 15px;
+            }
+            
+            .logo {
+                font-size: 1.8rem;
+            }
+            
+            .title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="javascript:history.back()" class="back-link" id="backButton">
+            ← Voltar
+        </a>
+        
+        <div class="header">
+            <div class="logo">EasyCut</div>
+            <h1 class="title">Termos de Uso</h1>
+            <p class="subtitle">Última atualização: Outubro de 2025</p>
+        </div>
+        
+        <div class="content">
+            <div class="highlight">
+                <p><strong>Bem-vindo ao EasyCut!</strong> Estes Termos de Uso regulam o uso da nossa plataforma de agendamento de serviços de barbearia. Ao utilizar nossos serviços, você concorda com estes termos.</p>
+            </div>
+            
+            <h2>1. Aceitação dos Termos</h2>
+            <p>Ao acessar e utilizar a plataforma EasyCut, você concorda em cumprir e estar vinculado aos termos e condições de uso aqui estabelecidos. Se você não concordar com qualquer parte destes termos, não deve utilizar nossa plataforma.</p>
+            
+            <h2>2. Descrição do Serviço</h2>
+            <p>O EasyCut é uma plataforma digital que conecta clientes a barbearias, facilitando o agendamento de serviços de corte de cabelo, barba e outros tratamentos estéticos masculinos.</p>
+            
+            <h3>2.1 Funcionalidades</h3>
+            <ul>
+                <li>Cadastro de clientes e barbearias</li>
+                <li>Sistema de agendamento online</li>
+                <li>Busca por barbearias próximas</li>
+                <li>Avaliações e comentários</li>
+                <li>Histórico de serviços</li>
+            </ul>
+            
+            <h2>3. Cadastro e Conta do Usuário</h2>
+            <p>Para utilizar nossos serviços, você deve criar uma conta fornecendo informações precisas e atualizadas.</p>
+            
+            <h3>3.1 Responsabilidades do Usuário</h3>
+            <ul>
+                <li>Manter a confidencialidade de sua senha</li>
+                <li>Notificar-nos imediatamente sobre qualquer uso não autorizado</li>
+                <li>Fornecer informações verdadeiras e precisas</li>
+                <li>Atualizar suas informações quando necessário</li>
+            </ul>
+            
+            <h2>4. Uso da Plataforma</h2>
+            <p>Você concorda em usar a plataforma apenas para fins legais e de acordo com estes termos.</p>
+            
+            <h3>4.1 Condutas Proibidas</h3>
+            <ul>
+                <li>Usar a plataforma para atividades ilegais</li>
+                <li>Interferir no funcionamento da plataforma</li>
+                <li>Tentar acessar contas de outros usuários</li>
+                <li>Enviar conteúdo ofensivo ou inadequado</li>
+                <li>Fazer reservas falsas ou não comparecer sem cancelar</li>
+            </ul>
+            
+            <h2>5. Agendamentos e Cancelamentos</h2>
+            <p>Os agendamentos são realizados diretamente entre clientes e barbearias. O EasyCut atua apenas como intermediário.</p>
+            
+            <h3>5.1 Política de Cancelamento</h3>
+            <ul>
+                <li>Cancelamentos devem ser feitos com pelo menos 2 horas de antecedência</li>
+                <li>Cancelamentos em cima da hora podem resultar em penalidades</li>
+                <li>Não comparecimento sem cancelamento pode resultar em suspensão da conta</li>
+            </ul>
+            
+            <h2>6. Pagamentos</h2>
+            <p>Os pagamentos são realizados diretamente na barbearia. O EasyCut não processa pagamentos.</p>
+            
+            <h2>7. Privacidade e Proteção de Dados</h2>
+            <p>Respeitamos sua privacidade e protegemos seus dados pessoais de acordo com a Lei Geral de Proteção de Dados (LGPD).</p>
+            
+            <h3>7.1 Dados Coletados</h3>
+            <ul>
+                <li>Informações de cadastro (nome, email, telefone)</li>
+                <li>Histórico de agendamentos</li>
+                <li>Localização (para busca de barbearias próximas)</li>
+                <li>Dados de navegação (cookies e logs)</li>
+            </ul>
+            
+            <h2>8. Propriedade Intelectual</h2>
+            <p>Todo o conteúdo da plataforma EasyCut, incluindo textos, gráficos, logotipos, ícones e software, é propriedade da EasyCut ou de seus licenciadores.</p>
+            
+            <h2>9. Limitação de Responsabilidade</h2>
+            <div class="warning">
+                <p><strong>Atenção:</strong> O EasyCut não se responsabiliza por:</p>
+                <ul>
+                    <li>Qualidade dos serviços prestados pelas barbearias</li>
+                    <li>Disputas entre clientes e barbearias</li>
+                    <li>Danos decorrentes do uso da plataforma</li>
+                    <li>Interrupções temporárias do serviço</li>
+                </ul>
+            </div>
+            
+            <h2>10. Modificações dos Termos</h2>
+            <p>Reservamo-nos o direito de modificar estes termos a qualquer momento. As alterações entrarão em vigor imediatamente após a publicação na plataforma.</p>
+            
+            <h2>11. Suspensão e Encerramento</h2>
+            <p>Podemos suspender ou encerrar sua conta em caso de violação destes termos ou por outros motivos legítimos.</p>
+            
+            <h2>12. Lei Aplicável</h2>
+            <p>Estes termos são regidos pelas leis brasileiras. Qualquer disputa será resolvida nos tribunais competentes do Brasil.</p>
+            
+            <div class="contact-info">
+                <h3>Contato</h3>
+                <p>Para dúvidas sobre estes Termos de Uso:</p>
+                <p>Email: <a href="mailto:contato@easycut.com">contato@easycut.com</a></p>
+                <p>WhatsApp: <a href="https://wa.me/5511999999999">(11) 99999-9999</a></p>
+                <p>Horário de atendimento: Segunda a Sexta, 9h às 18h</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Detectar de qual página o usuário veio e redirecionar adequadamente
+        document.addEventListener('DOMContentLoaded', function() {
+            const backButton = document.getElementById('backButton');
+            
+            // Verificar parâmetros da URL primeiro
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromPage = urlParams.get('from');
+            
+            if (fromPage) {
+                // Se há parâmetro 'from', redirecionar para a página especificada
+                switch(fromPage) {
+                    case 'cliente':
+                        backButton.href = 'CadastroCliente.html';
+                        break;
+                    case 'barbearia':
+                        backButton.href = 'CadastroBarbearia.html';
+                        break;
+                    case 'inicial':
+                        backButton.href = 'Login.html';
+                        break;
+                    default:
+                        backButton.href = 'Login.html';
+                }
+                backButton.onclick = null; // Remove o onclick padrão
+            } else if (document.referrer) {
+                // Fallback: verificar referrer se não há parâmetros
+                const referrer = document.referrer;
+                
+                if (referrer.includes('CadastroCliente.html')) {
+                    backButton.href = 'CadastroCliente.html';
+                } else if (referrer.includes('CadastroBarbearia.html')) {
+                    backButton.href = 'CadastroBarbearia.html';
+                } else if (referrer.includes('Login.html')) {
+                    backButton.href = 'Login.html';
+                } else {
+                    backButton.href = 'Login.html';
+                }
+                backButton.onclick = null;
+            } else {
+                // Se não há referrer nem parâmetros, redirecionar para login
+                backButton.href = 'Login.html';
+                backButton.onclick = null;
+            }
+        });
+    </script>
+</body>
+</html>

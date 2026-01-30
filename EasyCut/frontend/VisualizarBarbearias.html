@@ -1,0 +1,2403 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>EasyCut - Barbearias Próximas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .container {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                        0 0 0 1px rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+            margin: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 24px;
+        }
+        .back-link:hover {
+            color: #3b82f6;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 0.95rem;
+        }
+        .search-container {
+            position: relative;
+        }
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            background: rgba(30, 41, 59, 0.5);
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        input::placeholder {
+            color: #64748b;
+        }
+        .search-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px;
+            border-radius: 50%;
+        }
+        
+        .search-icon:hover {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .search-icon:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        .btn {
+            width: 100%;
+            padding: 16px 0;
+            margin: 24px 0 16px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn:hover::before {
+            left: 100%;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.1);
+            border-color: rgba(148, 163, 184, 0.5);
+            color: #fff;
+        }
+        .suggestions {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-top: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            backdrop-filter: blur(20px);
+        }
+        .suggestion-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.2s ease;
+            color: #e2e8f0;
+        }
+        .suggestion-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+        .suggestion-item.selected {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+        .radius-info {
+            text-align: center;
+            margin: 16px 0;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+        .barbearias-list {
+            margin-top: 24px;
+        }
+        .barbearia-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        .barbearia-card:hover {
+            transform: translateY(-2px);
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        .barbearia-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .barbearia-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 16px;
+            background: rgba(59, 130, 246, 0.2);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+        }
+        .barbearia-info h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .barbearia-meta {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+        .barbearia-hours {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-left: auto;
+            text-align: right;
+        }
+        
+        /* Indicador de Status */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-indicator.open {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+        
+        .status-indicator.closed {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+        
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: blink 1.5s infinite;
+        }
+        
+        .status-dot.open {
+            background: #10b981;
+        }
+        
+        .status-dot.closed {
+            background: #ef4444;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        @keyframes blink {
+            0%, 50% {
+                opacity: 1;
+            }
+            51%, 100% {
+                opacity: 0.3;
+            }
+        }
+        .services-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .service-tag {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            padding: 16px;
+            border-radius: 12px;
+            margin: 16px 0;
+            text-align: center;
+            font-size: 0.9rem;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            color: #6ee7b7;
+            padding: 16px;
+            border-radius: 12px;
+            margin: 16px 0;
+            text-align: center;
+            font-size: 0.9rem;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .menu-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .menu-toggle:hover {
+            background: rgba(30, 41, 59, 1);
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .menu-line {
+            width: 20px;
+            height: 2px;
+            background: #e2e8f0;
+            border-radius: 1px;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-toggle.active .menu-line:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .menu-toggle.active .menu-line:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .menu-toggle.active .menu-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+        
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .menu-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 350px;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+        
+        .menu-panel.active {
+            right: 0;
+        }
+        
+        .menu-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        .menu-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .menu-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .menu-user-details h3 {
+            margin: 0;
+            color: #e2e8f0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .menu-user-details p {
+            margin: 4px 0 0 0;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        
+        .menu-content {
+            padding: 20px;
+        }
+        
+        .menu-section {
+            margin-bottom: 24px;
+        }
+        
+        .menu-section h4 {
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #e2e8f0;
+            text-decoration: none;
+        }
+        
+        .menu-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            transform: translateX(4px);
+        }
+        
+        .menu-item-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        
+        .menu-item-text {
+            flex: 1;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        
+        .menu-item-badge {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .menu-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 16px 0;
+        }
+        
+        .menu-logout {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+        
+        .menu-logout:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        /* Responsividade do menu */
+        @media (max-width: 480px) {
+            .menu-panel {
+                width: 100%;
+                right: -100%;
+            }
+            
+            .menu-toggle {
+                top: 15px;
+                right: 15px;
+                width: 36px;
+                height: 36px;
+            }
+            
+            .menu-line {
+                width: 18px;
+            }
+        }
+        
+        /* Filtros */
+        .filters-section {
+            margin: 24px 0;
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .filters-header h3 {
+            color: #e2e8f0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .btn-toggle {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .btn-toggle:hover {
+            color: #3b82f6;
+        }
+        
+        .filters-content {
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .filter-group {
+            margin-bottom: 16px;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+        }
+        
+        .filter-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(30, 41, 59, 0.5);
+            color: #fff;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: rgba(30, 41, 59, 0.8);
+        }
+        
+        .filter-group select option {
+            background: #1e293b;
+            color: #fff;
+        }
+        
+        .services-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .service-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+        
+        .service-checkbox:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        .service-checkbox input[type="checkbox"] {
+            margin: 0;
+        }
+        
+        .service-checkbox.checked {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+        }
+        
+        .filter-group input[type="range"] {
+            width: 100%;
+            margin: 8px 0;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+        
+        .filter-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .filter-group input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        #distanceValue {
+            color: #3b82f6;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .filter-group input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.2);
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .filter-actions .btn {
+            flex: 1;
+            margin: 0;
+            padding: 12px 0;
+            font-size: 0.95rem;
+        }
+        
+        /* Tablets e telas médias */
+        @media (max-width: 1024px) {
+            .container {
+                max-width: 400px;
+                margin: 15px;
+            }
+        }
+        
+        /* Tablets pequenos */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 28px;
+                border-radius: 20px;
+                max-width: 380px;
+            }
+            .logo {
+                font-size: 1.9rem;
+            }
+            .subtitle {
+                font-size: 0.95rem;
+            }
+            .btn {
+                padding: 14px 0;
+                font-size: 1.05rem;
+            }
+        }
+        
+        /* Smartphones grandes */
+        @media (max-width: 600px) {
+            .container {
+                margin: 8px;
+                padding: 24px;
+                max-width: calc(100vw - 16px);
+            }
+            .logo {
+                font-size: 1.7rem;
+            }
+            .form-group {
+                margin-bottom: 18px;
+            }
+            input {
+                padding: 12px 14px;
+                font-size: 0.98rem;
+            }
+            .btn {
+                padding: 14px 0;
+                margin: 20px 0 14px 0;
+            }
+        }
+        
+        /* Smartphones médios */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 5px;
+                max-width: calc(100vw - 10px);
+            }
+            .logo {
+                font-size: 1.6rem;
+                margin-bottom: 6px;
+            }
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            .header {
+                margin-bottom: 28px;
+            }
+            input {
+                padding: 11px 13px;
+                font-size: 0.95rem;
+            }
+            .btn {
+                padding: 13px 0;
+                font-size: 1rem;
+                margin: 18px 0 12px 0;
+            }
+            .form-group {
+                margin-bottom: 16px;
+            }
+            .back-link {
+                font-size: 0.9rem;
+                margin-bottom: 20px;
+            }
+            .info-text {
+                font-size: 0.85rem;
+            }
+        }
+        
+        /* Smartphones pequenos */
+        @media (max-width: 360px) {
+            .container {
+                padding: 16px;
+                margin: 3px;
+                max-width: calc(100vw - 6px);
+            }
+            .logo {
+                font-size: 1.4rem;
+            }
+            .subtitle {
+                font-size: 0.85rem;
+            }
+            input {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+            .btn {
+                padding: 12px 0;
+                font-size: 0.95rem;
+            }
+            .form-group {
+                margin-bottom: 14px;
+            }
+            .header {
+                margin-bottom: 24px;
+            }
+        }
+        
+        /* Orientação landscape em smartphones */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .container {
+                margin: 5px;
+                padding: 16px;
+                max-height: calc(100vh - 10px);
+                overflow-y: auto;
+            }
+            .header {
+                margin-bottom: 16px;
+            }
+            .logo {
+                font-size: 1.4rem;
+                margin-bottom: 4px;
+            }
+            .subtitle {
+                font-size: 0.8rem;
+            }
+            .form-group {
+                margin-bottom: 12px;
+            }
+            .btn {
+                padding: 10px 0;
+                margin: 12px 0 8px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Menu Hambúrguer -->
+        <div class="menu-toggle" id="menuToggle">
+            <div class="menu-line"></div>
+            <div class="menu-line"></div>
+            <div class="menu-line"></div>
+        </div>
+        
+        <button class="back-link" onclick="handleBackButton()" style="background: none; border: none; color: inherit; font: inherit; cursor: pointer; text-decoration: none;">
+            ← Voltar
+        </button>
+        
+        <div class="header">
+            <div class="logo">EasyCut</div>
+            <div class="subtitle">Barbearias Próximas</div>
+        </div>
+
+        <!-- Seção de Busca -->
+        <div class="form-group">
+            <label for="addressInput">Digite o endereço</label>
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    id="addressInput" 
+                    placeholder="Ex: Rua das Flores, 123, Centro, Ipatinga - MG"
+                    autocomplete="off"
+                >
+                <div class="search-icon" id="searchIcon">🔍</div>
+                <div id="suggestions" class="suggestions"></div>
+            </div>
+            <div class="info-text">Digite pelo menos 3 caracteres para ver sugestões • Clique na lupa ou pressione Enter para buscar</div>
+        </div>
+
+        <button id="locationButton" class="btn btn-primary">
+            📍 Usar minha localização
+        </button>
+
+        <div class="radius-info">
+            Raio de <strong>5km</strong>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-section">
+            <div class="filters-header">
+                <h3>Filtros</h3>
+                <button id="toggleFilters" class="btn-toggle">🔽</button>
+            </div>
+            <div id="filtersContent" class="filters-content" style="display: none;">
+                <div class="filter-group">
+                    <label>Avaliação mínima</label>
+                    <select id="minRating">
+                        <option value="">Qualquer</option>
+                        <option value="4.5">4.5+ estrelas</option>
+                        <option value="4.0">4.0+ estrelas</option>
+                        <option value="3.5">3.5+ estrelas</option>
+                        <option value="3.0">3.0+ estrelas</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Ordenar por</label>
+                    <select id="priceSort">
+                        <option value="">Sem ordenação</option>
+                        <option value="cheap">💰 Mais barato primeiro</option>
+                        <option value="expensive">💎 Mais caro primeiro</option>
+                        <option value="rating">⭐ Melhor avaliação</option>
+                        <option value="distance">📍 Mais próximo</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Serviços</label>
+                    <div id="servicesFilter" class="services-filter">
+                        <!-- Será preenchido dinamicamente -->
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Distância máxima (km)</label>
+                    <input type="range" id="maxDistance" min="1" max="20" value="5" step="1">
+                    <span id="distanceValue">5 km</span>
+                </div>
+                
+                <div class="filter-actions">
+                    <button id="applyFilters" class="btn btn-primary">Aplicar Filtros</button>
+                    <button id="clearFilters" class="btn btn-secondary">Limpar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Barbearias -->
+        <div class="barbearias-list" id="barbeariasList">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <div>Carregando barbearias próximas...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Overlay -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    
+    <!-- Menu Panel -->
+    <div class="menu-panel" id="menuPanel">
+        <div class="menu-header">
+            <div class="menu-user-info">
+                <div class="menu-avatar" id="userAvatar">U</div>
+                <div class="menu-user-details">
+                    <h3 id="userName">Usuário</h3>
+                    <p id="userType">Cliente</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="menu-content" id="menuContent">
+            <!-- Conteúdo será preenchido dinamicamente -->
+        </div>
+    </div>
+
+    <script>
+        class BarbeariasFinder {
+            constructor() {
+                this.addressInput = document.getElementById('addressInput');
+                this.locationButton = document.getElementById('locationButton');
+                this.searchIcon = document.getElementById('searchIcon');
+                this.suggestions = document.getElementById('suggestions');
+                this.barbeariasList = document.getElementById('barbeariasList');
+                this.currentLocation = null;
+                this.selectedAddress = null;
+                this.currentFilters = {};
+                this.availableServices = [];
+                this.searchTimeout = null;
+                this.isLocationRequested = false;
+                this.allBarbearias = []; // Armazenar todas as barbearias para filtragem
+                
+                // Elementos do menu
+                this.menuToggle = document.getElementById('menuToggle');
+                this.menuOverlay = document.getElementById('menuOverlay');
+                this.menuPanel = document.getElementById('menuPanel');
+                this.menuContent = document.getElementById('menuContent');
+                this.userAvatar = document.getElementById('userAvatar');
+                this.userName = document.getElementById('userName');
+                this.userType = document.getElementById('userType');
+                this.isMenuOpen = false;
+                
+                // Elementos dos filtros
+                this.toggleFilters = document.getElementById('toggleFilters');
+                this.filtersContent = document.getElementById('filtersContent');
+                this.minRating = document.getElementById('minRating');
+                this.priceSort = document.getElementById('priceSort');
+                this.servicesFilter = document.getElementById('servicesFilter');
+                this.maxDistance = document.getElementById('maxDistance');
+                this.distanceValue = document.getElementById('distanceValue');
+                this.applyFilters = document.getElementById('applyFilters');
+                this.clearFilters = document.getElementById('clearFilters');
+                
+                // ===== CONFIGURAÇÕES DE API =====
+                // Para usar Google Maps (mais preciso):
+                // 1. Obtenha uma API Key em: https://console.cloud.google.com/
+                // 2. Ative as APIs: Places API, Geocoding API, Maps JavaScript API
+                // 3. Substitua 'SUA_API_KEY_AQUI' pela sua chave
+                // 4. Mude useGoogleMaps para true
+                this.googleApiKey = 'SUA_API_KEY_AQUI'; // Substitua pela sua API Key
+                this.useGoogleMaps = false; // Mudar para true quando tiver API Key
+                
+                // Atualmente usando Nominatim (OpenStreetMap) - GRATUITO
+                // Não requer API Key, mas pode ser menos preciso
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.loadBarbearias();
+            }
+
+            setupEventListeners() {
+                // Busca de endereço com debounce
+                this.addressInput.addEventListener('input', (e) => {
+                    this.handleAddressInputWithDebounce(e.target.value);
+                });
+
+                // Busca ao pressionar Enter
+                this.addressInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.performSearch();
+                    }
+                });
+
+                // Ícone da lupa clicável
+                this.searchIcon.addEventListener('click', () => {
+                    this.performSearch();
+                });
+
+                // Seleção de sugestão
+                this.suggestions.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('suggestion-item')) {
+                        this.selectSuggestion(e.target.textContent);
+                    }
+                });
+
+                // Botão de localização
+                this.locationButton.addEventListener('click', () => {
+                    this.getCurrentLocation();
+                });
+
+                // Fechar sugestões ao clicar fora
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.search-container')) {
+                        this.hideSuggestions();
+                    }
+                });
+
+                // Filtros
+                this.toggleFilters.addEventListener('click', () => {
+                    this.toggleFiltersPanel();
+                });
+
+                this.maxDistance.addEventListener('input', (e) => {
+                    this.distanceValue.textContent = `${e.target.value} km`;
+                });
+
+                this.applyFilters.addEventListener('click', () => {
+                    this.applyCurrentFilters();
+                });
+
+                this.clearFilters.addEventListener('click', () => {
+                    this.clearAllFilters();
+                });
+
+                // Carregar serviços disponíveis
+                this.loadAvailableServices();
+                
+                // Event listeners do menu
+                this.setupMenuEventListeners();
+                
+                // Detectar tipo de usuário e configurar menu
+                this.detectUserType();
+            }
+
+            // ===== MÉTODOS DO MENU =====
+            
+            setupMenuEventListeners() {
+                // Toggle do menu
+                this.menuToggle.addEventListener('click', () => {
+                    this.toggleMenu();
+                });
+                
+                // Fechar menu ao clicar no overlay
+                this.menuOverlay.addEventListener('click', () => {
+                    this.closeMenu();
+                });
+                
+                // Fechar menu com ESC
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.isMenuOpen) {
+                        this.closeMenu();
+                    }
+                });
+            }
+            
+            toggleMenu() {
+                if (this.isMenuOpen) {
+                    this.closeMenu();
+                } else {
+                    this.openMenu();
+                }
+            }
+            
+            openMenu() {
+                this.isMenuOpen = true;
+                this.menuToggle.classList.add('active');
+                this.menuOverlay.classList.add('active');
+                this.menuPanel.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            closeMenu() {
+                this.isMenuOpen = false;
+                this.menuToggle.classList.remove('active');
+                this.menuOverlay.classList.remove('active');
+                this.menuPanel.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            
+            detectUserType() {
+                // Detectar tipo de usuário baseado nos dados salvos
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                const userType = currentUser.tipo || 'cliente';
+                const userName = currentUser.nomeCompleto || currentUser.nomeBarbearia || 'Usuário';
+                
+                this.userType.textContent = userType === 'barbearia' ? 'Barbearia' : 'Cliente';
+                this.userName.textContent = userName;
+                this.userAvatar.textContent = userName.charAt(0).toUpperCase();
+                
+                this.renderMenuContent(userType);
+            }
+            
+            renderMenuContent(userType) {
+                if (userType === 'barbearia') {
+                    this.renderBarbeariaMenu();
+                } else {
+                    this.renderClienteMenu();
+                }
+            }
+            
+            renderClienteMenu() {
+                this.menuContent.innerHTML = `
+                    <div class="menu-section">
+                        <h4>Meu Perfil</h4>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('editProfile')">
+                            <div class="menu-item-icon">👤</div>
+                            <div class="menu-item-text">Editar Perfil</div>
+                        </div>
+                        
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h4>Agendamentos</h4>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('myAppointments')">
+                            <div class="menu-item-icon">📅</div>
+                            <div class="menu-item-text">Meus Agendamentos</div>
+                            <div class="menu-item-badge">3</div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h4>Favoritos</h4>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('favorites')">
+                            <div class="menu-item-icon">❤️</div>
+                            <div class="menu-item-text">Barbearias Favoritas</div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-divider"></div>
+                    
+                    <div class="menu-section">
+                        <div class="menu-item menu-logout" onclick="barbeariasFinder.handleMenuClick('logout')">
+                            <div class="menu-item-icon">🚪</div>
+                            <div class="menu-item-text">Sair</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            renderBarbeariaMenu() {
+                this.menuContent.innerHTML = `
+                    <div class="menu-section">
+                        <h4>Gerenciar Barbearia</h4>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('editProfile')">
+                            <div class="menu-item-icon">🏪</div>
+                            <div class="menu-item-text">Editar Perfil</div>
+                        </div>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('manageServices')">
+                            <div class="menu-item-icon">✂️</div>
+                            <div class="menu-item-text">Gerenciar Serviços</div>
+                        </div>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('manageLocation')">
+                            <div class="menu-item-icon">📍</div>
+                            <div class="menu-item-text">Localização</div>
+                        </div>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('manageContacts')">
+                            <div class="menu-item-icon">📞</div>
+                            <div class="menu-item-text">Contatos</div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h4>Agendamentos</h4>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('appointments')">
+                            <div class="menu-item-icon">📅</div>
+                            <div class="menu-item-text">Agendamentos</div>
+                            <div class="menu-item-badge">12</div>
+                        </div>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('schedule')">
+                            <div class="menu-item-icon">⏰</div>
+                            <div class="menu-item-text">Horários</div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h4>Relatórios</h4>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('reports')">
+                            <div class="menu-item-icon">📊</div>
+                            <div class="menu-item-text">Relatórios</div>
+                        </div>
+                        <div class="menu-item" onclick="barbeariasFinder.handleMenuClick('reviews')">
+                            <div class="menu-item-icon">⭐</div>
+                            <div class="menu-item-text">Avaliações</div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-divider"></div>
+                    
+                    <div class="menu-section">
+                        <div class="menu-item menu-logout" onclick="barbeariasFinder.handleMenuClick('logout')">
+                            <div class="menu-item-icon">🚪</div>
+                            <div class="menu-item-text">Sair</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            handleMenuClick(action) {
+                this.closeMenu();
+                
+                switch (action) {
+                    case 'editProfile':
+                        this.handleEditProfile();
+                        break;
+                    case 'changePassword':
+                        this.showComingSoon('Alterar Senha');
+                        break;
+                    case 'myAppointments':
+                        window.location.href = 'MeusAgendamentos.html';
+                        break;
+                    case 'favorites':
+                        window.location.href = 'Favoritos.html';
+                        break;
+                    case 'manageServices':
+                        this.showComingSoon('Gerenciar Serviços');
+                        break;
+                    case 'manageLocation':
+                        this.showComingSoon('Gerenciar Localização');
+                        break;
+                    case 'manageContacts':
+                        this.showComingSoon('Gerenciar Contatos');
+                        break;
+                    case 'appointments':
+                        this.showComingSoon('Agendamentos');
+                        break;
+                    case 'schedule':
+                        this.showComingSoon('Gerenciar Horários');
+                        break;
+                    case 'reports':
+                        this.showComingSoon('Relatórios');
+                        break;
+                    case 'reviews':
+                        this.showComingSoon('Avaliações');
+                        break;
+                    case 'logout':
+                        this.handleLogout();
+                        break;
+                    default:
+                        console.log('Ação não implementada:', action);
+                }
+            }
+            
+            handleEditProfile() {
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                const userType = currentUser.tipo || 'cliente';
+                
+                if (userType === 'barbearia') {
+                    window.location.href = 'EditarPerfilBarbearia.html';
+                } else {
+                    window.location.href = 'EditarPerfilCliente.html';
+                }
+            }
+            
+            showComingSoon(feature) {
+                alert(`🚧 ${feature} - Em breve!\n\nEsta funcionalidade está sendo desenvolvida e estará disponível em breve.`);
+            }
+            
+            handleLogout() {
+                if (confirm('Tem certeza que deseja sair?')) {
+                    // Limpar dados do usuário
+                    localStorage.removeItem('currentUser');
+                    localStorage.removeItem('userType');
+                    localStorage.removeItem('userName');
+                    localStorage.removeItem('userToken');
+                    
+                    // Redirecionar para tela inicial
+                    window.location.href = 'Login.html';
+                }
+            }
+
+            // Método com debounce para otimizar chamadas de API
+            handleAddressInputWithDebounce(value) {
+                clearTimeout(this.searchTimeout);
+                
+                if (value.length < 3) {
+                    this.hideSuggestions();
+                    return;
+                }
+
+                this.searchTimeout = setTimeout(() => {
+                    this.handleAddressInput(value);
+                }, 300); // Aguarda 300ms após parar de digitar
+            }
+
+            async handleAddressInput(value) {
+                try {
+                    let suggestions = [];
+                    
+                    if (this.useGoogleMaps) {
+                        suggestions = await this.getGooglePlacesSuggestions(value);
+                    } else {
+                        suggestions = await this.getNominatimSuggestions(value);
+                    }
+                    
+                    this.showSuggestions(suggestions);
+                } catch (error) {
+                    console.error('Erro ao buscar sugestões:', error);
+                    // Fallback para sugestões mock
+                    const mockSuggestions = await this.getMockSuggestions(value);
+                    this.showSuggestions(mockSuggestions);
+                }
+            }
+
+            // Método para realizar busca manual (lupa ou Enter)
+            async performSearch() {
+                const address = this.addressInput.value.trim();
+                
+                if (!address) {
+                    this.showError('Por favor, digite um endereço para buscar.');
+                    return;
+                }
+
+                if (address.length < 3) {
+                    this.showError('Digite pelo menos 3 caracteres para buscar.');
+                    return;
+                }
+
+                this.hideSuggestions();
+                this.showLoading();
+
+                try {
+                    // Tentar geocodificar o endereço digitado
+                    const coordinates = await this.geocode(address);
+                    this.currentLocation = coordinates;
+                    this.selectedAddress = address;
+                    
+                    await this.loadBarbearias();
+                    this.showSuccess('Endereço encontrado! Carregando barbearias próximas...');
+                } catch (error) {
+                    console.error('Erro ao buscar endereço:', error);
+                    this.showError('Não foi possível encontrar este endereço. Tente novamente.');
+                }
+            }
+
+            // ===== MÉTODOS DE SUGESTÕES DE ENDEREÇO =====
+            
+            async getGooglePlacesSuggestions(query) {
+                // Google Places Autocomplete API com foco no Vale do Aço - MG
+                const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&key=${this.googleApiKey}&language=pt-BR&components=country:br&types=address&location=-19.4703,-42.5369&radius=50000`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.status === 'OK') {
+                    // Filtrar resultados do Vale do Aço
+                    const valeDoAcoResults = data.predictions.filter(prediction => {
+                        const description = prediction.description.toLowerCase();
+                        return description.includes('ipatinga') || 
+                               description.includes('timóteo') || 
+                               description.includes('coronel fabriciano') ||
+                               description.includes('santana do paraíso') ||
+                               description.includes('minas gerais');
+                    });
+                    
+                    return valeDoAcoResults.map(prediction => prediction.description);
+                } else {
+                    throw new Error(`Google Places API error: ${data.status}`);
+                }
+            }
+            
+            async getNominatimSuggestions(query) {
+                // OpenStreetMap Nominatim API (gratuita) - Focada no Vale do Aço - MG com máxima precisão
+                const valeDoAcoQuery = `${query}, Vale do Aço, Minas Gerais, Brasil`;
+                const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(valeDoAcoQuery)}&format=json&limit=10&addressdetails=1&countrycodes=br&bounded=1&viewbox=-42.8,-19.6,-42.2,-19.2&extratags=1`;
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': 'EasyCut/1.0'
+                    }
+                });
+                const data = await response.json();
+                
+                // Filtrar e formatar resultados do Vale do Aço com endereços precisos
+                const valeDoAcoResults = data.filter(result => {
+                    const displayName = result.display_name.toLowerCase();
+                    return displayName.includes('ipatinga') || 
+                           displayName.includes('timóteo') || 
+                           displayName.includes('coronel fabriciano') ||
+                           displayName.includes('santana do paraíso') ||
+                           displayName.includes('vale do aço') ||
+                           displayName.includes('minas gerais');
+                });
+                
+                // Formatar endereços com componentes específicos
+                return valeDoAcoResults.map(result => {
+                    if (result.address) {
+                        const address = result.address;
+                        let enderecoFormatado = '';
+                        
+                        // Montar endereço com componentes específicos
+                        if (address.road || address.pedestrian || address.footway) {
+                            const rua = address.road || address.pedestrian || address.footway;
+                            const numero = address.house_number || '';
+                            enderecoFormatado += `${rua}${numero ? ', ' + numero : ''}`;
+                        }
+                        
+                        if (address.suburb || address.neighbourhood || address.quarter) {
+                            const bairro = address.suburb || address.neighbourhood || address.quarter;
+                            enderecoFormatado += enderecoFormatado ? `, ${bairro}` : bairro;
+                        }
+                        
+                        if (address.city || address.town || address.village) {
+                            const cidade = address.city || address.town || address.village;
+                            enderecoFormatado += enderecoFormatado ? `, ${cidade}` : cidade;
+                        }
+                        
+                        if (address.state) {
+                            enderecoFormatado += enderecoFormatado ? ` - ${address.state}` : address.state;
+                        }
+                        
+                        return enderecoFormatado || result.display_name;
+                    }
+                    return result.display_name;
+                });
+            }
+            
+            async getMockSuggestions(query) {
+                // Fallback com sugestões mock - Focadas no Vale do Aço - MG com endereços precisos
+                const mockSuggestions = [
+                    `${query}, 123, Centro, Ipatinga - MG`,
+                    `${query}, 456, Cariru, Ipatinga - MG`,
+                    `${query}, 789, Cidade Nova, Ipatinga - MG`,
+                    `${query}, 321, Veneza, Ipatinga - MG`,
+                    `${query}, 654, Bethânia, Ipatinga - MG`,
+                    `${query}, 987, Centro, Timóteo - MG`,
+                    `${query}, 147, Centro, Coronel Fabriciano - MG`,
+                    `${query}, 258, Centro, Santana do Paraíso - MG`
+                ];
+
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                return mockSuggestions.filter(suggestion => 
+                    suggestion.toLowerCase().includes(query.toLowerCase())
+                );
+            }
+
+            showSuggestions(suggestions) {
+                if (suggestions.length === 0) {
+                    this.hideSuggestions();
+                    return;
+                }
+
+                this.suggestions.innerHTML = suggestions.map(suggestion => 
+                    `<div class="suggestion-item">${suggestion}</div>`
+                ).join('');
+
+                this.suggestions.style.display = 'block';
+            }
+
+            hideSuggestions() {
+                this.suggestions.style.display = 'none';
+            }
+
+            async selectSuggestion(address) {
+                this.addressInput.value = address;
+                this.selectedAddress = address;
+                this.hideSuggestions();
+
+                try {
+                    // Converter endereço para coordenadas (Geocodificação)
+                    const coordinates = await this.geocode(address);
+                    this.currentLocation = coordinates;
+                    
+                    await this.loadBarbearias();
+                } catch (error) {
+                    console.error('Erro ao converter endereço:', error);
+                    // Usar localização do Vale do Aço se falhar
+                    this.currentLocation = { lat: -19.4703, lng: -42.5369 }; // Centro de Ipatinga-MG
+                    await this.loadBarbearias();
+                }
+            }
+            
+            async geocode(address) {
+                try {
+                    let coordinates = null;
+                    
+                    if (this.useGoogleMaps) {
+                        coordinates = await this.googleGeocode(address);
+                    } else {
+                        coordinates = await this.nominatimGeocode(address);
+                    }
+                    
+                    return coordinates;
+                } catch (error) {
+                    console.error('Erro na geocodificação:', error);
+                    throw error;
+                }
+            }
+            
+            async googleGeocode(address) {
+                const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${this.googleApiKey}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.status === 'OK' && data.results.length > 0) {
+                    const location = data.results[0].geometry.location;
+                    return { lat: location.lat, lng: location.lng };
+                } else {
+                    throw new Error(`Google Geocoding API error: ${data.status}`);
+                }
+            }
+            
+            async nominatimGeocode(address) {
+                // Geocodificação focada no Vale do Aço - MG
+                const valeDoAcoAddress = `${address}, Vale do Aço, Minas Gerais, Brasil`;
+                const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(valeDoAcoAddress)}&format=json&limit=1&addressdetails=1&countrycodes=br&bounded=1&viewbox=-42.8,-19.6,-42.2,-19.2`;
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': 'EasyCut/1.0'
+                    }
+                });
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+                } else {
+                    throw new Error('Nominatim geocoding failed');
+                }
+            }
+
+            async getCurrentLocation() {
+                // Evitar múltiplas requisições simultâneas
+                if (this.isLocationRequested) {
+                    return;
+                }
+
+                this.isLocationRequested = true;
+                this.locationButton.disabled = true;
+                this.locationButton.textContent = '📍 Obtendo localização...';
+
+                if (!navigator.geolocation) {
+                    this.showError('Geolocalização não é suportada neste navegador.');
+                    this.resetLocationButton();
+                    return;
+                }
+
+                try {
+                    // Verificar permissões primeiro
+                    const permission = await this.checkLocationPermission();
+                    if (permission === 'denied') {
+                        this.showError('Permissão de localização negada. Por favor, permita o acesso à localização nas configurações do navegador.');
+                        this.resetLocationButton();
+                        return;
+                    }
+
+                    if (permission === 'prompt') {
+                        this.locationButton.textContent = '📍 Aguardando permissão...';
+                    }
+
+                    const position = await this.getCurrentPositionPromise();
+                    this.currentLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    // Verificar se a localização está no Vale do Aço
+                    const isInValeDoAco = this.isLocationInValeDoAco(this.currentLocation);
+                    if (!isInValeDoAco) {
+                        this.showError('Sua localização está fora da região do Vale do Aço. Por favor, digite um endereço da região.');
+                        this.resetLocationButton();
+                        return;
+                    }
+
+                    // Converter coordenadas para endereço
+                    const address = await this.reverseGeocode(this.currentLocation);
+                    this.addressInput.value = address;
+                    this.selectedAddress = address;
+
+                    this.showSuccess('Localização obtida com sucesso!');
+                    await this.loadBarbearias();
+
+                } catch (error) {
+                    console.error('Erro ao obter localização:', error);
+                    this.handleLocationError(error);
+                } finally {
+                    this.resetLocationButton();
+                }
+            }
+
+            // Verificar permissões de localização
+            async checkLocationPermission() {
+                if (!navigator.permissions) {
+                    return 'unknown';
+                }
+
+                try {
+                    const permission = await navigator.permissions.query({ name: 'geolocation' });
+                    return permission.state;
+                } catch (error) {
+                    return 'unknown';
+                }
+            }
+
+            // Verificar se a localização está no Vale do Aço
+            isLocationInValeDoAco(location) {
+                const valeDoAcoBounds = {
+                    north: -19.2,
+                    south: -19.6,
+                    east: -42.2,
+                    west: -42.8
+                };
+
+                return location.lat >= valeDoAcoBounds.south && 
+                       location.lat <= valeDoAcoBounds.north &&
+                       location.lng >= valeDoAcoBounds.west && 
+                       location.lng <= valeDoAcoBounds.east;
+            }
+
+            // Tratar erros de geolocalização de forma mais específica
+            handleLocationError(error) {
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        this.showError('Permissão de localização negada. Por favor, permita o acesso nas configurações do navegador.');
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        this.showError('Localização indisponível. Verifique se o GPS está ativado.');
+                        break;
+                    case error.TIMEOUT:
+                        this.showError('Tempo limite excedido. Tente novamente.');
+                        break;
+                    default:
+                        this.showError('Não foi possível obter sua localização. Tente digitar um endereço.');
+                        break;
+                }
+            }
+
+            getCurrentPositionPromise() {
+                return new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 300000
+                    });
+                });
+            }
+
+            async reverseGeocode(location) {
+                try {
+                    let address = '';
+                    
+                    if (this.useGoogleMaps) {
+                        address = await this.googleReverseGeocode(location.lat, location.lng);
+                    } else {
+                        address = await this.nominatimReverseGeocode(location.lat, location.lng);
+                    }
+                    
+                    return address;
+                } catch (error) {
+                    console.error('Erro na geocodificação reversa:', error);
+                    // Fallback para endereço do Vale do Aço
+                    return `📍 Localização atual (${location.lat.toFixed(4)}, ${location.lng.toFixed(4)})`;
+                }
+            }
+            
+            async googleReverseGeocode(lat, lng) {
+                // Google Geocoding com máxima precisão para o Vale do Aço
+                const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${this.googleApiKey}&language=pt-BR&result_type=street_address|route|premise|subpremise`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.status === 'OK' && data.results.length > 0) {
+                    // Procurar resultado mais específico (rua + número)
+                    const specificResult = data.results.find(result => 
+                        result.types.includes('street_address') || 
+                        result.types.includes('premise')
+                    );
+                    
+                    if (specificResult) {
+                        return specificResult.formatted_address;
+                    } else {
+                        return data.results[0].formatted_address;
+                    }
+                } else {
+                    throw new Error(`Google Geocoding API error: ${data.status}`);
+                }
+            }
+            
+            async nominatimReverseGeocode(lat, lng) {
+                // Geocodificação reversa focada no Vale do Aço - MG com máxima precisão
+                const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&accept-language=pt-BR&zoom=18&extratags=1`;
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': 'EasyCut/1.0'
+                    }
+                });
+                const data = await response.json();
+                
+                if (data && data.address) {
+                    // Construir endereço completo e preciso
+                    const address = data.address;
+                    let enderecoCompleto = '';
+                    
+                    // Montar endereço com componentes específicos
+                    if (address.road || address.pedestrian || address.footway) {
+                        const rua = address.road || address.pedestrian || address.footway;
+                        const numero = address.house_number || '';
+                        enderecoCompleto += `${rua}${numero ? ', ' + numero : ''}`;
+                    }
+                    
+                    if (address.suburb || address.neighbourhood || address.quarter) {
+                        const bairro = address.suburb || address.neighbourhood || address.quarter;
+                        enderecoCompleto += enderecoCompleto ? `, ${bairro}` : bairro;
+                    }
+                    
+                    if (address.city || address.town || address.village) {
+                        const cidade = address.city || address.town || address.village;
+                        enderecoCompleto += enderecoCompleto ? `, ${cidade}` : cidade;
+                    }
+                    
+                    if (address.state) {
+                        enderecoCompleto += enderecoCompleto ? ` - ${address.state}` : address.state;
+                    }
+                    
+                    // Verificar se está no Vale do Aço
+                    const enderecoLower = enderecoCompleto.toLowerCase();
+                    if (enderecoLower.includes('ipatinga') || 
+                        enderecoLower.includes('timóteo') || 
+                        enderecoLower.includes('coronel fabriciano') ||
+                        enderecoLower.includes('santana do paraíso') ||
+                        enderecoLower.includes('vale do aço') ||
+                        enderecoLower.includes('minas gerais')) {
+                        return enderecoCompleto;
+                    } else {
+                        // Se não estiver no Vale do Aço, usar coordenadas
+                        return `📍 Localização atual (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+                    }
+                } else {
+                    throw new Error('Nominatim reverse geocoding failed');
+                }
+            }
+
+            resetLocationButton() {
+                this.isLocationRequested = false;
+                this.locationButton.disabled = false;
+                this.locationButton.textContent = '📍 Usar minha localização';
+            }
+
+            async loadBarbearias() {
+                this.showLoading();
+
+                try {
+                    // Se temos localização, buscar barbearias reais
+                    if (this.currentLocation) {
+                        await this.loadRealBarbearias();
+                    } else {
+                        // Usar dados mock para demonstração
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        const barbearias = this.getMockBarbearias();
+                        this.displayBarbearias(barbearias);
+                    }
+
+                } catch (error) {
+                    console.error('Erro ao carregar barbearias:', error);
+                    this.showError('Erro ao carregar barbearias. Tente novamente.');
+                }
+            }
+
+            async loadRealBarbearias() {
+                // Usar dados mock diretamente (sem tentar conectar com API)
+                console.log('Carregando barbearias mock...');
+                const barbearias = this.getMockBarbearias();
+                this.displayBarbearias(barbearias);
+            }
+
+            async loadAvailableServices() {
+                // Usar serviços mock diretamente (sem tentar conectar com API)
+                console.log('Carregando serviços mock...');
+                this.availableServices = [
+                    "Corte masculino", "Barba", "Sobrancelha", "Design de sobrancelhas", 
+                    "Barboterapia", "Massagem facial", "Tratamentos capilares", 
+                    "Progressivas", "Relaxamento", "Pigmentação", "Limpeza de pele", 
+                    "Toalha quente", "Massagem", "Tratamentos"
+                ];
+                this.renderServicesFilter();
+            }
+
+            renderServicesFilter() {
+                this.servicesFilter.innerHTML = this.availableServices.map(service => `
+                    <div class="service-checkbox" onclick="this.toggleService(this)">
+                        <input type="checkbox" id="service_${service.replace(/\s+/g, '_')}" value="${service}">
+                        <label for="service_${service.replace(/\s+/g, '_')}">${service}</label>
+                    </div>
+                `).join('');
+            }
+
+            toggleService(element) {
+                const checkbox = element.querySelector('input[type="checkbox"]');
+                checkbox.checked = !checkbox.checked;
+                
+                if (checkbox.checked) {
+                    element.classList.add('checked');
+                } else {
+                    element.classList.remove('checked');
+                }
+            }
+
+            toggleFiltersPanel() {
+                const isVisible = this.filtersContent.style.display !== 'none';
+                this.filtersContent.style.display = isVisible ? 'none' : 'block';
+                this.toggleFilters.textContent = isVisible ? '🔽' : '🔼';
+            }
+
+            applyCurrentFilters() {
+                this.currentFilters = {
+                    min_rating: this.minRating.value ? parseFloat(this.minRating.value) : null,
+                    sort_by: this.priceSort.value,
+                    services: this.getSelectedServices(),
+                    max_distance: parseFloat(this.maxDistance.value)
+                };
+
+                // Aplicar filtros aos dados atuais
+                this.applyFiltersToCurrentData();
+            }
+
+            getSelectedServices() {
+                const checkboxes = this.servicesFilter.querySelectorAll('input[type="checkbox"]:checked');
+                return Array.from(checkboxes).map(cb => cb.value);
+            }
+
+            clearAllFilters() {
+                this.minRating.value = '';
+                this.priceSort.value = '';
+                this.maxDistance.value = '5';
+                this.distanceValue.textContent = '5 km';
+
+                // Limpar checkboxes de serviços
+                const checkboxes = this.servicesFilter.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.service-checkbox').classList.remove('checked');
+                });
+
+                this.currentFilters = {};
+                this.applyFiltersToCurrentData();
+            }
+
+            // Método para aplicar filtros aos dados atuais
+            applyFiltersToCurrentData() {
+                if (this.allBarbearias.length === 0) {
+                    return;
+                }
+
+                let filteredBarbearias = [...this.allBarbearias];
+
+                // Filtro por avaliação mínima
+                if (this.currentFilters.min_rating) {
+                    filteredBarbearias = filteredBarbearias.filter(barbearia => 
+                        barbearia.rating >= this.currentFilters.min_rating
+                    );
+                }
+
+                // Filtro por serviços
+                if (this.currentFilters.services && this.currentFilters.services.length > 0) {
+                    filteredBarbearias = filteredBarbearias.filter(barbearia => {
+                        return this.currentFilters.services.some(service => 
+                            barbearia.services.some(barbeariaService => 
+                                barbeariaService.toLowerCase().includes(service.toLowerCase())
+                            )
+                        );
+                    });
+                }
+
+                // Filtro por distância
+                if (this.currentFilters.max_distance) {
+                    filteredBarbearias = filteredBarbearias.filter(barbearia => {
+                        const distance = parseFloat(barbearia.distance.replace(' km', ''));
+                        return distance <= this.currentFilters.max_distance;
+                    });
+                }
+
+                // Ordenação por preço
+                if (this.currentFilters.sort_by) {
+                    filteredBarbearias = this.sortBarbeariasByPrice(filteredBarbearias, this.currentFilters.sort_by);
+                }
+
+                this.displayBarbearias(filteredBarbearias);
+                
+                // Mostrar contador de resultados
+                this.showResultsCount(filteredBarbearias.length, this.allBarbearias.length);
+                
+                // Mostrar indicador de ordenação se ativo
+                this.showSortIndicator();
+            }
+
+            // Método para mostrar indicador de ordenação
+            showSortIndicator() {
+                // Remover indicador anterior se existir
+                const existingIndicator = document.querySelector('.sort-indicator');
+                if (existingIndicator) {
+                    existingIndicator.remove();
+                }
+
+                if (this.currentFilters.sort_by) {
+                    const sortTexts = {
+                        'cheap': '💰 Ordenado por: Mais barato primeiro',
+                        'expensive': '💎 Ordenado por: Mais caro primeiro',
+                        'rating': '⭐ Ordenado por: Melhor avaliação',
+                        'distance': '📍 Ordenado por: Mais próximo'
+                    };
+
+                    const indicatorDiv = document.createElement('div');
+                    indicatorDiv.className = 'sort-indicator';
+                    indicatorDiv.style.cssText = `
+                        text-align: center;
+                        margin: 8px 0;
+                        padding: 8px 12px;
+                        background: rgba(16, 185, 129, 0.1);
+                        border: 1px solid rgba(16, 185, 129, 0.3);
+                        border-radius: 6px;
+                        color: #6ee7b7;
+                        font-size: 0.85rem;
+                        font-weight: 500;
+                    `;
+                    indicatorDiv.textContent = sortTexts[this.currentFilters.sort_by];
+                    
+                    // Inserir antes da lista de barbearias
+                    this.barbeariasList.parentNode.insertBefore(indicatorDiv, this.barbeariasList);
+                }
+            }
+
+            // Método para ordenar barbearias
+            sortBarbeariasByPrice(barbearias, sortType) {
+                return barbearias.sort((a, b) => {
+                    switch (sortType) {
+                        case 'cheap':
+                            return a.price_level - b.price_level; // Mais barato primeiro
+                        case 'expensive':
+                            return b.price_level - a.price_level; // Mais caro primeiro
+                        case 'rating':
+                            return b.rating - a.rating; // Melhor avaliação primeiro
+                        case 'distance':
+                            const distanceA = parseFloat(a.distance.replace(' km', ''));
+                            const distanceB = parseFloat(b.distance.replace(' km', ''));
+                            return distanceA - distanceB; // Mais próximo primeiro
+                        default:
+                            return 0;
+                    }
+                });
+            }
+
+            // Método para mostrar contador de resultados
+            showResultsCount(filteredCount, totalCount) {
+                // Remover contador anterior se existir
+                const existingCounter = document.querySelector('.results-counter');
+                if (existingCounter) {
+                    existingCounter.remove();
+                }
+
+                if (filteredCount !== totalCount) {
+                    const counterDiv = document.createElement('div');
+                    counterDiv.className = 'results-counter';
+                    counterDiv.style.cssText = `
+                        text-align: center;
+                        margin: 16px 0;
+                        padding: 12px;
+                        background: rgba(59, 130, 246, 0.1);
+                        border: 1px solid rgba(59, 130, 246, 0.3);
+                        border-radius: 8px;
+                        color: #60a5fa;
+                        font-size: 0.9rem;
+                        font-weight: 500;
+                    `;
+                    counterDiv.textContent = `Mostrando ${filteredCount} de ${totalCount} barbearias`;
+                    
+                    // Inserir antes da lista de barbearias
+                    this.barbeariasList.parentNode.insertBefore(counterDiv, this.barbeariasList);
+                }
+            }
+
+            getMockBarbearias() {
+                return [
+                    {
+                        id: 1,
+                        name: 'Barber King',
+                        image: 'https://via.placeholder.com/50x50/3b82f6/ffffff?text=BK',
+                        services: ['Design de sobrancelhas', 'Barboterapia', 'Pigmentação', 'Relaxamento', 'Progressivas', 'Limpeza de pele', 'Massagem facial', 'Toalha quente'],
+                        hours: '08:00 às 18:00',
+                        distance: '0.8 km',
+                        rating: 4.8,
+                        price_level: 3,
+                        opening_hours: {
+                            "monday": {"open": "08:00", "close": "18:00"},
+                            "tuesday": {"open": "08:00", "close": "18:00"},
+                            "wednesday": {"open": "08:00", "close": "18:00"},
+                            "thursday": {"open": "08:00", "close": "18:00"},
+                            "friday": {"open": "08:00", "close": "19:00"},
+                            "saturday": {"open": "08:00", "close": "17:00"},
+                            "sunday": {"open": "09:00", "close": "15:00"}
+                        }
+                    },
+                    {
+                        id: 2,
+                        name: 'Barbearia do João',
+                        image: 'https://via.placeholder.com/50x50/10b981/ffffff?text=BJ',
+                        services: ['Corte masculino', 'Barba', 'Sobrancelha', 'Relaxamento'],
+                        hours: '09:00 às 19:00',
+                        distance: '1.2 km',
+                        rating: 4.6,
+                        price_level: 2,
+                        opening_hours: {
+                            "monday": {"open": "09:00", "close": "19:00"},
+                            "tuesday": {"open": "09:00", "close": "19:00"},
+                            "wednesday": {"open": "09:00", "close": "19:00"},
+                            "thursday": {"open": "09:00", "close": "19:00"},
+                            "friday": {"open": "09:00", "close": "20:00"},
+                            "saturday": {"open": "08:00", "close": "18:00"},
+                            "sunday": {"closed": true}
+                        }
+                    },
+                    {
+                        id: 3,
+                        name: 'Studio Hair',
+                        image: 'https://via.placeholder.com/50x50/8b5cf6/ffffff?text=SH',
+                        services: ['Corte', 'Barba', 'Design de sobrancelhas', 'Massagem', 'Tratamentos'],
+                        hours: '08:30 às 17:30',
+                        distance: '2.1 km',
+                        rating: 4.9,
+                        price_level: 4,
+                        opening_hours: {
+                            "monday": {"open": "08:30", "close": "17:30"},
+                            "tuesday": {"open": "08:30", "close": "17:30"},
+                            "wednesday": {"open": "08:30", "close": "17:30"},
+                            "thursday": {"open": "08:30", "close": "17:30"},
+                            "friday": {"open": "08:30", "close": "18:30"},
+                            "saturday": {"open": "08:00", "close": "16:00"},
+                            "sunday": {"closed": true}
+                        }
+                    },
+                    {
+                        id: 4,
+                        name: 'Barbearia Central',
+                        image: 'https://via.placeholder.com/50x50/f59e0b/ffffff?text=BC',
+                        services: ['Corte masculino', 'Barba', 'Sobrancelha', 'Relaxamento', 'Progressivas'],
+                        hours: '07:00 às 20:00',
+                        distance: '3.5 km',
+                        rating: 4.4,
+                        price_level: 2,
+                        opening_hours: {
+                            "monday": {"open": "07:00", "close": "20:00"},
+                            "tuesday": {"open": "07:00", "close": "20:00"},
+                            "wednesday": {"open": "07:00", "close": "20:00"},
+                            "thursday": {"open": "07:00", "close": "20:00"},
+                            "friday": {"open": "07:00", "close": "21:00"},
+                            "saturday": {"open": "07:00", "close": "19:00"},
+                            "sunday": {"open": "08:00", "close": "16:00"}
+                        }
+                    },
+                    {
+                        id: 5,
+                        name: 'Elite Barber',
+                        image: 'https://via.placeholder.com/50x50/ef4444/ffffff?text=EB',
+                        services: ['Corte masculino', 'Barba', 'Design de sobrancelhas', 'Massagem facial', 'Tratamentos capilares'],
+                        hours: '09:00 às 18:00',
+                        distance: '4.2 km',
+                        rating: 4.7,
+                        price_level: 3,
+                        opening_hours: {
+                            "monday": {"open": "09:00", "close": "18:00"},
+                            "tuesday": {"open": "09:00", "close": "18:00"},
+                            "wednesday": {"open": "09:00", "close": "18:00"},
+                            "thursday": {"open": "09:00", "close": "18:00"},
+                            "friday": {"open": "09:00", "close": "19:00"},
+                            "saturday": {"open": "08:00", "close": "17:00"},
+                            "sunday": {"closed": true}
+                        }
+                    },
+                    {
+                        id: 6,
+                        name: 'Barbearia Popular',
+                        image: 'https://via.placeholder.com/50x50/22c55e/ffffff?text=BP',
+                        services: ['Corte masculino', 'Barba', 'Sobrancelha'],
+                        hours: '08:00 às 19:00',
+                        distance: '1.8 km',
+                        rating: 4.2,
+                        price_level: 1,
+                        opening_hours: {
+                            "monday": {"open": "08:00", "close": "19:00"},
+                            "tuesday": {"open": "08:00", "close": "19:00"},
+                            "wednesday": {"open": "08:00", "close": "19:00"},
+                            "thursday": {"open": "08:00", "close": "19:00"},
+                            "friday": {"open": "08:00", "close": "20:00"},
+                            "saturday": {"open": "08:00", "close": "18:00"},
+                            "sunday": {"open": "09:00", "close": "16:00"}
+                        }
+                    }
+                ];
+            }
+
+            displayBarbearias(barbearias) {
+                // Armazenar todas as barbearias para filtragem
+                this.allBarbearias = barbearias;
+                
+                this.barbeariasList.innerHTML = barbearias.map(barbearia => `
+                    <div class="barbearia-card" onclick="barbeariasFinder.selectBarbearia(${barbearia.id})">
+                        <div class="barbearia-header">
+                            <img src="${barbearia.image}" alt="${barbearia.name}" class="barbearia-image">
+                            <div class="barbearia-info">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    <h3 style="margin: 0;">${barbearia.name}</h3>
+                                    ${this.getStatusIndicator(barbearia.opening_hours)}
+                                </div>
+                                <div class="barbearia-meta">
+                                    ⭐ ${barbearia.rating} • ${barbearia.distance} • ${this.getPriceLevelText(barbearia.price_level)}
+                                </div>
+                            </div>
+                            <div class="barbearia-hours">${barbearia.hours}</div>
+                        </div>
+                        <div class="services-list">
+                            ${barbearia.services.map(service => 
+                                `<span class="service-tag">${service}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Mostrar contador de resultados
+                this.showResultsCount(barbearias.length, barbearias.length);
+            }
+
+            // Método para converter nível de preço em texto
+            getPriceLevelText(priceLevel) {
+                const priceLevels = {
+                    1: '$ - Econômico',
+                    2: '$$ - Moderado', 
+                    3: '$$$ - Caro',
+                    4: '$$$$ - Premium'
+                };
+                return priceLevels[priceLevel] || '$$ - Moderado';
+            }
+            
+            getStatusIndicator(openingHours) {
+                const now = new Date();
+                const currentDay = now.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
+                const currentTime = now.toTimeString().slice(0, 5); // HH:MM
+                
+                // Mapear dias da semana
+                const dayMap = {
+                    'domingo': 'sunday',
+                    'segunda-feira': 'monday',
+                    'terça-feira': 'tuesday',
+                    'quarta-feira': 'wednesday',
+                    'quinta-feira': 'thursday',
+                    'sexta-feira': 'friday',
+                    'sábado': 'saturday'
+                };
+                
+                const dayKey = dayMap[currentDay];
+                const todaySchedule = openingHours[dayKey];
+                
+                if (!todaySchedule || todaySchedule.closed) {
+                    return `
+                        <div class="status-indicator closed">
+                            <div class="status-dot closed"></div>
+                            Fechado
+                        </div>
+                    `;
+                }
+                
+                const isOpen = this.isTimeInRange(currentTime, todaySchedule.open, todaySchedule.close);
+                
+                if (isOpen) {
+                    return `
+                        <div class="status-indicator open">
+                            <div class="status-dot open"></div>
+                            Aberto
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="status-indicator closed">
+                            <div class="status-dot closed"></div>
+                            Fechado
+                        </div>
+                    `;
+                }
+            }
+            
+            isTimeInRange(currentTime, openTime, closeTime) {
+                const current = this.timeToMinutes(currentTime);
+                const open = this.timeToMinutes(openTime);
+                const close = this.timeToMinutes(closeTime);
+                
+                return current >= open && current <= close;
+            }
+            
+            timeToMinutes(timeString) {
+                const [hours, minutes] = timeString.split(':').map(Number);
+                return hours * 60 + minutes;
+            }
+
+            selectBarbearia(barbeariaId) {
+                console.log('Barbearia selecionada:', barbeariaId);
+                // Navegar para página de detalhes da barbearia
+                window.location.href = `BarbeariaDetalhes.html?id=${barbeariaId}`;
+            }
+
+            showLoading() {
+                this.barbeariasList.innerHTML = `
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <div>Carregando barbearias próximas...</div>
+                    </div>
+                `;
+            }
+
+            showError(message) {
+                this.barbeariasList.innerHTML = `
+                    <div class="error-message">${message}</div>
+                `;
+            }
+
+            showSuccess(message) {
+                const successDiv = document.createElement('div');
+                successDiv.className = 'success-message';
+                successDiv.textContent = message;
+                
+                // Inserir após o campo de busca
+                const formGroup = this.addressInput.closest('.form-group');
+                formGroup.insertAdjacentElement('afterend', successDiv);
+                
+                setTimeout(() => {
+                    successDiv.remove();
+                }, 3000);
+            }
+        }
+
+        // Função global para o botão voltar
+        function handleBackButton() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            
+            if (currentUser.email) {
+                // Usuário logado, voltar para dashboard apropriado
+                const userType = currentUser.tipo || 'cliente';
+                if (userType === 'barbearia') {
+                    window.location.href = 'BarbeariaDashboard.html';
+                } else {
+                    window.location.href = 'ClienteDashboard.html';
+                }
+            } else {
+                // Usuário não logado, voltar para tela inicial
+                window.location.href = 'Login.html';
+            }
+        }
+
+        // Função global para o botão voltar
+        function handleBackButton() {
+            console.log('handleBackButton chamada - voltando para página anterior');
+            
+            // Usar history.back() para voltar para a página anterior
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // Se não há histórico, redirecionar baseado no tipo de usuário
+                console.log('Sem histórico, redirecionando baseado no tipo de usuário');
+                
+                try {
+                    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                    const userType = localStorage.getItem('userType');
+                    
+                    const detectedUserType = currentUser.tipo || userType || 'cliente';
+                    
+                    if (detectedUserType === 'barbearia') {
+                        window.location.href = 'BarbeariaDashboard.html';
+                    } else {
+                        window.location.href = 'ClienteDashboard.html';
+                    }
+                } catch (error) {
+                    console.error('Erro no fallback:', error);
+                    window.location.href = 'Login.html';
+                }
+            }
+        }
+
+        // Inicializar quando a página carregar
+        let barbeariasFinder;
+        document.addEventListener('DOMContentLoaded', () => {
+            barbeariasFinder = new BarbeariasFinder();
+        });
+    </script>
+</body>
+</html>
