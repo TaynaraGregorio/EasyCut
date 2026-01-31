@@ -29,7 +29,7 @@ Oferecer uma solução simples e prática para barbearias, permitindo mais contr
 Projeto desenvolvido como parte do Projeto Integrador do curso de Engenharia de Software, com foco na aplicação prática dos conhecimentos adquiridos durante a graduação.
 
 ## 📌 Status do projeto
-Em desenvolvimento / Projeto acadêmico finalizado (escolha o que fizer mais sentido)
+Em desenvolvimento...
 
 ---
 
