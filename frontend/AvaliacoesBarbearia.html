@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>EasyCut - Avaliações da Barbearia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #fff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .header {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #e2e8f0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .back-button:hover {
+            background: rgba(30, 41, 59, 1);
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateX(-2px);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .page-subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            margin-bottom: 32px;
+        }
+        
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #3b82f6;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .filters-section {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .filters-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #e2e8f0;
+        }
+        
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .filter-label {
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .filter-select {
+            padding: 12px 16px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.5);
+            background: rgba(30, 41, 59, 1);
+        }
+        
+        .reviews-section {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 32px;
+        }
+        
+        .reviews-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .reviews-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        
+        .reviews-count {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        
+        .review-item {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .review-item:hover {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        
+        .review-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .user-info h4 {
+            margin: 0;
+            color: #e2e8f0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .user-info p {
+            margin: 2px 0 0 0;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+        
+        .review-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stars {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .star {
+            color: #fbbf24;
+            font-size: 1.2rem;
+        }
+        
+        .star.empty {
+            color: #64748b;
+        }
+        
+        .rating-number {
+            color: #e2e8f0;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .review-date {
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+        
+        .review-content {
+            margin-bottom: 16px;
+        }
+        
+        .review-text {
+            color: #e2e8f0;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        
+        .review-service {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+        
+        .review-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .action-button {
+            padding: 8px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(30, 41, 59, 0.5);
+            color: #e2e8f0;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .action-button:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+        }
+        
+        .action-button.primary {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+        }
+        
+        .action-button.primary:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        .response-section {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+        
+        .response-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .response-icon {
+            color: #3b82f6;
+            font-size: 1.1rem;
+        }
+        
+        .response-label {
+            color: #3b82f6;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .response-text {
+            color: #e2e8f0;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+        
+        .response-date {
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+        
+        .no-reviews {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+        
+        .no-reviews-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .no-reviews h3 {
+            margin: 0 0 8px 0;
+            color: #e2e8f0;
+            font-size: 1.2rem;
+        }
+        
+        .no-reviews p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 32px;
+        }
+        
+        .pagination-button {
+            padding: 8px 12px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination-button:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .pagination-button.active {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.5);
+            color: #3b82f6;
+        }
+        
+        .pagination-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Modal de resposta */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 32px;
+            width: 90%;
+            max-width: 500px;
+            z-index: 1001;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #e2e8f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-close:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        
+        .modal-content {
+            margin-bottom: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 100px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-textarea:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.5);
+            background: rgba(30, 41, 59, 1);
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary {
+            background: rgba(30, 41, 59, 0.8);
+            color: #e2e8f0;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(30, 41, 59, 1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-primary {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+        }
+        
+        .btn-primary:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 16px;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .stats-overview {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+            
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .review-header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+            
+            .review-actions {
+                flex-wrap: wrap;
+            }
+            
+            .modal {
+                width: 95%;
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">EasyCut</div>
+            <a href="BarbeariaDashboard.html" class="back-button">
+                ← Voltar ao Dashboard
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">Avaliações</h1>
+            <p class="page-subtitle">Gerencie e responda às avaliações dos seus clientes</p>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-number" id="totalReviews">24</div>
+                <div class="stat-label">Total de Avaliações</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="averageRating">4.7</div>
+                <div class="stat-label">Avaliação Média</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="fiveStars">18</div>
+                <div class="stat-label">5 Estrelas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingResponses">3</div>
+                <div class="stat-label">Sem Resposta</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <h3 class="filters-title">Filtros</h3>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Ordenar por</label>
+                    <select class="filter-select" id="sortBy">
+                        <option value="newest">Mais recentes</option>
+                        <option value="oldest">Mais antigas</option>
+                        <option value="rating-high">Maior avaliação</option>
+                        <option value="rating-low">Menor avaliação</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Avaliação</label>
+                    <select class="filter-select" id="filterRating">
+                        <option value="all">Todas</option>
+                        <option value="5">5 estrelas</option>
+                        <option value="4">4 estrelas</option>
+                        <option value="3">3 estrelas</option>
+                        <option value="2">2 estrelas</option>
+                        <option value="1">1 estrela</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Status</label>
+                    <select class="filter-select" id="filterStatus">
+                        <option value="all">Todas</option>
+                        <option value="responded">Com resposta</option>
+                        <option value="pending">Sem resposta</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="reviews-section">
+            <div class="reviews-header">
+                <h2 class="reviews-title">Avaliações dos Clientes</h2>
+                <span class="reviews-count" id="reviewsCount">24 avaliações</span>
+            </div>
+            
+            <div id="reviewsList">
+                <!-- Reviews will be loaded here -->
+            </div>
+            
+            <div class="pagination" id="pagination">
+                <!-- Pagination will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resposta -->
+    <div class="modal-overlay" id="responseModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Responder Avaliação</h3>
+                <button class="modal-close" id="closeModal">×</button>
+            </div>
+            <div class="modal-content">
+                <div class="form-group">
+                    <label class="form-label">Sua resposta</label>
+                    <textarea class="form-textarea" id="responseText" placeholder="Digite sua resposta para o cliente..."></textarea>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelResponse">Cancelar</button>
+                <button class="btn btn-primary" id="saveResponse">Enviar Resposta</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AvaliacoesBarbearia {
+            constructor() {
+                this.reviews = [];
+                this.filteredReviews = [];
+                this.currentPage = 1;
+                this.reviewsPerPage = 5;
+                this.currentReviewId = null;
+                
+                this.init();
+            }
+            
+            init() {
+                this.loadReviews();
+                this.setupEventListeners();
+                this.renderReviews();
+                this.updateStats();
+            }
+            
+            loadReviews() {
+                // Dados simulados de avaliações
+                this.reviews = [
+                    {
+                        id: 1,
+                        clientName: "João Silva",
+                        clientInitial: "J",
+                        rating: 5,
+                        date: "2024-01-15",
+                        text: "Excelente atendimento! O barbeiro foi muito atencioso e o corte ficou perfeito. Recomendo!",
+                        service: "Corte + Barba",
+                        hasResponse: true,
+                        response: "Obrigado pelo feedback, João! Ficamos felizes que tenha gostado do atendimento. Volte sempre!",
+                        responseDate: "2024-01-15"
+                    },
+                    {
+                        id: 2,
+                        clientName: "Maria Santos",
+                        clientInitial: "M",
+                        rating: 4,
+                        date: "2024-01-14",
+                        text: "Muito bom o atendimento, ambiente limpo e organizado. Só demorou um pouco mais que o esperado.",
+                        service: "Corte Feminino",
+                        hasResponse: false,
+                        response: null,
+                        responseDate: null
+                    },
+                    {
+                        id: 3,
+                        clientName: "Pedro Costa",
+                        clientInitial: "P",
+                        rating: 5,
+                        date: "2024-01-13",
+                        text: "Melhor barbearia da região! Profissionais qualificados e preços justos. Já sou cliente há anos.",
+                        service: "Corte + Barba + Sobrancelha",
+                        hasResponse: true,
+                        response: "Pedro, muito obrigado pela fidelidade! É um prazer ter você como cliente há tanto tempo.",
+                        responseDate: "2024-01-13"
+                    },
+                    {
+                        id: 4,
+                        clientName: "Ana Oliveira",
+                        clientInitial: "A",
+                        rating: 3,
+                        date: "2024-01-12",
+                        text: "Atendimento ok, mas o horário de funcionamento poderia ser mais flexível nos fins de semana.",
+                        service: "Corte",
+                        hasResponse: false,
+                        response: null,
+                        responseDate: null
+                    },
+                    {
+                        id: 5,
+                        clientName: "Carlos Ferreira",
+                        clientInitial: "C",
+                        rating: 5,
+                        date: "2024-01-11",
+                        text: "Serviço impecável! Ambiente moderno e profissionais muito competentes. Voltarei com certeza.",
+                        service: "Corte + Barba",
+                        hasResponse: true,
+                        response: "Obrigado, Carlos! Ficamos felizes que tenha gostado. Esperamos vê-lo novamente em breve!",
+                        responseDate: "2024-01-11"
+                    },
+                    {
+                        id: 6,
+                        clientName: "Lucia Mendes",
+                        clientInitial: "L",
+                        rating: 2,
+                        date: "2024-01-10",
+                        text: "Não gostei muito do resultado. O corte não ficou como eu esperava. Talvez tenha sido falta de comunicação.",
+                        service: "Corte Feminino",
+                        hasResponse: false,
+                        response: null,
+                        responseDate: null
+                    }
+                ];
+                
+                this.filteredReviews = [...this.reviews];
+            }
+            
+            setupEventListeners() {
+                // Filtros
+                document.getElementById('sortBy').addEventListener('change', () => this.applyFilters());
+                document.getElementById('filterRating').addEventListener('change', () => this.applyFilters());
+                document.getElementById('filterStatus').addEventListener('change', () => this.applyFilters());
+                
+                // Modal
+                document.getElementById('closeModal').addEventListener('click', () => this.closeModal());
+                document.getElementById('cancelResponse').addEventListener('click', () => this.closeModal());
+                document.getElementById('saveResponse').addEventListener('click', () => this.saveResponse());
+                
+                // Fechar modal ao clicar no overlay
+                document.getElementById('responseModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'responseModal') {
+                        this.closeModal();
+                    }
+                });
+            }
+            
+            applyFilters() {
+                const sortBy = document.getElementById('sortBy').value;
+                const filterRating = document.getElementById('filterRating').value;
+                const filterStatus = document.getElementById('filterStatus').value;
+                
+                this.filteredReviews = [...this.reviews];
+                
+                // Filtrar por avaliação
+                if (filterRating !== 'all') {
+                    this.filteredReviews = this.filteredReviews.filter(review => review.rating === parseInt(filterRating));
+                }
+                
+                // Filtrar por status
+                if (filterStatus === 'responded') {
+                    this.filteredReviews = this.filteredReviews.filter(review => review.hasResponse);
+                } else if (filterStatus === 'pending') {
+                    this.filteredReviews = this.filteredReviews.filter(review => !review.hasResponse);
+                }
+                
+                // Ordenar
+                switch (sortBy) {
+                    case 'newest':
+                        this.filteredReviews.sort((a, b) => new Date(b.date) - new Date(a.date));
+                        break;
+                    case 'oldest':
+                        this.filteredReviews.sort((a, b) => new Date(a.date) - new Date(b.date));
+                        break;
+                    case 'rating-high':
+                        this.filteredReviews.sort((a, b) => b.rating - a.rating);
+                        break;
+                    case 'rating-low':
+                        this.filteredReviews.sort((a, b) => a.rating - b.rating);
+                        break;
+                }
+                
+                this.currentPage = 1;
+                this.renderReviews();
+                this.updateStats();
+            }
+            
+            renderReviews() {
+                const reviewsList = document.getElementById('reviewsList');
+                const startIndex = (this.currentPage - 1) * this.reviewsPerPage;
+                const endIndex = startIndex + this.reviewsPerPage;
+                const pageReviews = this.filteredReviews.slice(startIndex, endIndex);
+                
+                if (pageReviews.length === 0) {
+                    reviewsList.innerHTML = `
+                        <div class="no-reviews">
+                            <div class="no-reviews-icon">⭐</div>
+                            <h3>Nenhuma avaliação encontrada</h3>
+                            <p>Não há avaliações que correspondam aos filtros selecionados.</p>
+                        </div>
+                    `;
+                    document.getElementById('pagination').innerHTML = '';
+                    return;
+                }
+                
+                reviewsList.innerHTML = pageReviews.map(review => this.renderReviewItem(review)).join('');
+                this.renderPagination();
+            }
+            
+            renderReviewItem(review) {
+                const stars = this.renderStars(review.rating);
+                const responseSection = review.hasResponse ? this.renderResponseSection(review) : '';
+                const responseButton = review.hasResponse ? 
+                    '<button class="action-button" onclick="avaliacoes.editResponse(' + review.id + ')">Editar Resposta</button>' :
+                    '<button class="action-button primary" onclick="avaliacoes.openResponseModal(' + review.id + ')">Responder</button>';
+                
+                return `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="review-user">
+                                <div class="user-avatar">${review.clientInitial}</div>
+                                <div class="user-info">
+                                    <h4>${review.clientName}</h4>
+                                    <p>${review.service}</p>
+                                </div>
+                            </div>
+                            <div class="review-rating">
+                                <div class="stars">${stars}</div>
+                                <span class="rating-number">${review.rating}</span>
+                            </div>
+                        </div>
+                        <div class="review-content">
+                            <p class="review-text">${review.text}</p>
+                            <p class="review-service">Serviço: ${review.service}</p>
+                        </div>
+                        ${responseSection}
+                        <div class="review-actions">
+                            ${responseButton}
+                            <span class="review-date">${this.formatDate(review.date)}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            renderStars(rating) {
+                let stars = '';
+                for (let i = 1; i <= 5; i++) {
+                    stars += `<span class="star ${i <= rating ? '' : 'empty'}">★</span>`;
+                }
+                return stars;
+            }
+            
+            renderResponseSection(review) {
+                return `
+                    <div class="response-section">
+                        <div class="response-header">
+                            <span class="response-icon">💬</span>
+                            <span class="response-label">Resposta da Barbearia</span>
+                        </div>
+                        <p class="response-text">${review.response}</p>
+                        <span class="response-date">${this.formatDate(review.responseDate)}</span>
+                    </div>
+                `;
+            }
+            
+            renderPagination() {
+                const totalPages = Math.ceil(this.filteredReviews.length / this.reviewsPerPage);
+                const pagination = document.getElementById('pagination');
+                
+                if (totalPages <= 1) {
+                    pagination.innerHTML = '';
+                    return;
+                }
+                
+                let paginationHTML = '';
+                
+                // Botão anterior
+                paginationHTML += `
+                    <button class="pagination-button" ${this.currentPage === 1 ? 'disabled' : ''} 
+                            onclick="avaliacoes.goToPage(${this.currentPage - 1})">
+                        ← Anterior
+                    </button>
+                `;
+                
+                // Páginas
+                for (let i = 1; i <= totalPages; i++) {
+                    paginationHTML += `
+                        <button class="pagination-button ${i === this.currentPage ? 'active' : ''}" 
+                                onclick="avaliacoes.goToPage(${i})">
+                            ${i}
+                        </button>
+                    `;
+                }
+                
+                // Botão próximo
+                paginationHTML += `
+                    <button class="pagination-button" ${this.currentPage === totalPages ? 'disabled' : ''} 
+                            onclick="avaliacoes.goToPage(${this.currentPage + 1})">
+                        Próximo →
+                    </button>
+                `;
+                
+                pagination.innerHTML = paginationHTML;
+            }
+            
+            goToPage(page) {
+                const totalPages = Math.ceil(this.filteredReviews.length / this.reviewsPerPage);
+                if (page >= 1 && page <= totalPages) {
+                    this.currentPage = page;
+                    this.renderReviews();
+                }
+            }
+            
+            openResponseModal(reviewId) {
+                this.currentReviewId = reviewId;
+                document.getElementById('responseText').value = '';
+                document.getElementById('responseModal').classList.add('active');
+            }
+            
+            editResponse(reviewId) {
+                const review = this.reviews.find(r => r.id === reviewId);
+                this.currentReviewId = reviewId;
+                document.getElementById('responseText').value = review.response || '';
+                document.getElementById('responseModal').classList.add('active');
+            }
+            
+            closeModal() {
+                document.getElementById('responseModal').classList.remove('active');
+                this.currentReviewId = null;
+            }
+            
+            saveResponse() {
+                const responseText = document.getElementById('responseText').value.trim();
+                
+                if (!responseText) {
+                    alert('Por favor, digite uma resposta.');
+                    return;
+                }
+                
+                // Encontrar o review e atualizar
+                const reviewIndex = this.reviews.findIndex(r => r.id === this.currentReviewId);
+                if (reviewIndex !== -1) {
+                    this.reviews[reviewIndex].hasResponse = true;
+                    this.reviews[reviewIndex].response = responseText;
+                    this.reviews[reviewIndex].responseDate = new Date().toISOString().split('T')[0];
+                    
+                    // Atualizar lista filtrada
+                    const filteredIndex = this.filteredReviews.findIndex(r => r.id === this.currentReviewId);
+                    if (filteredIndex !== -1) {
+                        this.filteredReviews[filteredIndex] = this.reviews[reviewIndex];
+                    }
+                    
+                    this.renderReviews();
+                    this.updateStats();
+                    this.closeModal();
+                    
+                    alert('Resposta enviada com sucesso!');
+                }
+            }
+            
+            updateStats() {
+                const totalReviews = this.reviews.length;
+                const averageRating = this.reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews;
+                const fiveStars = this.reviews.filter(review => review.rating === 5).length;
+                const pendingResponses = this.reviews.filter(review => !review.hasResponse).length;
+                
+                document.getElementById('totalReviews').textContent = totalReviews;
+                document.getElementById('averageRating').textContent = averageRating.toFixed(1);
+                document.getElementById('fiveStars').textContent = fiveStars;
+                document.getElementById('pendingResponses').textContent = pendingResponses;
+                document.getElementById('reviewsCount').textContent = `${this.filteredReviews.length} avaliações`;
+            }
+            
+            formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+        }
+        
+        // Inicializar
+        let avaliacoes;
+        document.addEventListener('DOMContentLoaded', () => {
+            avaliacoes = new AvaliacoesBarbearia();
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

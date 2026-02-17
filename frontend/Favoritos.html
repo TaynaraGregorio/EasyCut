@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barbearias Favoritas - EasyCut</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: #e2e8f0;
+            text-decoration: none;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-5px);
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #f1f5f9;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            opacity: 0.9;
+        }
+
+        .favorites-section {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            box-sizing: border-box;
+            flex: 1;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .favorite-card {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .favorite-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .favorite-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .barbearia-info {
+            flex: 1;
+        }
+
+        .barbearia-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 4px;
+        }
+
+        .barbearia-address {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+        }
+
+        .barbearia-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 2px;
+        }
+
+        .rating-number {
+            color: #fbbf24;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+
+        .favorite-details {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .detail-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .services-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .service-tag {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #cbd5e1;
+        }
+
+        .empty-state-text {
+            font-size: 1rem;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(59, 130, 246, 0.2);
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideIn {
+            0% { 
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            100% { 
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .badge {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .favorite-indicator {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .favorite-indicator:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: scale(1.05);
+        }
+
+        .click-hint {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Responsividade */
+        @media (max-width: 1400px) {
+            .container {
+                max-width: 100%;
+                padding: 20px;
+            }
+            
+            .favorites-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .favorites-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 18px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .favorites-grid {
+                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+                gap: 16px;
+            }
+            
+            .favorite-card {
+                padding: 18px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+
+            .header {
+                margin-bottom: 25px;
+                padding: 15px 0;
+            }
+
+            .logo {
+                font-size: 2.2rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .favorites-section {
+                padding: 20px;
+            }
+
+            .favorites-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .favorite-card {
+                padding: 16px;
+            }
+
+            .favorite-header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+
+            .detail-row {
+                flex-direction: column;
+                gap: 4px;
+                align-items: flex-start;
+            }
+
+            .services-list {
+                justify-content: flex-start;
+            }
+
+            .click-hint {
+                position: static;
+                margin-top: 12px;
+                text-align: center;
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                margin-bottom: 20px;
+                padding: 12px 0;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .favorites-section {
+                padding: 16px;
+            }
+
+            .section-title {
+                font-size: 1.3rem;
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+
+            .favorite-card {
+                padding: 14px;
+            }
+
+            .barbearia-name {
+                font-size: 1.1rem;
+            }
+
+            .barbearia-address {
+                font-size: 0.9rem;
+            }
+
+            .detail-label,
+            .detail-value {
+                font-size: 0.85rem;
+            }
+
+            .service-tag {
+                font-size: 0.75rem;
+                padding: 3px 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 8px;
+            }
+
+            .header {
+                padding: 10px 0;
+            }
+
+            .logo {
+                font-size: 1.8rem;
+            }
+
+            .favorites-section {
+                padding: 12px;
+            }
+
+            .favorite-card {
+                padding: 12px;
+            }
+
+            .barbearia-name {
+                font-size: 1rem;
+            }
+
+            .barbearia-address {
+                font-size: 0.85rem;
+            }
+
+            .favorite-indicator {
+                font-size: 0.7rem;
+                padding: 3px 6px;
+            }
+            
+            .favorite-indicator:hover {
+                transform: scale(1.02);
+            }
+
+            .click-hint {
+                font-size: 0.65rem;
+                padding: 3px 6px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .container {
+                padding: 6px;
+            }
+
+            .favorites-section {
+                padding: 10px;
+            }
+
+            .favorite-card {
+                padding: 10px;
+            }
+
+            .barbearia-name {
+                font-size: 0.95rem;
+            }
+
+            .barbearia-address {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button class="back-link" id="backButton" style="background: none; border: none; color: inherit; font: inherit; cursor: pointer; text-decoration: none;">
+                ← Voltar
+            </button>
+            <div class="logo">EasyCut</div>
+            <div class="subtitle">Barbearias Favoritas</div>
+        </div>
+
+        <!-- Favoritas -->
+        <div class="favorites-section">
+            <h3 class="section-title">
+                ❤️ Minhas Barbearias Favoritas
+                <span id="favoritesCount" class="badge">0</span>
+            </h3>
+            
+            <div id="loadingState" class="loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Carregando favoritas...</p>
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">❤️</div>
+                <h3 class="empty-state-title">Nenhuma barbearia favorita</h3>
+                <p class="empty-state-text">
+                    Você ainda não adicionou nenhuma barbearia aos seus favoritos. 
+                    Explore as barbearias disponíveis e adicione suas preferidas!
+                </p>
+                <a href="VisualizarBarbearias.html" class="btn btn-primary">
+                    🔍 Encontrar Barbearias
+                </a>
+            </div>
+
+            <div id="favoritesGrid" class="favorites-grid">
+                <!-- Será preenchido dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados das barbearias favoritas (mock)
+        let allFavorites = [];
+
+        // Função para gerar dados mock de favoritas usando barbearias já cadastradas
+        function generateMockFavorites() {
+            const barbearias = [
+                {
+                    id: "1",
+                    name: "Barber King",
+                    address: "Rua das Flores, 123, Centro, Ipatinga - MG",
+                    distance: "0.8 km",
+                    rating: 4.8,
+                    totalReviews: 156,
+                    phone: "(31) 99999-9999",
+                    hours: "08:00 às 18:00",
+                    services: ["Design de sobrancelhas", "Barboterapia", "Pigmentação", "Relaxamento", "Progressivas", "Limpeza de pele", "Massagem facial", "Toalha quente"],
+                    priceRange: "R$ 15 - R$ 40",
+                    image: "https://via.placeholder.com/300x200/3b82f6/ffffff?text=Barber+King",
+                    addedDate: "2024-01-15",
+                    lastVisit: "2024-01-20"
+                },
+                {
+                    id: "2",
+                    name: "Barbearia do João",
+                    address: "Av. Central, 456, Cariru, Ipatinga - MG",
+                    distance: "1.2 km",
+                    rating: 4.6,
+                    totalReviews: 89,
+                    phone: "(31) 88888-8888",
+                    hours: "09:00 às 19:00",
+                    services: ["Corte masculino", "Barba", "Sobrancelha", "Relaxamento"],
+                    priceRange: "R$ 8 - R$ 20",
+                    image: "https://via.placeholder.com/300x200/10b981/ffffff?text=Barbearia+do+João",
+                    addedDate: "2024-01-10",
+                    lastVisit: "2024-01-18"
+                },
+                {
+                    id: "3",
+                    name: "Studio Hair",
+                    address: "Rua do Comércio, 789, Cidade Nova, Ipatinga - MG",
+                    distance: "2.1 km",
+                    rating: 4.9,
+                    totalReviews: 234,
+                    phone: "(31) 77777-7777",
+                    hours: "08:30 às 17:30",
+                    services: ["Corte", "Barba", "Design de sobrancelhas", "Massagem", "Tratamentos"],
+                    priceRange: "R$ 25 - R$ 60",
+                    image: "https://via.placeholder.com/300x200/8b5cf6/ffffff?text=Studio+Hair",
+                    addedDate: "2024-01-05",
+                    lastVisit: "2024-01-22"
+                },
+                {
+                    id: "4",
+                    name: "Barbearia Central",
+                    address: "Praça da Liberdade, 321, Centro, Ipatinga - MG",
+                    distance: "3.5 km",
+                    rating: 4.4,
+                    totalReviews: 67,
+                    phone: "(31) 66666-6666",
+                    hours: "07:00 às 20:00",
+                    services: ["Corte masculino", "Barba", "Sobrancelha", "Relaxamento", "Progressivas"],
+                    priceRange: "R$ 12 - R$ 35",
+                    image: "https://via.placeholder.com/300x200/f59e0b/ffffff?text=Barbearia+Central",
+                    addedDate: "2024-01-12",
+                    lastVisit: "2024-01-19"
+                }
+            ];
+
+            return barbearias;
+        }
+
+        // Função para renderizar favoritas
+        function renderFavorites() {
+            const container = document.getElementById('favoritesGrid');
+            const countElement = document.getElementById('favoritesCount');
+            const emptyState = document.getElementById('emptyState');
+            const loadingState = document.getElementById('loadingState');
+
+            // Esconder loading
+            loadingState.style.display = 'none';
+
+            // Atualizar contador
+            countElement.textContent = allFavorites.length;
+
+            if (allFavorites.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            container.innerHTML = allFavorites.map(favorite => `
+                <div class="favorite-card" onclick="openBarbeariaPage('${favorite.id}')">
+                    <div class="favorite-indicator" onclick="removeFromFavorites(event, '${favorite.id}')">❤️ Favorita</div>
+                    <div class="click-hint">Clique para ver detalhes</div>
+                    
+                    <div class="favorite-header">
+                        <div class="barbearia-info">
+                            <div class="barbearia-name">${favorite.name}</div>
+                            <div class="barbearia-address">📍 ${favorite.address}</div>
+                            <div class="barbearia-rating">
+                                <div class="rating-stars">
+                                    ${Array.from({length: 5}, (_, i) => 
+                                        `<span style="color: ${i < Math.floor(favorite.rating) ? '#fbbf24' : '#64748b'}; font-size: 1rem;">★</span>`
+                                    ).join('')}
+                                </div>
+                                <span class="rating-number">${favorite.rating}</span>
+                                <span style="color: #94a3b8; font-size: 0.8rem;">(${favorite.totalReviews} avaliações)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="favorite-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Distância:</span>
+                            <span class="detail-value">${favorite.distance}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Telefone:</span>
+                            <span class="detail-value">${favorite.phone}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Horário:</span>
+                            <span class="detail-value">${favorite.hours}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Preço:</span>
+                            <span class="detail-value">${favorite.priceRange}</span>
+                        </div>
+                        
+                        <div style="margin-top: 12px;">
+                            <span class="detail-label">Serviços:</span>
+                            <div class="services-list">
+                                ${favorite.services.map(service => 
+                                    `<span class="service-tag">${service}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Função para abrir página da barbearia
+        function openBarbeariaPage(barbeariaId) {
+            const favorite = allFavorites.find(f => f.id === barbeariaId);
+            if (!favorite) return;
+
+            // Redirecionar para página de detalhes da barbearia
+            window.location.href = `BarbeariaDetalhes.html?id=${barbeariaId}`;
+        }
+
+        // Função para remover dos favoritos
+        function removeFromFavorites(event, barbeariaId) {
+            // Prevenir que o clique no botão abra a página da barbearia
+            event.stopPropagation();
+            
+            const favorite = allFavorites.find(f => f.id === barbeariaId);
+            if (!favorite) return;
+
+            // Remover da lista
+            allFavorites = allFavorites.filter(f => f.id !== barbeariaId);
+            
+            // Atualizar interface
+            renderFavorites();
+            
+            // Mostrar mensagem de sucesso
+            showSuccessMessage('Barbearia removida dos favoritos!');
+        }
+
+        // Função para mostrar mensagem de sucesso
+        function showSuccessMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(34, 197, 94, 0.95);
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                z-index: 10000;
+                font-weight: 500;
+                max-width: 300px;
+                animation: slideIn 0.3s ease;
+            `;
+            messageDiv.textContent = message;
+            
+            document.body.appendChild(messageDiv);
+            
+            // Remover após 3 segundos
+            setTimeout(() => {
+                messageDiv.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => {
+                    if (document.body.contains(messageDiv)) {
+                        document.body.removeChild(messageDiv);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Função para voltar
+        function handleBackButton() {
+            console.log('handleBackButton chamada - voltando para página anterior');
+            
+            // Usar history.back() para voltar para a página anterior
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // Se não há histórico, redirecionar para dashboard do cliente
+                console.log('Sem histórico, redirecionando para dashboard do cliente');
+                window.location.href = 'ClienteDashboard.html';
+            }
+        }
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar botão de voltar
+            const backButton = document.getElementById('backButton');
+            if (backButton) {
+                backButton.addEventListener('click', function() {
+                    console.log('Botão voltar clicado via event listener');
+                    handleBackButton();
+                });
+            }
+            
+            // Mostrar loading
+            document.getElementById('loadingState').style.display = 'block';
+            
+            // Simular carregamento
+            setTimeout(() => {
+                allFavorites = generateMockFavorites();
+                renderFavorites();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>EasyCut - Dashboard Cliente</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #fff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .header {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .user-details h3 {
+            margin: 0;
+            color: #e2e8f0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .user-details p {
+            margin: 2px 0 0 0;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+        
+        .menu-toggle {
+            width: 40px;
+            height: 40px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-toggle:hover {
+            background: rgba(30, 41, 59, 1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        
+        .menu-line {
+            width: 20px;
+            height: 2px;
+            background: #e2e8f0;
+            border-radius: 1px;
+            transition: all 0.3s ease;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .welcome-subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            margin-bottom: 32px;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        
+        .action-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 32px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .action-card:hover::before {
+            left: 100%;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(16, 185, 129, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .action-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+        
+        .action-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #e2e8f0;
+        }
+        
+        .action-description {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .stats-section {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 40px;
+        }
+        
+        .stats-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #e2e8f0;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .recent-section {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 32px;
+        }
+        
+        .recent-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #e2e8f0;
+        }
+        
+        .recent-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .recent-item:hover {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        
+        .recent-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .recent-content h4 {
+            margin: 0;
+            color: #e2e8f0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .recent-content p {
+            margin: 4px 0 0 0;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+        
+        .recent-date {
+            margin-left: auto;
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+        
+        /* Menu Overlay */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .menu-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 350px;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+        
+        .menu-panel.active {
+            right: 0;
+        }
+        
+        .menu-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            position: relative;
+        }
+        
+        .menu-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 60px;
+            margin-bottom: 16px;
+        }
+
+        .menu-back-button {
+            position: absolute;
+            left: 16px;
+            top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: rgba(15, 23, 42, 0.9);
+            color: #e2e8f0;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .menu-back-button span {
+            font-size: 1rem;
+        }
+
+        .menu-back-button:hover {
+            background: rgba(5, 150, 105, 0.9);
+            border-color: rgba(16, 185, 129, 0.7);
+            color: #fff;
+        }
+        
+        .menu-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .menu-user-details h3 {
+            margin: 0;
+            color: #e2e8f0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .menu-user-details p {
+            margin: 4px 0 0 0;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        
+        .menu-content {
+            padding: 20px;
+        }
+        
+        .menu-section {
+            margin-bottom: 24px;
+        }
+        
+        .menu-section h4 {
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #e2e8f0;
+            text-decoration: none;
+        }
+        
+        .menu-item:hover {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            transform: translateX(4px);
+        }
+        
+        .menu-item-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        
+        .menu-item-text {
+            flex: 1;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        
+        .menu-item-badge {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .menu-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 16px 0;
+        }
+        
+        .menu-logout {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+        
+        .menu-logout:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0 16px;
+            }
+            
+            .container {
+                padding: 20px 16px;
+            }
+            
+            .welcome-title {
+                font-size: 2rem;
+            }
+            
+            .quick-actions {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .action-card {
+                padding: 24px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+            
+            .menu-panel {
+                width: 100%;
+                right: -100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">EasyCut</div>
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div class="user-details">
+                    <h3 id="userName">Usuário</h3>
+                    <p>Cliente</p>
+                </div>
+                <div class="menu-toggle" id="menuToggle">
+                    <div class="menu-line"></div>
+                    <div class="menu-line"></div>
+                    <div class="menu-line"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h1 class="welcome-title">Bem-vindo de volta!</h1>
+            <p class="welcome-subtitle">Encontre as melhores barbearias próximas a você</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="action-card" onclick="handleAction('findBarbershops')">
+                <span class="action-icon">🔍</span>
+                <h3 class="action-title">Encontrar Barbearias</h3>
+                <p class="action-description">Descubra barbearias próximas com base na sua localização</p>
+            </div>
+            
+            <div class="action-card" onclick="handleAction('myAppointments')">
+                <span class="action-icon">📅</span>
+                <h3 class="action-title">Meus Agendamentos</h3>
+                <p class="action-description">Visualize e gerencie seus agendamentos</p>
+            </div>
+            
+            <div class="action-card" onclick="handleAction('favorites')">
+                <span class="action-icon">❤️</span>
+                <h3 class="action-title">Favoritas</h3>
+                <p class="action-description">Acesse suas barbearias favoritas</p>
+            </div>
+            
+            <div class="action-card" onclick="handleAction('editProfile')">
+                <span class="action-icon">👤</span>
+                <h3 class="action-title">Editar Perfil</h3>
+                <p class="action-description">Atualize suas informações pessoais</p>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <h2 class="stats-title">Suas Estatísticas</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalAppointments">0</div>
+                    <div class="stat-label">Agendamentos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="favoriteBarbershops">0</div>
+                    <div class="stat-label">Favoritas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalSpent">R$ 0</div>
+                    <div class="stat-label">Total Gasto</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="averageRating">0.0</div>
+                    <div class="stat-label">Avaliação Média</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="recent-section">
+            <h2 class="recent-title">Atividade Recente</h2>
+            <div id="recentActivity">
+                <div class="recent-item">
+                    <div class="recent-icon">📅</div>
+                    <div class="recent-content">
+                        <h4>Agendamento realizado</h4>
+                        <p>Barbearia do João - Corte + Barba</p>
+                    </div>
+                    <div class="recent-date">Hoje</div>
+                </div>
+                <div class="recent-item">
+                    <div class="recent-icon">⭐</div>
+                    <div class="recent-content">
+                        <h4>Avaliação enviada</h4>
+                        <p>Studio Hair - 5 estrelas</p>
+                    </div>
+                    <div class="recent-date">Ontem</div>
+                </div>
+                <div class="recent-item">
+                    <div class="recent-icon">❤️</div>
+                    <div class="recent-content">
+                        <h4>Barbearia favoritada</h4>
+                        <p>Elite Barber adicionada aos favoritos</p>
+                    </div>
+                    <div class="recent-date">3 dias atrás</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Overlay -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    
+    <!-- Menu Panel -->
+    <div class="menu-panel" id="menuPanel">
+        <div class="menu-header">
+            <button type="button" class="menu-back-button" id="menuBackButton">
+                <span>←</span>
+                <span>Voltar</span>
+            </button>
+            <div class="menu-user-info">
+                <div class="menu-avatar" id="menuUserAvatar">U</div>
+                <div class="menu-user-details">
+                    <h3 id="menuUserName">Usuário</h3>
+                    <p>Cliente</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="menu-content" id="menuContent">
+            <!-- Conteúdo será preenchido dinamicamente -->
+        </div>
+    </div>
+
+    <script>
+        class ClienteDashboard {
+            constructor() {
+                this.menuToggle = document.getElementById('menuToggle');
+                this.menuOverlay = document.getElementById('menuOverlay');
+                this.menuPanel = document.getElementById('menuPanel');
+                this.menuContent = document.getElementById('menuContent');
+                this.menuBackButton = document.getElementById('menuBackButton');
+                this.userAvatar = document.getElementById('userAvatar');
+                this.userName = document.getElementById('userName');
+                this.menuUserAvatar = document.getElementById('menuUserAvatar');
+                this.menuUserName = document.getElementById('menuUserName');
+                this.isMenuOpen = false;
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupEventListeners();
+                this.loadUserData();
+                this.loadStats();
+                this.renderMenuContent();
+            }
+            
+            setupEventListeners() {
+                // Toggle do menu
+                this.menuToggle.addEventListener('click', () => {
+                    this.toggleMenu();
+                });
+                
+                // Fechar menu ao clicar no overlay
+                this.menuOverlay.addEventListener('click', () => {
+                    this.closeMenu();
+                });
+
+                // Botão de voltar/fechar no topo do menu (especialmente útil no celular)
+                if (this.menuBackButton) {
+                    this.menuBackButton.addEventListener('click', () => {
+                        this.closeMenu();
+                    });
+                }
+                
+                // Fechar menu com ESC
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.isMenuOpen) {
+                        this.closeMenu();
+                    }
+                });
+            }
+            
+            toggleMenu() {
+                if (this.isMenuOpen) {
+                    this.closeMenu();
+                } else {
+                    this.openMenu();
+                }
+            }
+            
+            openMenu() {
+                this.isMenuOpen = true;
+                this.menuToggle.classList.add('active');
+                this.menuOverlay.classList.add('active');
+                this.menuPanel.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            closeMenu() {
+                this.isMenuOpen = false;
+                this.menuToggle.classList.remove('active');
+                this.menuOverlay.classList.remove('active');
+                this.menuPanel.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            
+            loadUserData() {
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                const userName = currentUser.nomeCompleto || 'Usuário';
+                
+                this.userName.textContent = userName;
+                this.menuUserName.textContent = userName;
+                this.userAvatar.textContent = userName.charAt(0).toUpperCase();
+                this.menuUserAvatar.textContent = userName.charAt(0).toUpperCase();
+            }
+            
+            loadStats() {
+                // Simular dados de estatísticas
+                document.getElementById('totalAppointments').textContent = '12';
+                document.getElementById('favoriteBarbershops').textContent = '3';
+                document.getElementById('totalSpent').textContent = 'R$ 240';
+                document.getElementById('averageRating').textContent = '4.8';
+            }
+            
+            renderMenuContent() {
+                this.menuContent.innerHTML = `
+                    <div class="menu-section">
+                        <h4>Meu Perfil</h4>
+                        <div class="menu-item" onclick="dashboard.handleMenuClick('editProfile')">
+                            <div class="menu-item-icon">👤</div>
+                            <div class="menu-item-text">Editar Perfil</div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h4>Agendamentos</h4>
+                        <div class="menu-item" onclick="dashboard.handleMenuClick('myAppointments')">
+                            <div class="menu-item-icon">📅</div>
+                            <div class="menu-item-text">Meus Agendamentos</div>
+                            <div class="menu-item-badge">3</div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h4>Favoritos</h4>
+                        <div class="menu-item" onclick="dashboard.handleMenuClick('favorites')">
+                            <div class="menu-item-icon">❤️</div>
+                            <div class="menu-item-text">Barbearias Favoritas</div>
+                        </div>
+                    </div>
+                    
+                    <div class="menu-divider"></div>
+                    
+                    <div class="menu-section">
+                        <div class="menu-item menu-logout" onclick="dashboard.handleMenuClick('logout')">
+                            <div class="menu-item-icon">🚪</div>
+                            <div class="menu-item-text">Sair</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            handleMenuClick(action) {
+                this.closeMenu();
+                
+                switch (action) {
+                    case 'editProfile':
+                        window.location.href = 'EditarPerfilCliente.html';
+                        break;
+                    case 'myAppointments':
+                        window.location.href = 'MeusAgendamentos.html';
+                        break;
+                    case 'favorites':
+                        window.location.href = 'Favoritos.html';
+                        break;
+                    case 'logout':
+                        this.handleLogout();
+                        break;
+                    default:
+                        console.log('Ação não implementada:', action);
+                }
+            }
+            
+            showComingSoon(feature) {
+                alert(`🚧 ${feature} - Em breve!\n\nEsta funcionalidade está sendo desenvolvida e estará disponível em breve.`);
+            }
+            
+            handleLogout() {
+                if (confirm('Tem certeza que deseja sair?')) {
+                    // Limpar dados do usuário
+                    localStorage.removeItem('currentUser');
+                    localStorage.removeItem('userType');
+                    localStorage.removeItem('userName');
+                    
+                    // Redirecionar para tela inicial
+                    window.location.href = 'Login.html';
+                }
+            }
+        }
+        
+        // Função global para ações dos cards
+        function handleAction(action) {
+            switch (action) {
+                case 'findBarbershops':
+                    window.location.href = 'VisualizarBarbearias.html';
+                    break;
+                case 'myAppointments':
+                    window.location.href = 'MeusAgendamentos.html';
+                    break;
+                case 'favorites':
+                    window.location.href = 'Favoritos.html';
+                    break;
+                case 'editProfile':
+                    window.location.href = 'EditarPerfilCliente.html';
+                    break;
+                default:
+                    console.log('Ação não implementada:', action);
+            }
+        }
+        
+        // Inicializar dashboard
+        let dashboard;
+        document.addEventListener('DOMContentLoaded', () => {
+            dashboard = new ClienteDashboard();
+        });
+    </script>
+</body>
+</html>

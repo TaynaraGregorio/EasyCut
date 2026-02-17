@@ -1,0 +1,3195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Agendamentos - EasyCut</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #f1f5f9;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            opacity: 0.9;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: #e2e8f0;
+            text-decoration: none;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-5px);
+        }
+
+        .filters-section {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .filters-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #f1f5f9;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.8);
+            color: #e2e8f0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .appointments-section {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .appointments-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .appointment-card {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .appointment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .appointment-info {
+            flex: 1;
+        }
+
+        .barbearia-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 4px;
+        }
+
+        .appointment-date {
+            font-size: 1rem;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+        }
+
+        .appointment-time {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #3b82f6;
+        }
+
+        .appointment-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-confirmed {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .status-pending {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .status-cancelled {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-completed {
+            background: rgba(107, 114, 128, 0.2);
+            color: #6b7280;
+            border: 1px solid rgba(107, 114, 128, 0.3);
+        }
+
+        .appointment-details {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .detail-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .appointment-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(34, 197, 94, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #cbd5e1;
+        }
+
+        .empty-state-text {
+            font-size: 1rem;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(59, 130, 246, 0.2);
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes scrollHint {
+            0% { transform: translateX(-50%) translateY(0px); opacity: 0.6; }
+            50% { transform: translateX(-50%) translateY(-2px); opacity: 1; }
+            100% { transform: translateX(-50%) translateY(0px); opacity: 0.6; }
+        }
+
+        /* Scroll bar personalizada para o modal de avaliação */
+        #ratingModalContent::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #ratingModalContent::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.3);
+            border-radius: 4px;
+        }
+
+        #ratingModalContent::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(59, 130, 246, 0.8), rgba(29, 78, 216, 0.8));
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #ratingModalContent::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(59, 130, 246, 1), rgba(29, 78, 216, 1));
+        }
+
+        /* Para Firefox */
+        #ratingModalContent {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(59, 130, 246, 0.8) rgba(15, 23, 42, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3b82f6;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Reschedule Modal Styles */
+        .reschedule-modal {
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .modal-overlay.reschedule-modal-overlay.active {
+            opacity: 1 !important;
+            visibility: visible !important;
+            display: flex !important;
+        }
+
+        .modal-overlay.reschedule-modal-overlay.active .reschedule-modal {
+            transform: scale(1) translateY(0) !important;
+        }
+
+        .reschedule-content {
+            color: #e2e8f0;
+        }
+
+        .info-section {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-section h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .services-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .service-tag {
+            padding: 12px 20px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .service-tag:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+        }
+
+        .service-tag.selected {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .date-picker {
+            margin-bottom: 20px;
+        }
+
+        .date-picker label {
+            display: block;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .date-picker input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.8);
+            color: #e2e8f0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .date-picker input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .selected-services-summary {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .selected-services-summary h4 {
+            margin: 0 0 12px 0;
+            color: #3b82f6;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .service-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .service-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .service-name {
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+
+        .service-price {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .total-price {
+            margin-top: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #10b981;
+        }
+
+        .reschedule-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
+        }
+
+        .reschedule-btn {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .form-section {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .form-section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.8);
+            color: #e2e8f0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .time-slot {
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.6);
+            color: #e2e8f0;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .time-slot:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+        }
+
+        .time-slot.selected {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .time-slot.unavailable {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            color: #ef4444;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .service-options {
+            display: grid;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .service-option {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.6);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .service-option:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+        }
+
+        .service-option.selected {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+        }
+
+        .service-option input[type="checkbox"] {
+            margin-right: 12px;
+            width: auto;
+        }
+
+        .selected-services-summary {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .selected-services-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #22c55e;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .selected-service-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(34, 197, 94, 0.1);
+        }
+
+        .selected-service-item:last-child {
+            border-bottom: none;
+        }
+
+        .selected-service-name {
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+
+        .selected-service-price {
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .total-summary {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .total-duration {
+            color: #3b82f6;
+            font-size: 1rem;
+        }
+
+        .total-price {
+            color: #3b82f6;
+            font-size: 1.2rem;
+        }
+
+        .service-info {
+            flex: 1;
+        }
+
+        .service-name {
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 4px;
+        }
+
+        .service-details {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .current-appointment {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .current-appointment-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fbbf24;
+            margin-bottom: 8px;
+        }
+
+        .current-appointment-details {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        .reschedule-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
+        }
+
+        .reschedule-btn {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .loading-time-slots {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8;
+        }
+
+        .loading-time-slots .loading-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(59, 130, 246, 0.2);
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .modal-close:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            transform: scale(1.1);
+        }
+
+        .modal-content {
+            color: #e2e8f0;
+        }
+
+        .detail-section {
+            margin-bottom: 24px;
+        }
+
+        .detail-section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: #e2e8f0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-align: right;
+            max-width: 60%;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
+        }
+
+        .modal-btn {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        @media (max-width: 480px) {
+            .modal {
+                padding: 24px;
+                margin: 20px;
+            }
+
+            .modal-title {
+                font-size: 1.3rem;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .modal-btn {
+                flex: none;
+            }
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .appointment-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .appointment-actions {
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button class="back-link" id="backButton" style="background: none; border: none; color: inherit; font: inherit; cursor: pointer; text-decoration: none;">
+                ← Voltar
+            </button>
+            <div class="logo">EasyCut</div>
+            <div class="subtitle">Meus Agendamentos</div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="stats-grid" id="statsGrid">
+            <!-- Será preenchido dinamicamente -->
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-section">
+            <h3 class="filters-title">🔍 Filtrar Agendamentos</h3>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="statusFilter">Status</label>
+                    <select id="statusFilter">
+                        <option value="">Todos os status</option>
+                        <option value="confirmed">Confirmado</option>
+                        <option value="pending">Pendente</option>
+                        <option value="cancelled">Cancelado</option>
+                        <option value="completed">Concluído</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="dateFilter">Data</label>
+                    <select id="dateFilter">
+                        <option value="">Todas as datas</option>
+                        <option value="today">Hoje</option>
+                        <option value="tomorrow">Amanhã</option>
+                        <option value="thisWeek">Esta semana</option>
+                        <option value="nextWeek">Próxima semana</option>
+                        <option value="thisMonth">Este mês</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="barbeariaFilter">Barbearia</label>
+                    <select id="barbeariaFilter">
+                        <option value="">Todas as barbearias</option>
+                        <!-- Será preenchido dinamicamente -->
+                    </select>
+                </div>
+            </div>
+            <div class="filter-buttons">
+                <button class="btn btn-primary" onclick="applyFilters()">
+                    🔍 Aplicar Filtros
+                </button>
+                <button class="btn btn-secondary" onclick="clearFilters()">
+                    🗑️ Limpar Filtros
+                </button>
+            </div>
+        </div>
+
+        <!-- Agendamentos -->
+        <div class="appointments-section">
+            <h3 class="section-title">
+                📅 Meus Agendamentos
+                <span id="appointmentsCount" class="badge">0</span>
+            </h3>
+            
+            <div id="loadingState" class="loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Carregando agendamentos...</p>
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">📅</div>
+                <h3 class="empty-state-title">Nenhum agendamento encontrado</h3>
+                <p class="empty-state-text">
+                    Você ainda não possui agendamentos ou não há agendamentos que correspondam aos filtros selecionados.
+                </p>
+                <a href="VisualizarBarbearias.html" class="btn btn-primary">
+                    🔍 Encontrar Barbearias
+                </a>
+            </div>
+
+            <div id="appointmentsGrid" class="appointments-grid">
+                <!-- Será preenchido dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes -->
+    <div id="appointmentModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    📅 Detalhes do Agendamento
+                </h3>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            
+            <div class="modal-content" id="modalContent">
+                <!-- Conteúdo será preenchido dinamicamente -->
+            </div>
+            
+            <div class="modal-actions" id="modalActions">
+                <!-- Ações serão preenchidas dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Reagendamento -->
+    <div id="rescheduleModal" class="modal-overlay reschedule-modal-overlay">
+        <div class="reschedule-modal">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    📅 Reagendar Agendamento
+                </h3>
+                <button class="modal-close" onclick="closeRescheduleModal()">×</button>
+            </div>
+            
+            <div class="reschedule-content" id="rescheduleContent">
+                <!-- Conteúdo será preenchido dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5001';
+        let allAppointments = [];
+        let filteredAppointments = [];
+
+        // Variáveis para reagendamento
+        let rescheduleSelectedServices = [];
+        let rescheduleSelectedDate = null;
+        let rescheduleSelectedTime = null;
+
+        function getClienteId() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const userType = localStorage.getItem('userType') || '';
+            if (userType !== 'cliente' || !currentUser.id) return null;
+            return parseInt(currentUser.id, 10);
+        }
+
+        // Carrega agendamentos do cliente do banco (lista vazia se não tiver nenhum)
+        async function loadAgendamentosFromApi() {
+            const clienteId = getClienteId();
+            if (!clienteId) {
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'block';
+                document.getElementById('emptyState').querySelector('.empty-state-title').textContent = 'Faça login como cliente';
+                document.getElementById('emptyState').querySelector('.empty-state-text').textContent = 'Para ver seus agendamentos, faça login com sua conta de cliente.';
+                allAppointments = [];
+                filteredAppointments = [];
+                renderStats();
+                renderAppointments();
+                return;
+            }
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('emptyState').style.display = 'none';
+            try {
+                const response = await fetch(`${API_BASE}/api/clientes/${clienteId}/agendamentos`);
+                const data = await response.json();
+                if (data.success && data.agendamentos) {
+                    allAppointments = data.agendamentos.map(a => ({
+                        id: a.id,
+                        barbearia: a.barbearia || '',
+                        service: a.service || '',
+                        date: a.date || '',
+                        time: a.time || '',
+                        status: a.status || 'pending',
+                        price: a.price != null ? String(a.price) : '0',
+                        duration: a.duration != null ? a.duration : 30,
+                        notes: a.notes || '',
+                        rating: a.rating
+                    }));
+                } else {
+                    allAppointments = [];
+                }
+            } catch (err) {
+                console.error(err);
+                allAppointments = [];
+            }
+            filteredAppointments = [...allAppointments];
+            document.getElementById('loadingState').style.display = 'none';
+            renderStats();
+            renderAppointments();
+            if (typeof populateBarbeariaFilter === 'function') populateBarbeariaFilter();
+        }
+
+        // Função para formatar data
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            
+            const isToday = date.toDateString() === today.toDateString();
+            const isTomorrow = date.toDateString() === tomorrow.toDateString();
+            
+            if (isToday) return 'Hoje';
+            if (isTomorrow) return 'Amanhã';
+            
+            return date.toLocaleDateString('pt-BR', {
+                weekday: 'long',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        // Função para formatar status
+        function formatStatus(status) {
+            const statusMap = {
+                'confirmed': 'Confirmado',
+                'pending': 'Pendente',
+                'cancelled': 'Cancelado',
+                'completed': 'Concluído'
+            };
+            return statusMap[status] || status;
+        }
+
+        // Função para obter classe CSS do status
+        function getStatusClass(status) {
+            return `status-${status}`;
+        }
+
+        // Função para renderizar estatísticas
+        function renderStats() {
+            const stats = {
+                total: allAppointments.length,
+                confirmed: allAppointments.filter(a => a.status === 'confirmed').length,
+                pending: allAppointments.filter(a => a.status === 'pending').length,
+                completed: allAppointments.filter(a => a.status === 'completed').length
+            };
+
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${stats.total}</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.confirmed}</div>
+                    <div class="stat-label">Confirmados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.pending}</div>
+                    <div class="stat-label">Pendentes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.completed}</div>
+                    <div class="stat-label">Concluídos</div>
+                </div>
+            `;
+        }
+
+        // Função para renderizar agendamentos
+        function renderAppointments() {
+            const container = document.getElementById('appointmentsGrid');
+            const countElement = document.getElementById('appointmentsCount');
+            const emptyState = document.getElementById('emptyState');
+            const loadingState = document.getElementById('loadingState');
+
+            // Esconder loading
+            loadingState.style.display = 'none';
+
+            // Atualizar contador
+            countElement.textContent = filteredAppointments.length;
+
+            if (filteredAppointments.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            container.innerHTML = filteredAppointments.map(appointment => `
+                <div class="appointment-card">
+                    <div class="appointment-header">
+                        <div class="appointment-info">
+                            <div class="barbearia-name">${appointment.barbearia}</div>
+                            <div class="appointment-date">${formatDate(appointment.date)}</div>
+                            <div class="appointment-time">${appointment.time}</div>
+                        </div>
+                        <div class="appointment-status ${getStatusClass(appointment.status)}">
+                            ${formatStatus(appointment.status)}
+                        </div>
+                    </div>
+                    
+                    <div class="appointment-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Serviço:</span>
+                            <span class="detail-value">${appointment.service}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Duração:</span>
+                            <span class="detail-value">${appointment.duration} min</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Preço:</span>
+                            <span class="detail-value">R$ ${appointment.price}</span>
+                        </div>
+                        ${appointment.notes ? `
+                            <div class="detail-row">
+                                <span class="detail-label">Observações:</span>
+                                <span class="detail-value">${appointment.notes}</span>
+                            </div>
+                        ` : ''}
+                        ${appointment.rating ? `
+                            <div class="detail-row">
+                                <span class="detail-label">Avaliação:</span>
+                                <span class="detail-value">
+                                    <div style="display: flex; align-items: center; gap: 4px;">
+                                        ${Array.from({length: 5}, (_, i) => 
+                                            `<span style="color: ${i < appointment.rating ? '#fbbf24' : '#64748b'}; font-size: 1rem;">★</span>`
+                                        ).join('')}
+                                        <span style="margin-left: 4px; color: #e2e8f0; font-weight: 600;">${appointment.rating}/5</span>
+                                    </div>
+                                </span>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="appointment-actions">
+                        ${appointment.status === 'confirmed' || appointment.status === 'pending' ? `
+                            <button class="btn btn-danger btn-small" onclick="cancelAppointment('${appointment.id}')">
+                                ❌ Cancelar
+                            </button>
+                            <button class="btn btn-primary btn-small" onclick="rescheduleAppointment('${appointment.id}')">
+                                📅 Reagendar
+                            </button>
+                        ` : ''}
+                        ${appointment.status === 'completed' ? `
+                            ${appointment.rating ? `
+                                <button class="btn btn-secondary btn-small" onclick="viewAppointmentDetails('${appointment.id}')">
+                                    👁️ Ver Avaliação
+                                </button>
+                            ` : `
+                                <button class="btn btn-success btn-small" onclick="rateAppointment('${appointment.id}')">
+                                    ⭐ Avaliar
+                                </button>
+                            `}
+                        ` : ''}
+                        <button class="btn btn-secondary btn-small" onclick="viewAppointmentDetails('${appointment.id}')">
+                            👁️ Detalhes
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Função para aplicar filtros
+        function applyFilters() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            const barbeariaFilter = document.getElementById('barbeariaFilter').value;
+
+            filteredAppointments = allAppointments.filter(appointment => {
+                // Filtro por status
+                if (statusFilter && appointment.status !== statusFilter) {
+                    return false;
+                }
+
+                // Filtro por data
+                if (dateFilter) {
+                    const appointmentDate = new Date(appointment.date);
+                    const today = new Date();
+                    
+                    switch (dateFilter) {
+                        case 'today':
+                            if (appointmentDate.toDateString() !== today.toDateString()) return false;
+                            break;
+                        case 'tomorrow':
+                            const tomorrow = new Date(today);
+                            tomorrow.setDate(today.getDate() + 1);
+                            if (appointmentDate.toDateString() !== tomorrow.toDateString()) return false;
+                            break;
+                        case 'thisWeek':
+                            const weekStart = new Date(today);
+                            weekStart.setDate(today.getDate() - today.getDay());
+                            const weekEnd = new Date(weekStart);
+                            weekEnd.setDate(weekStart.getDate() + 6);
+                            if (appointmentDate < weekStart || appointmentDate > weekEnd) return false;
+                            break;
+                        case 'nextWeek':
+                            const nextWeekStart = new Date(today);
+                            nextWeekStart.setDate(today.getDate() + (7 - today.getDay()));
+                            const nextWeekEnd = new Date(nextWeekStart);
+                            nextWeekEnd.setDate(nextWeekStart.getDate() + 6);
+                            if (appointmentDate < nextWeekStart || appointmentDate > nextWeekEnd) return false;
+                            break;
+                        case 'thisMonth':
+                            if (appointmentDate.getMonth() !== today.getMonth() || 
+                                appointmentDate.getFullYear() !== today.getFullYear()) return false;
+                            break;
+                    }
+                }
+
+                // Filtro por barbearia
+                if (barbeariaFilter && appointment.barbearia !== barbeariaFilter) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            renderAppointments();
+        }
+
+        // Função para limpar filtros
+        function clearFilters() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('dateFilter').value = '';
+            document.getElementById('barbeariaFilter').value = '';
+            
+            filteredAppointments = [...allAppointments];
+            renderAppointments();
+        }
+
+        // Função para cancelar agendamento
+        function cancelAppointment(appointmentId) {
+            const appointment = allAppointments.find(a => a.id === appointmentId);
+            if (!appointment) return;
+
+            // Mostrar modal de confirmação de cancelamento
+            showCancelConfirmationModal(appointment);
+        }
+
+        // Função para mostrar modal de confirmação de cancelamento
+        function showCancelConfirmationModal(appointment) {
+            const formattedDate = new Date(appointment.date).toLocaleDateString('pt-BR');
+            
+            // Criar modal de confirmação
+            const confirmationModal = document.createElement('div');
+            confirmationModal.id = 'cancelConfirmationModal';
+            confirmationModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.7);
+                backdrop-filter: blur(5px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+            
+            confirmationModal.innerHTML = `
+                <div style="
+                    background: rgba(30, 41, 59, 0.95);
+                    border-radius: 16px;
+                    padding: 32px;
+                    max-width: 500px;
+                    width: 90%;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                    transform: scale(0.9);
+                    transition: transform 0.3s ease;
+                ">
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <div style="font-size: 3rem; margin-bottom: 16px;">⚠️</div>
+                        <h3 style="font-size: 1.5rem; font-weight: 600; color: #f1f5f9; margin-bottom: 8px;">
+                            Cancelar Agendamento
+                        </h3>
+                        <p style="color: #cbd5e1; font-size: 1rem;">
+                            Tem certeza que deseja cancelar este agendamento? Esta ação não pode ser desfeita.
+                        </p>
+                    </div>
+                    
+                    <div style="background: rgba(239, 68, 68, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid rgba(239, 68, 68, 0.3);">
+                        <h4 style="color: #ef4444; margin-bottom: 16px; font-size: 1.1rem;">📋 Detalhes do Agendamento</h4>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <span style="color: #94a3b8; font-size: 0.9rem;">Barbearia:</span>
+                            <span style="color: #e2e8f0; font-weight: 600; margin-left: 8px;">${appointment.barbearia}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <span style="color: #94a3b8; font-size: 0.9rem;">Data:</span>
+                            <span style="color: #e2e8f0; font-weight: 600; margin-left: 8px;">${formattedDate}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <span style="color: #94a3b8; font-size: 0.9rem;">Horário:</span>
+                            <span style="color: #e2e8f0; font-weight: 600; margin-left: 8px;">${appointment.time}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <span style="color: #94a3b8; font-size: 0.9rem;">Serviço:</span>
+                            <span style="color: #e2e8f0; font-weight: 600; margin-left: 8px;">${appointment.service}</span>
+                        </div>
+                        
+                        <div style="border-top: 1px solid rgba(239, 68, 68, 0.3); padding-top: 12px; margin-top: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #94a3b8; font-size: 0.9rem;">Preço:</span>
+                                <span style="color: #ef4444; font-weight: 600; font-size: 1.1rem;">R$ ${appointment.price}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px;">
+                        <button onclick="cancelCancelConfirmation()" style="
+                            flex: 1;
+                            padding: 12px 24px;
+                            border: 1px solid rgba(255, 255, 255, 0.2);
+                            border-radius: 8px;
+                            background: rgba(255, 255, 255, 0.1);
+                            color: #e2e8f0;
+                            font-size: 1rem;
+                            font-weight: 500;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                        ">
+                            ✅ Manter Agendamento
+                        </button>
+                        <button onclick="proceedWithCancel('${appointment.id}')" style="
+                            flex: 1;
+                            padding: 12px 24px;
+                            border: none;
+                            border-radius: 8px;
+                            background: linear-gradient(135deg, #ef4444, #dc2626);
+                            color: white;
+                            font-size: 1rem;
+                            font-weight: 500;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                        ">
+                            ❌ Cancelar Agendamento
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(confirmationModal);
+            
+            // Animar entrada
+            setTimeout(() => {
+                confirmationModal.style.opacity = '1';
+                const modalContent = confirmationModal.querySelector('div');
+                modalContent.style.transform = 'scale(1)';
+            }, 10);
+        }
+
+        // Função para cancelar confirmação de cancelamento
+        function cancelCancelConfirmation() {
+            const modal = document.getElementById('cancelConfirmationModal');
+            if (modal) {
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(modal);
+                }, 300);
+            }
+        }
+
+        // Função para prosseguir com o cancelamento (atualiza no banco)
+        async function proceedWithCancel(appointmentId) {
+            const appointment = allAppointments.find(a => a.id === appointmentId);
+            if (!appointment) return;
+
+            cancelCancelConfirmation();
+
+            try {
+                const response = await fetch(`${API_BASE}/api/agendamentos/${appointmentId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'cancelled' })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    appointment.status = 'cancelled';
+                    applyFilters();
+                    showSuccessMessage('Agendamento cancelado com sucesso!');
+                } else {
+                    alert('Erro ao cancelar: ' + (data.message || 'Tente novamente.'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Erro de conexão ao cancelar.');
+            }
+        }
+
+        // Função para reagendar
+        function rescheduleAppointment(appointmentId) {
+            const appointment = allAppointments.find(a => a.id === appointmentId);
+            if (!appointment) {
+                console.error('Agendamento não encontrado:', appointmentId);
+                return;
+            }
+
+            openRescheduleModal(appointment);
+        }
+
+        // Função para abrir modal de reagendamento
+        function openRescheduleModal(appointment) {
+            const modal = document.getElementById('rescheduleModal');
+            const content = document.getElementById('rescheduleContent');
+
+            // Calcular preço correto do serviço atual
+            const currentServicePrice = getCurrentServicePrice(appointment.service);
+
+            // Criar interface igual ao agendamento normal
+            content.innerHTML = `
+                <div class="info-section">
+                    <h3>📅 Agendamento Atual</h3>
+                    <div style="padding: 16px; background: rgba(251, 191, 36, 0.1); border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.3);">
+                        <p style="margin: 0; color: #fbbf24; font-weight: 600;">${appointment.barbearia}</p>
+                        <p style="margin: 8px 0 0 0; color: #cbd5e1;">${formatDate(appointment.date)} às ${appointment.time}</p>
+                        <p style="margin: 4px 0 0 0; color: #cbd5e1;">${appointment.service} - R$ ${currentServicePrice.toFixed(2)}</p>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3>✂️ Serviços Oferecidos</h3>
+                    <p>Selecione os serviços que deseja reagendar:</p>
+                    <div class="services-list" id="servicesList">
+                        <!-- Será preenchido dinamicamente -->
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3>📅 Nova Data</h3>
+                    <div class="date-picker">
+                        <label for="newAppointmentDate">Selecione a nova data:</label>
+                        <input type="date" id="newAppointmentDate" min="${getMinDate()}" max="${getMaxDate()}">
+                    </div>
+                </div>
+
+                <div class="info-section" id="timeSlotsSection" style="display: none;">
+                    <h3>⏰ Novo Horário</h3>
+                    <div id="timeSlotsContainer">
+                        <label>Horários disponíveis:</label>
+                        <div class="time-slots" id="timeSlots">
+                            <!-- Horários serão carregados dinamicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="selectedServicesSummary" style="display: none;">
+                    <h4>📋 Resumo do Reagendamento</h4>
+                    <div id="servicesListSummary"></div>
+                    <div id="totalPriceSummary"></div>
+                </div>
+
+                <div class="reschedule-actions">
+                    <button class="btn btn-secondary reschedule-btn" onclick="closeRescheduleModal()">
+                        ❌ Cancelar
+                    </button>
+                    <button class="btn btn-primary reschedule-btn" onclick="confirmReschedule('${appointment.id}')" id="confirmRescheduleBtn" disabled>
+                        ✅ Confirmar Reagendamento
+                    </button>
+                </div>
+            `;
+
+            // Carregar serviços disponíveis
+            loadRescheduleServices(appointment.service);
+
+            // Configurar eventos
+            setupRescheduleEvents(appointment);
+
+            // Mostrar modal
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Função para obter preço do serviço atual
+        function getCurrentServicePrice(serviceName) {
+            const prices = getServicePrices();
+            
+            // Mapear nomes de serviços para corresponder aos preços
+            const serviceMapping = {
+                'Corte masculino': 'Corte Masculino',
+                'Barba': 'Barba',
+                'Sobrancelha': 'Sobrancelha',
+                'Design de sobrancelhas': 'Design de Sobrancelhas',
+                'Barboterapia': 'Barboterapia',
+                'Massagem facial': 'Massagem Facial',
+                'Tratamentos capilares': 'Tratamentos Capilares'
+            };
+            
+            const mappedService = serviceMapping[serviceName] || serviceName;
+            return prices[mappedService] || 20.00; // Valor padrão se não encontrar
+        }
+
+        // Função para obter data mínima (hoje)
+        function getMinDate() {
+            const today = new Date();
+            return today.toISOString().split('T')[0];
+        }
+
+        // Função para obter data máxima (30 dias)
+        function getMaxDate() {
+            const maxDate = new Date();
+            maxDate.setDate(maxDate.getDate() + 30);
+            return maxDate.toISOString().split('T')[0];
+        }
+
+        // Função para carregar serviços disponíveis no reagendamento
+        function loadRescheduleServices(currentService) {
+            const container = document.getElementById('servicesList');
+            
+            const services = [
+                'Corte Masculino', 'Barba', 'Sobrancelha', 'Design de Sobrancelhas',
+                'Barboterapia', 'Massagem Facial', 'Tratamentos Capilares'
+            ];
+
+            container.innerHTML = services.map(service => 
+                `<span class="service-tag" onclick="toggleRescheduleService('${service}')" title="Clique para selecionar">${service}</span>`
+            ).join('');
+
+            // Selecionar serviço atual por padrão se existir
+            if (currentService) {
+                // Mapear nomes de serviços para corresponder aos disponíveis
+                const serviceMapping = {
+                    'Corte masculino': 'Corte Masculino',
+                    'Barba': 'Barba',
+                    'Sobrancelha': 'Sobrancelha',
+                    'Design de sobrancelhas': 'Design de Sobrancelhas',
+                    'Barboterapia': 'Barboterapia',
+                    'Massagem facial': 'Massagem Facial',
+                    'Tratamentos capilares': 'Tratamentos Capilares'
+                };
+                
+                const mappedService = serviceMapping[currentService] || currentService;
+                if (services.includes(mappedService)) {
+                    // Simular clique no serviço para selecioná-lo
+                    setTimeout(() => {
+                        const serviceElement = document.querySelector(`[onclick="toggleRescheduleService('${mappedService}')"]`);
+                        if (serviceElement) {
+                            serviceElement.click();
+                        }
+                    }, 100);
+                }
+            }
+        }
+
+        // Função para alternar seleção de serviço no reagendamento
+        function toggleRescheduleService(serviceName) {
+            const serviceElement = event.target;
+            const index = rescheduleSelectedServices.indexOf(serviceName);
+            
+            if (index > -1) {
+                rescheduleSelectedServices.splice(index, 1);
+                serviceElement.classList.remove('selected');
+            } else {
+                rescheduleSelectedServices.push(serviceName);
+                serviceElement.classList.add('selected');
+            }
+            
+            updateRescheduleServicesSummary();
+            updateRescheduleButton();
+        }
+
+        // Função para atualizar resumo dos serviços no reagendamento
+        function updateRescheduleServicesSummary() {
+            const summaryContainer = document.getElementById('selectedServicesSummary');
+            const servicesList = document.getElementById('servicesListSummary');
+            const totalPrice = document.getElementById('totalPriceSummary');
+            
+            if (rescheduleSelectedServices.length === 0) {
+                summaryContainer.style.display = 'none';
+                return;
+            }
+            
+            summaryContainer.style.display = 'block';
+            
+            const prices = getServicePrices();
+            let total = 0;
+            
+            const servicesHtml = rescheduleSelectedServices.map(service => {
+                const price = prices[service] || 20;
+                total += price;
+                return `
+                    <div class="service-item">
+                        <span class="service-name">✂️ ${service}</span>
+                        <span class="service-price">R$ ${price.toFixed(2)}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            servicesList.innerHTML = servicesHtml;
+            totalPrice.innerHTML = `💰 <strong>Total: R$ ${total.toFixed(2)}</strong>`;
+        }
+
+        // Função para obter preços dos serviços
+        function getServicePrices() {
+            return {
+                'Corte Masculino': 25.00,
+                'Barba': 15.00,
+                'Sobrancelha': 10.00,
+                'Design de Sobrancelhas': 20.00,
+                'Barboterapia': 50.00,
+                'Massagem Facial': 25.00,
+                'Tratamentos Capilares': 30.00
+            };
+        }
+
+        // Função para atualizar botão de reagendamento
+        function updateRescheduleButton() {
+            const scheduleButton = document.getElementById('confirmRescheduleBtn');
+            const canSchedule = rescheduleSelectedServices.length > 0 && rescheduleSelectedDate && rescheduleSelectedTime;
+            
+            scheduleButton.disabled = !canSchedule;
+            
+            if (canSchedule) {
+                const totalPrice = calculateRescheduleTotalPrice();
+                scheduleButton.innerHTML = `✅ Confirmar Reagendamento - ${rescheduleSelectedServices.join(', ')} - R$ ${totalPrice}`;
+            } else {
+                scheduleButton.innerHTML = '✅ Confirmar Reagendamento';
+            }
+        }
+
+        // Função para calcular preço total do reagendamento
+        function calculateRescheduleTotalPrice() {
+            const prices = getServicePrices();
+            return rescheduleSelectedServices.reduce((total, service) => {
+                return total + (prices[service] || 20);
+            }, 0).toFixed(2);
+        }
+
+        // Função para configurar eventos do reagendamento
+        function setupRescheduleEvents(appointment) {
+            const dateInput = document.getElementById('newAppointmentDate');
+            dateInput.addEventListener('change', function() {
+                rescheduleSelectedDate = this.value;
+                rescheduleSelectedTime = null;
+                loadRescheduleTimeSlots(this.value);
+                updateRescheduleButton();
+            });
+        }
+
+        // Função para carregar horários no reagendamento
+        function loadRescheduleTimeSlots(date) {
+            const timeSlotsSection = document.getElementById('timeSlotsSection');
+            const timeSlots = document.getElementById('timeSlots');
+            
+            if (!date) {
+                timeSlotsSection.style.display = 'none';
+                return;
+            }
+            
+            timeSlotsSection.style.display = 'block';
+            
+            // Simular carregamento
+            timeSlots.innerHTML = '<div style="text-align: center; padding: 20px; color: #94a3b8;">Carregando horários...</div>';
+            
+            setTimeout(() => {
+                const slots = generateRescheduleTimeSlots(date);
+                renderRescheduleTimeSlots(slots);
+            }, 500);
+        }
+
+        // Função para gerar horários disponíveis no reagendamento
+        function generateRescheduleTimeSlots(selectedDate) {
+            const slots = [];
+            const startHour = 8;
+            const endHour = 20;
+            const interval = 30;
+
+            // Simular alguns horários ocupados
+            const occupiedSlots = ['09:00', '10:30', '14:00', '15:30', '17:00'];
+
+            for (let hour = startHour; hour < endHour; hour++) {
+                for (let minute = 0; minute < 60; minute += interval) {
+                    const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                    const isOccupied = occupiedSlots.includes(timeString);
+                    const isPastTime = isTimeInPast(timeString) && selectedDate === getMinDate();
+
+                    slots.push({
+                        time: timeString,
+                        available: !isOccupied && !isPastTime
+                    });
+                }
+            }
+
+            return slots;
+        }
+
+        // Função para renderizar horários no reagendamento
+        function renderRescheduleTimeSlots(slots) {
+            const timeSlots = document.getElementById('timeSlots');
+            
+            if (slots.length === 0) {
+                timeSlots.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">Nenhum horário disponível para esta data.</div>';
+                return;
+            }
+
+            timeSlots.innerHTML = slots.map(slot => `
+                <div class="time-slot ${slot.available ? '' : 'unavailable'}" 
+                     onclick="${slot.available ? `selectRescheduleTimeSlot('${slot.time}')` : ''}"
+                     data-time="${slot.time}">
+                    ${slot.time}
+                </div>
+            `).join('');
+        }
+
+        // Função para selecionar horário no reagendamento
+        function selectRescheduleTimeSlot(time) {
+            // Remover seleção anterior
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+
+            // Selecionar novo horário
+            const selectedSlot = document.querySelector(`[data-time="${time}"]`);
+            if (selectedSlot) {
+                selectedSlot.classList.add('selected');
+            }
+
+            rescheduleSelectedTime = time;
+            updateRescheduleButton();
+        }
+
+        // Função para carregar horários disponíveis
+        function loadTimeSlots(selectedDate, barbeariaName) {
+            const container = document.getElementById('timeSlotsContainer');
+            const confirmBtn = document.getElementById('confirmRescheduleBtn');
+            
+            // Mostrar loading
+            container.innerHTML = `
+                <div class="loading-spinner"></div>
+                <p>Carregando horários...</p>
+            `;
+            confirmBtn.disabled = true;
+
+            // Simular carregamento de horários
+            setTimeout(() => {
+                const timeSlots = generateTimeSlots(selectedDate, barbeariaName);
+                renderTimeSlots(timeSlots);
+            }, 800);
+        }
+
+        // Função para gerar horários disponíveis
+        function generateTimeSlots(selectedDate, barbeariaName) {
+            const slots = [];
+            const startHour = 8;
+            const endHour = 20;
+            const interval = 30; // 30 minutos
+
+            // Simular alguns horários ocupados
+            const occupiedSlots = [
+                '09:00', '10:30', '14:00', '15:30', '17:00'
+            ];
+
+            for (let hour = startHour; hour < endHour; hour++) {
+                for (let minute = 0; minute < 60; minute += interval) {
+                    const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                    
+                    // Verificar se é um horário ocupado
+                    const isOccupied = occupiedSlots.includes(timeString);
+                    
+                    // Verificar se é um horário passado (para hoje)
+                    const selectedDateObj = new Date(selectedDate);
+                    const today = new Date();
+                    const isToday = selectedDateObj.toDateString() === today.toDateString();
+                    const isPastTime = isToday && isTimeInPast(timeString);
+
+                    slots.push({
+                        time: timeString,
+                        available: !isOccupied && !isPastTime
+                    });
+                }
+            }
+
+            return slots;
+        }
+
+        // Função para verificar se horário já passou
+        function isTimeInPast(timeString) {
+            const now = new Date();
+            const [hours, minutes] = timeString.split(':').map(Number);
+            const timeSlot = new Date();
+            timeSlot.setHours(hours, minutes, 0, 0);
+            
+            return timeSlot < now;
+        }
+
+        // Função para renderizar horários
+        function renderTimeSlots(slots) {
+            const container = document.getElementById('timeSlotsContainer');
+            
+            if (slots.length === 0) {
+                container.innerHTML = '<p style="color: #ef4444;">Nenhum horário disponível para esta data.</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="time-slots">
+                    ${slots.map(slot => `
+                        <div class="time-slot ${slot.available ? '' : 'unavailable'}" 
+                             onclick="${slot.available ? `selectTimeSlot('${slot.time}')` : ''}"
+                             data-time="${slot.time}">
+                            ${slot.time}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Função para selecionar horário
+        function selectTimeSlot(time) {
+            // Remover seleção anterior
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+
+            // Selecionar novo horário
+            const selectedSlot = document.querySelector(`[data-time="${time}"]`);
+            if (selectedSlot) {
+                selectedSlot.classList.add('selected');
+            }
+
+            // Habilitar botão de confirmação
+            const confirmBtn = document.getElementById('confirmRescheduleBtn');
+            confirmBtn.disabled = false;
+        }
+
+        // Função para carregar horários disponíveis
+        function loadTimeSlots(selectedDate, barbeariaName) {
+            const container = document.getElementById('timeSlotsContainer');
+            const confirmBtn = document.getElementById('confirmRescheduleBtn');
+
+            if (!selectedDate) {
+                container.style.display = 'none';
+                if (confirmBtn) confirmBtn.disabled = true;
+                return;
+            }
+
+            container.style.display = 'block';
+
+            // Simular carregamento
+            container.innerHTML = `
+                <div class="loading-time-slots">
+                    <div class="loading-spinner"></div>
+                    <p>Carregando horários...</p>
+                </div>
+            `;
+
+            // Simular delay de carregamento
+            setTimeout(() => {
+                const slots = generateTimeSlots(selectedDate);
+                renderTimeSlots(slots);
+            }, 1000);
+        }
+
+        // Função para verificar se horário já passou
+        function isTimeInPast(timeString) {
+            const now = new Date();
+            const [hours, minutes] = timeString.split(':').map(Number);
+            const timeDate = new Date();
+            timeDate.setHours(hours, minutes, 0, 0);
+            return timeDate < now;
+        }
+
+        // Função para gerar horários disponíveis
+        function generateTimeSlots(selectedDate) {
+            const slots = [];
+            const startHour = 8;
+            const endHour = 20;
+            const interval = 30;
+
+            // Simular alguns horários ocupados
+            const occupiedSlots = ['09:00', '10:30', '14:00', '15:30', '17:00'];
+
+            for (let hour = startHour; hour < endHour; hour++) {
+                for (let minute = 0; minute < 60; minute += interval) {
+                    const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                    const isOccupied = occupiedSlots.includes(timeString);
+                    const isPastTime = isTimeInPast(timeString) && selectedDate === getMinDate();
+
+                    slots.push({
+                        time: timeString,
+                        available: !isOccupied && !isPastTime
+                    });
+                }
+            }
+
+            return slots;
+        }
+
+        // Função para renderizar horários
+        function renderTimeSlots(slots) {
+            const container = document.getElementById('timeSlotsContainer');
+            
+            if (slots.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">Nenhum horário disponível para esta data.</div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <label>Horários disponíveis:</label>
+                <div class="time-slots">
+                    ${slots.map(slot => `
+                        <div class="time-slot ${slot.available ? '' : 'unavailable'}" 
+                             onclick="${slot.available ? `selectTimeSlot('${slot.time}')` : ''}"
+                             data-time="${slot.time}">
+                            ${slot.time}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Função para selecionar horário
+        function selectTimeSlot(time) {
+            // Remover seleção anterior
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+
+            // Selecionar novo horário
+            const selectedSlot = document.querySelector(`[data-time="${time}"]`);
+            if (selectedSlot) {
+                selectedSlot.classList.add('selected');
+            }
+
+            // Habilitar botão de confirmação
+            const confirmBtn = document.getElementById('confirmRescheduleBtn');
+            confirmBtn.disabled = false;
+        }
+
+        // Função para confirmar reagendamento
+        function confirmReschedule(appointmentId) {
+            const appointment = allAppointments.find(a => a.id === appointmentId);
+            if (!appointment) return;
+
+            // Validar campos obrigatórios
+            if (rescheduleSelectedServices.length === 0) {
+                showValidationMessage('Por favor, selecione pelo menos um serviço.');
+                return;
+            }
+
+            if (!rescheduleSelectedDate) {
+                showValidationMessage('Por favor, selecione uma nova data.');
+                return;
+            }
+
+            if (!rescheduleSelectedTime) {
+                showValidationMessage('Por favor, selecione um horário.');
+                return;
+            }
+
+            // Mostrar modal de confirmação
+            showRescheduleConfirmationModal(appointment);
+        }
+
+        // Função para mostrar mensagem de validação
+        function showValidationMessage(message) {
+            // Criar elemento de mensagem temporário
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(239, 68, 68, 0.95);
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                z-index: 10000;
+                font-weight: 500;
+                max-width: 300px;
+                animation: slideIn 0.3s ease;
+            `;
+            messageDiv.textContent = message;
+            
+            // Adicionar animação CSS
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(messageDiv);
+            
+            // Remover após 3 segundos
+            setTimeout(() => {
+                messageDiv.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => {
+                    document.body.removeChild(messageDiv);
+                    document.head.removeChild(style);
+                }, 300);
+            }, 3000);
+        }
+
+        // Função para mostrar modal de confirmação de reagendamento
+        function showRescheduleConfirmationModal(appointment) {
+            const totalPrice = calculateRescheduleTotalPrice();
+            const formattedDate = new Date(rescheduleSelectedDate).toLocaleDateString('pt-BR');
+            
+            // Criar modal de confirmação
+            const confirmationModal = document.createElement('div');
+            confirmationModal.id = 'rescheduleConfirmationModal';
+            confirmationModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.7);
+                backdrop-filter: blur(5px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+            
+            confirmationModal.innerHTML = `
+                <div style="
+                    background: rgba(30, 41, 59, 0.95);
+                    border-radius: 16px;
+                    padding: 32px;
+                    max-width: 500px;
+                    width: 90%;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                    transform: scale(0.9);
+                    transition: transform 0.3s ease;
+                ">
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <div style="font-size: 3rem; margin-bottom: 16px;">📅</div>
+                        <h3 style="font-size: 1.5rem; font-weight: 600; color: #f1f5f9; margin-bottom: 8px;">
+                            Confirmar Reagendamento
+                        </h3>
+                        <p style="color: #cbd5e1; font-size: 1rem;">
+                            Você está prestes a reagendar seu agendamento. Confirme os detalhes abaixo:
+                        </p>
+                    </div>
+                    
+                    <div style="background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                        <h4 style="color: #f1f5f9; margin-bottom: 16px; font-size: 1.1rem;">📋 Detalhes do Reagendamento</h4>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <span style="color: #94a3b8; font-size: 0.9rem;">Barbearia:</span>
+                            <span style="color: #e2e8f0; font-weight: 600; margin-left: 8px;">${appointment.barbearia}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <span style="color: #94a3b8; font-size: 0.9rem;">Nova Data:</span>
+                            <span style="color: #e2e8f0; font-weight: 600; margin-left: 8px;">${formattedDate}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <span style="color: #94a3b8; font-size: 0.9rem;">Novo Horário:</span>
+                            <span style="color: #e2e8f0; font-weight: 600; margin-left: 8px;">${rescheduleSelectedTime}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <span style="color: #94a3b8; font-size: 0.9rem;">Serviços:</span>
+                            <span style="color: #e2e8f0; font-weight: 600; margin-left: 8px;">${rescheduleSelectedServices.join(', ')}</span>
+                        </div>
+                        
+                        <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 12px; margin-top: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #94a3b8; font-size: 0.9rem;">Preço Total:</span>
+                                <span style="color: #10b981; font-weight: 600; font-size: 1.1rem;">R$ ${totalPrice}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px;">
+                        <button onclick="cancelRescheduleConfirmation()" style="
+                            flex: 1;
+                            padding: 12px 24px;
+                            border: 1px solid rgba(255, 255, 255, 0.2);
+                            border-radius: 8px;
+                            background: rgba(255, 255, 255, 0.1);
+                            color: #e2e8f0;
+                            font-size: 1rem;
+                            font-weight: 500;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                        ">
+                            ❌ Cancelar
+                        </button>
+                        <button onclick="proceedWithReschedule('${appointment.id}')" style="
+                            flex: 1;
+                            padding: 12px 24px;
+                            border: none;
+                            border-radius: 8px;
+                            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+                            color: white;
+                            font-size: 1rem;
+                            font-weight: 500;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                        ">
+                            ✅ Confirmar
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(confirmationModal);
+            
+            // Animar entrada
+            setTimeout(() => {
+                confirmationModal.style.opacity = '1';
+                const modalContent = confirmationModal.querySelector('div');
+                modalContent.style.transform = 'scale(1)';
+            }, 10);
+        }
+
+        // Função para cancelar confirmação de reagendamento
+        function cancelRescheduleConfirmation() {
+            const modal = document.getElementById('rescheduleConfirmationModal');
+            if (modal) {
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(modal);
+                }, 300);
+            }
+        }
+
+        // Função para prosseguir com o reagendamento
+        function proceedWithReschedule(appointmentId) {
+            const appointment = allAppointments.find(a => a.id === appointmentId);
+            if (!appointment) return;
+
+            // Atualizar dados do agendamento
+            appointment.date = rescheduleSelectedDate;
+            appointment.time = rescheduleSelectedTime;
+            appointment.service = rescheduleSelectedServices.join(', ');
+            appointment.price = calculateRescheduleTotalPrice();
+            appointment.status = 'confirmed'; // Reagendamento sempre fica confirmado
+
+            // Fechar modais
+            cancelRescheduleConfirmation();
+            closeRescheduleModal();
+
+            // Resetar variáveis
+            rescheduleSelectedServices = [];
+            rescheduleSelectedDate = null;
+            rescheduleSelectedTime = null;
+
+            // Atualizar lista
+            applyFilters();
+
+            // Mostrar mensagem de sucesso
+            showSuccessMessage('Agendamento reagendado com sucesso!');
+        }
+
+        // Função para mostrar mensagem de sucesso
+        function showSuccessMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(34, 197, 94, 0.95);
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                z-index: 10000;
+                font-weight: 500;
+                max-width: 300px;
+                animation: slideIn 0.3s ease;
+            `;
+            messageDiv.textContent = message;
+            
+            document.body.appendChild(messageDiv);
+            
+            // Remover após 3 segundos
+            setTimeout(() => {
+                messageDiv.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => {
+                    document.body.removeChild(messageDiv);
+                }, 300);
+            }, 3000);
+        }
+
+        // Função para fechar modal de reagendamento
+        function closeRescheduleModal() {
+            const modal = document.getElementById('rescheduleModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+
+            // Resetar variáveis
+            rescheduleSelectedServices = [];
+            rescheduleSelectedDate = null;
+            rescheduleSelectedTime = null;
+        }
+
+        // Função para avaliar agendamento
+        function rateAppointment(appointmentId) {
+            const appointment = allAppointments.find(a => a.id === appointmentId);
+            if (!appointment) return;
+
+            // Mostrar modal de avaliação
+            showRatingModal(appointment);
+        }
+
+        // Função para mostrar modal de avaliação
+        function showRatingModal(appointment) {
+            const formattedDate = new Date(appointment.date).toLocaleDateString('pt-BR');
+            
+            // Criar modal de avaliação
+            const ratingModal = document.createElement('div');
+            ratingModal.id = 'ratingModal';
+            ratingModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.7);
+                backdrop-filter: blur(5px);
+                z-index: 10000;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+            
+            ratingModal.innerHTML = `
+                <div id="ratingModalContent" style="
+                    background: rgba(30, 41, 59, 0.95);
+                    border-radius: 16px;
+                    padding: 32px;
+                    max-width: 500px;
+                    width: 90%;
+                    max-height: 80vh;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                    position: absolute;
+                    left: 50%;
+                    top: 50%;
+                    transform: translateX(-50%) translateY(-50%) scale(0.9);
+                    transition: transform 0.3s ease;
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                ">
+                    <!-- Handle para arrastar -->
+                    <div id="ratingModalHandle" style="
+                        position: absolute;
+                        top: 8px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 80px;
+                        height: 12px;
+                        background: linear-gradient(90deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6));
+                        border-radius: 6px;
+                        cursor: grab;
+                        z-index: 10001;
+                        transition: all 0.2s ease;
+                        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+                        border: 1px solid rgba(255, 255, 255, 0.4);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    " title="Arrastar para mover o modal">
+                        <!-- Scroll bar visual -->
+                        <div style="
+                            width: 50px;
+                            height: 3px;
+                            background: rgba(0, 0, 0, 0.4);
+                            border-radius: 2px;
+                            position: relative;
+                        ">
+                            <!-- Indicador de movimento -->
+                            <div style="
+                                position: absolute;
+                                top: -1px;
+                                left: 50%;
+                                transform: translateX(-50%);
+                                width: 8px;
+                                height: 5px;
+                                background: rgba(0, 0, 0, 0.6);
+                                border-radius: 1px;
+                                animation: scrollHint 2s ease-in-out infinite;
+                            "></div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <div style="font-size: 3rem; margin-bottom: 16px;">⭐</div>
+                        <h3 style="font-size: 1.5rem; font-weight: 600; color: #f1f5f9; margin-bottom: 8px;">
+                            Avaliar Serviço
+                        </h3>
+                        <p style="color: #cbd5e1; font-size: 1rem;">
+                            Como foi sua experiência com este serviço?
+                        </p>
+                        <p style="color: #94a3b8; font-size: 0.8rem; margin-top: 8px; opacity: 0.7;">
+                            💡 Dica: Arraste a barra superior para mover o modal
+                        </p>
+                    </div>
+                    
+                    <div style="background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                        <h4 style="color: #f1f5f9; margin-bottom: 16px; font-size: 1.1rem;">📋 Detalhes do Agendamento</h4>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <span style="color: #94a3b8; font-size: 0.9rem;">Barbearia:</span>
+                            <span style="color: #e2e8f0; font-weight: 600; margin-left: 8px;">${appointment.barbearia}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <span style="color: #94a3b8; font-size: 0.9rem;">Data:</span>
+                            <span style="color: #e2e8f0; font-weight: 600; margin-left: 8px;">${formattedDate}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <span style="color: #94a3b8; font-size: 0.9rem;">Serviço:</span>
+                            <span style="color: #e2e8f0; font-weight: 600; margin-left: 8px;">${appointment.service}</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 24px;">
+                        <h4 style="color: #f1f5f9; margin-bottom: 16px; font-size: 1.1rem;">⭐ Sua Avaliação</h4>
+                        
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <div id="starRating" style="display: flex; justify-content: center; gap: 8px; margin-bottom: 12px;">
+                                <span class="star" data-rating="1" style="font-size: 2rem; cursor: pointer; color: #64748b; transition: color 0.2s ease;">★</span>
+                                <span class="star" data-rating="2" style="font-size: 2rem; cursor: pointer; color: #64748b; transition: color 0.2s ease;">★</span>
+                                <span class="star" data-rating="3" style="font-size: 2rem; cursor: pointer; color: #64748b; transition: color 0.2s ease;">★</span>
+                                <span class="star" data-rating="4" style="font-size: 2rem; cursor: pointer; color: #64748b; transition: color 0.2s ease;">★</span>
+                                <span class="star" data-rating="5" style="font-size: 2rem; cursor: pointer; color: #64748b; transition: color 0.2s ease;">★</span>
+                            </div>
+                            <p id="ratingText" style="color: #94a3b8; font-size: 0.9rem; margin: 0;">Clique nas estrelas para avaliar</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; color: #cbd5e1; font-size: 0.95rem; margin-bottom: 8px; font-weight: 500;">
+                                Comentário (opcional)
+                            </label>
+                            <textarea id="ratingComment" placeholder="Conte-nos sobre sua experiência..." style="
+                                width: 100%;
+                                padding: 12px 16px;
+                                border: 1px solid rgba(255, 255, 255, 0.2);
+                                border-radius: 8px;
+                                background: rgba(15, 23, 42, 0.8);
+                                color: #e2e8f0;
+                                font-size: 1rem;
+                                resize: vertical;
+                                min-height: 120px;
+                                transition: all 0.3s ease;
+                            "></textarea>
+                        </div>
+                        
+                        <!-- Seção adicional para demonstrar scroll -->
+                        <div style="background: rgba(15, 23, 42, 0.4); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                            <h5 style="color: #f1f5f9; margin-bottom: 12px; font-size: 1rem;">📝 Informações Adicionais</h5>
+                            <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 8px;">
+                                • Tempo de espera: Satisfatório
+                            </p>
+                            <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 8px;">
+                                • Ambiente: Limpo e organizado
+                            </p>
+                            <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 8px;">
+                                • Atendimento: Cordial e profissional
+                            </p>
+                            <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 8px;">
+                                • Qualidade do serviço: Excelente
+                            </p>
+                        </div>
+                        
+                        <!-- Seção de sugestões -->
+                        <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                            <h5 style="color: #22c55e; margin-bottom: 12px; font-size: 1rem;">💡 Sugestões</h5>
+                            <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 8px;">
+                                Sua avaliação nos ajuda a melhorar nossos serviços. 
+                                Compartilhe sugestões ou elogios específicos sobre sua experiência.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px;">
+                        <button onclick="cancelRating()" style="
+                            flex: 1;
+                            padding: 12px 24px;
+                            border: 1px solid rgba(255, 255, 255, 0.2);
+                            border-radius: 8px;
+                            background: rgba(255, 255, 255, 0.1);
+                            color: #e2e8f0;
+                            font-size: 1rem;
+                            font-weight: 500;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                        ">
+                            ❌ Cancelar
+                        </button>
+                        <button onclick="submitRating('${appointment.id}')" id="submitRatingBtn" disabled style="
+                            flex: 1;
+                            padding: 12px 24px;
+                            border: none;
+                            border-radius: 8px;
+                            background: rgba(107, 114, 128, 0.5);
+                            color: #9ca3af;
+                            font-size: 1rem;
+                            font-weight: 500;
+                            cursor: not-allowed;
+                            transition: all 0.3s ease;
+                        ">
+                            ⭐ Enviar Avaliação
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(ratingModal);
+            
+            // Configurar eventos das estrelas
+            setupStarRating();
+            
+            // Configurar funcionalidade de arrastar
+            setupModalDrag(ratingModal);
+            
+            // Animar entrada
+            setTimeout(() => {
+                ratingModal.style.opacity = '1';
+                const modalContent = ratingModal.querySelector('#ratingModalContent');
+                modalContent.style.transform = 'translateX(-50%) scale(1)';
+            }, 10);
+        }
+
+        // Função para configurar funcionalidade de arrastar específica do modal de avaliação
+        function setupModalDrag(modal) {
+            const modalContent = modal.querySelector('#ratingModalContent');
+            const handle = modal.querySelector('#ratingModalHandle');
+            
+            if (!handle || !modalContent) {
+                console.error('Handle ou modalContent não encontrados');
+                return;
+            }
+            
+            let isDragging = false;
+            let startY = 0;
+            let startTop = 0;
+            
+            // Configurar posicionamento inicial imediatamente
+            const centerY = Math.max(50, (window.innerHeight - modalContent.offsetHeight) / 2);
+            modalContent.style.top = centerY + 'px';
+            modalContent.style.left = '50%';
+            modalContent.style.position = 'absolute';
+            modalContent.style.transform = 'translateX(-50%) translateY(-50%) scale(1)';
+            
+            console.log('Modal configurado para arrastar:', {
+                centerY,
+                modalHeight: modalContent.offsetHeight,
+                windowHeight: window.innerHeight
+            });
+            
+            // Adicionar efeito hover ao handle
+            handle.addEventListener('mouseenter', () => {
+                if (!isDragging) {
+                    handle.style.background = 'linear-gradient(90deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.8))';
+                    handle.style.transform = 'translateX(-50%) scale(1.1)';
+                    handle.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)';
+                }
+            });
+            
+            handle.addEventListener('mouseleave', () => {
+                if (!isDragging) {
+                    handle.style.background = 'linear-gradient(90deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6))';
+                    handle.style.transform = 'translateX(-50%) scale(1)';
+                    handle.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)';
+                }
+            });
+            
+            // Função para iniciar o arrasto
+            function startDrag(e) {
+                console.log('Iniciando arrasto');
+                e.preventDefault();
+                e.stopPropagation();
+                
+                isDragging = true;
+                startY = e.clientY;
+                
+                // Obter posição atual do modal
+                const currentTop = parseInt(modalContent.style.top) || centerY;
+                startTop = currentTop;
+                
+                // Mudar cursor do handle
+                handle.style.cursor = 'grabbing';
+                handle.style.background = 'linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.9))';
+                handle.style.transform = 'translateX(-50%) scale(1.2)';
+                handle.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.5)';
+                
+                // Desabilitar transições durante o arrasto
+                modalContent.style.transition = 'none';
+                
+                console.log('Arrasto iniciado:', { startY, startTop });
+            }
+            
+            // Função para arrastar
+            function drag(e) {
+                if (!isDragging) return;
+                
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const deltaY = e.clientY - startY;
+                const newTop = startTop + deltaY;
+                
+                // Limitar movimento vertical
+                const maxTop = 50; // 50px do topo
+                const minTop = window.innerHeight - modalContent.offsetHeight - 50; // 50px do fundo
+                
+                const constrainedTop = Math.max(maxTop, Math.min(minTop, newTop));
+                
+                // Atualizar posição - REMOVER translateY para permitir movimento livre
+                modalContent.style.top = constrainedTop + 'px';
+                modalContent.style.transform = 'translateX(-50%) scale(1)';
+                
+                console.log('Arrastando:', { deltaY, newTop, constrainedTop });
+            }
+            
+            // Função para parar o arrasto
+            function stopDrag(e) {
+                if (!isDragging) return;
+                
+                console.log('Parando arrasto');
+                
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                
+                isDragging = false;
+                
+                // Restaurar cursor do handle
+                handle.style.cursor = 'grab';
+                handle.style.background = 'linear-gradient(90deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6))';
+                handle.style.transform = 'translateX(-50%) scale(1)';
+                handle.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)';
+                
+                // Restaurar transições
+                modalContent.style.transition = 'transform 0.3s ease';
+            }
+            
+            // Event listeners específicos para o modal de avaliação
+            handle.addEventListener('mousedown', startDrag);
+            
+            // Usar event listeners específicos para este modal
+            const dragHandler = (e) => drag(e);
+            const stopHandler = (e) => stopDrag(e);
+            
+            document.addEventListener('mousemove', dragHandler);
+            document.addEventListener('mouseup', stopHandler);
+            
+            // Event listeners para touch (mobile)
+            handle.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                startDrag(e.touches[0]);
+            });
+            
+            const touchDragHandler = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                drag(e.touches[0]);
+            };
+            
+            const touchStopHandler = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                stopDrag();
+            };
+            
+            document.addEventListener('touchmove', touchDragHandler);
+            document.addEventListener('touchend', touchStopHandler);
+            
+            // Prevenir arrasto em elementos internos
+            const interactiveElements = modalContent.querySelectorAll('button, textarea, input, .star');
+            interactiveElements.forEach(element => {
+                element.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                });
+                
+                element.addEventListener('touchstart', (e) => {
+                    e.stopPropagation();
+                });
+            });
+            
+            // Limpar event listeners quando o modal for fechado
+            modal.addEventListener('modalClose', () => {
+                document.removeEventListener('mousemove', dragHandler);
+                document.removeEventListener('mouseup', stopHandler);
+                document.removeEventListener('touchmove', touchDragHandler);
+                document.removeEventListener('touchend', touchStopHandler);
+            });
+        }
+
+        // Função para configurar sistema de estrelas
+        function setupStarRating() {
+            const stars = document.querySelectorAll('.star');
+            const ratingText = document.getElementById('ratingText');
+            const submitBtn = document.getElementById('submitRatingBtn');
+            let currentRating = 0;
+            
+            const ratingTexts = {
+                1: 'Péssimo',
+                2: 'Ruim',
+                3: 'Regular',
+                4: 'Bom',
+                5: 'Excelente'
+            };
+            
+            stars.forEach((star, index) => {
+                star.addEventListener('mouseenter', () => {
+                    highlightStars(index + 1);
+                });
+                
+                star.addEventListener('mouseleave', () => {
+                    highlightStars(currentRating);
+                });
+                
+                star.addEventListener('click', () => {
+                    currentRating = index + 1;
+                    highlightStars(currentRating);
+                    ratingText.textContent = ratingTexts[currentRating];
+                    submitBtn.disabled = false;
+                    submitBtn.style.background = 'linear-gradient(135deg, #fbbf24, #f59e0b)';
+                    submitBtn.style.color = 'white';
+                    submitBtn.style.cursor = 'pointer';
+                });
+            });
+            
+            function highlightStars(rating) {
+                stars.forEach((star, index) => {
+                    if (index < rating) {
+                        star.style.color = '#fbbf24';
+                    } else {
+                        star.style.color = '#64748b';
+                    }
+                });
+            }
+        }
+
+        // Função para cancelar avaliação
+        function cancelRating() {
+            const modal = document.getElementById('ratingModal');
+            if (modal) {
+                // Disparar evento de fechamento para limpar event listeners
+                modal.dispatchEvent(new CustomEvent('modalClose'));
+                
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(modal);
+                }, 300);
+            }
+        }
+
+        // Função para enviar avaliação
+        function submitRating(appointmentId) {
+            const appointment = allAppointments.find(a => a.id === appointmentId);
+            if (!appointment) return;
+
+            // Obter dados da avaliação
+            const stars = document.querySelectorAll('.star');
+            let rating = 0;
+            stars.forEach((star, index) => {
+                if (star.style.color === 'rgb(251, 191, 36)') {
+                    rating = index + 1;
+                }
+            });
+            
+            const comment = document.getElementById('ratingComment').value.trim();
+
+            // Validar avaliação
+            if (rating === 0) {
+                showValidationMessage('Por favor, selecione uma avaliação com estrelas.');
+                return;
+            }
+
+            // Salvar avaliação
+            appointment.rating = rating;
+            appointment.ratingComment = comment;
+            appointment.ratedAt = new Date().toISOString();
+
+            // Fechar modal
+            const modal = document.getElementById('ratingModal');
+            if (modal) {
+                // Disparar evento de fechamento para limpar event listeners
+                modal.dispatchEvent(new CustomEvent('modalClose'));
+                
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(modal);
+                }, 300);
+            }
+
+            // Atualizar lista
+            applyFilters();
+
+            // Mostrar mensagem de sucesso
+            showSuccessMessage('Avaliação enviada com sucesso! Obrigado pelo feedback.');
+        }
+
+        // Função para ver detalhes
+        function viewAppointmentDetails(appointmentId) {
+            const appointment = allAppointments.find(a => a.id === appointmentId);
+            if (!appointment) return;
+
+            const modal = document.getElementById('appointmentModal');
+            const modalContent = document.getElementById('modalContent');
+            const modalActions = document.getElementById('modalActions');
+
+            // Criar conteúdo do modal
+            modalContent.innerHTML = `
+                <div class="detail-section">
+                    <h4 class="detail-section-title">🏪 Informações da Barbearia</h4>
+                    <div class="detail-item">
+                        <span class="detail-label">Nome:</span>
+                        <span class="detail-value">${appointment.barbearia}</span>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4 class="detail-section-title">📅 Data e Horário</h4>
+                    <div class="detail-item">
+                        <span class="detail-label">Data:</span>
+                        <span class="detail-value">${formatDate(appointment.date)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Horário:</span>
+                        <span class="detail-value">${appointment.time}</span>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4 class="detail-section-title">✂️ Serviço</h4>
+                    <div class="detail-item">
+                        <span class="detail-label">Tipo:</span>
+                        <span class="detail-value">${appointment.service}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Duração:</span>
+                        <span class="detail-value">${appointment.duration} minutos</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Preço:</span>
+                        <span class="detail-value">R$ ${appointment.price}</span>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4 class="detail-section-title">📊 Status</h4>
+                    <div class="detail-item">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value">
+                            <span class="status-badge ${getStatusClass(appointment.status)}">
+                                ${formatStatus(appointment.status)}
+                            </span>
+                        </span>
+                    </div>
+                </div>
+
+                ${appointment.notes ? `
+                    <div class="detail-section">
+                        <h4 class="detail-section-title">📝 Observações</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Notas:</span>
+                            <span class="detail-value">${appointment.notes}</span>
+                        </div>
+                    </div>
+                ` : ''}
+
+                ${appointment.rating ? `
+                    <div class="detail-section">
+                        <h4 class="detail-section-title">⭐ Avaliação</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Nota:</span>
+                            <span class="detail-value">
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    ${Array.from({length: 5}, (_, i) => 
+                                        `<span style="color: ${i < appointment.rating ? '#fbbf24' : '#64748b'}; font-size: 1.2rem;">★</span>`
+                                    ).join('')}
+                                    <span style="margin-left: 8px; color: #e2e8f0; font-weight: 600;">${appointment.rating}/5</span>
+                                </div>
+                            </span>
+                        </div>
+                        ${appointment.ratingComment ? `
+                            <div class="detail-item">
+                                <span class="detail-label">Comentário:</span>
+                                <span class="detail-value">${appointment.ratingComment}</span>
+                            </div>
+                        ` : ''}
+                        <div class="detail-item">
+                            <span class="detail-label">Avaliado em:</span>
+                            <span class="detail-value">${new Date(appointment.ratedAt).toLocaleDateString('pt-BR')}</span>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            // Criar ações do modal baseadas no status
+            let actionsHTML = '';
+            
+            if (appointment.status === 'confirmed' || appointment.status === 'pending') {
+                actionsHTML = `
+                    <button class="btn btn-danger modal-btn" onclick="cancelAppointmentFromModal('${appointment.id}')">
+                        ❌ Cancelar
+                    </button>
+                    <button class="btn btn-primary modal-btn" onclick="rescheduleAppointmentFromModal('${appointment.id}')">
+                        📅 Reagendar
+                    </button>
+                `;
+            } else if (appointment.status === 'completed') {
+                if (appointment.rating) {
+                    actionsHTML = `
+                        <button class="btn btn-secondary modal-btn" onclick="closeModal()">
+                            ✅ Fechar
+                        </button>
+                    `;
+                } else {
+                    actionsHTML = `
+                        <button class="btn btn-success modal-btn" onclick="rateAppointmentFromModal('${appointment.id}')">
+                            ⭐ Avaliar
+                        </button>
+                    `;
+                }
+            }
+
+            actionsHTML += `
+                <button class="btn btn-secondary modal-btn" onclick="closeModal()">
+                    ✅ Fechar
+                </button>
+            `;
+
+            modalActions.innerHTML = actionsHTML;
+
+            // Mostrar modal
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevenir scroll da página
+        }
+
+        // Função para fechar modal
+        function closeModal() {
+            const modal = document.getElementById('appointmentModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto'; // Restaurar scroll da página
+        }
+
+        // Funções para ações do modal
+        function cancelAppointmentFromModal(appointmentId) {
+            closeModal();
+            cancelAppointment(appointmentId);
+        }
+
+        function rescheduleAppointmentFromModal(appointmentId) {
+            closeModal();
+            rescheduleAppointment(appointmentId);
+        }
+
+        function rateAppointmentFromModal(appointmentId) {
+            closeModal();
+            rateAppointment(appointmentId);
+        }
+
+        // Fechar modal ao clicar no overlay
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('appointmentModal');
+            const rescheduleModal = document.getElementById('rescheduleModal');
+            
+            if (e.target === modal) {
+                closeModal();
+            }
+            
+            if (e.target === rescheduleModal) {
+                closeRescheduleModal();
+            }
+        });
+
+        // Fechar modal com ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeRescheduleModal();
+            }
+        });
+
+        // Função para popular filtro de barbearias
+        function populateBarbeariaFilter() {
+            const barbearias = [...new Set(allAppointments.map(a => a.barbearia))];
+            const select = document.getElementById('barbeariaFilter');
+            
+            barbearias.forEach(barbearia => {
+                const option = document.createElement('option');
+                option.value = barbearia;
+                option.textContent = barbearia;
+                select.appendChild(option);
+            });
+        }
+
+        // Função para voltar
+        function handleBackButton() {
+            console.log('handleBackButton chamada - voltando para página anterior');
+            
+            // Usar history.back() para voltar para a página anterior
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // Se não há histórico, redirecionar baseado no tipo de usuário
+                console.log('Sem histórico, redirecionando baseado no tipo de usuário');
+                
+                try {
+                    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                    const userType = localStorage.getItem('userType');
+                    
+                    const detectedUserType = currentUser.tipo || userType || 'cliente';
+                    
+                    if (detectedUserType === 'barbearia') {
+                        window.location.href = 'BarbeariaDashboard.html';
+                    } else {
+                        window.location.href = 'ClienteDashboard.html';
+                    }
+                } catch (error) {
+                    console.error('Erro no fallback:', error);
+                    window.location.href = 'Login.html';
+                }
+            }
+        }
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar botão de voltar
+            const backButton = document.getElementById('backButton');
+            if (backButton) {
+                backButton.addEventListener('click', function() {
+                    console.log('Botão voltar clicado via event listener');
+                    handleBackButton();
+                });
+            }
+            
+            document.getElementById('loadingState').style.display = 'block';
+            loadAgendamentosFromApi();
+        });
+    </script>
+</body>
+</html>

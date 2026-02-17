@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>EasyCut - Horários da Barbearia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #fff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .header {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            cursor: pointer;
+        }
+        
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #e2e8f0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .back-button:hover {
+            background: rgba(30, 41, 59, 1);
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateX(-2px);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+        }
+        
+        .page-subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .schedule-section {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        
+        .add-button {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+        }
+        
+        .add-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .add-button:active {
+            transform: translateY(0);
+        }
+        
+        .schedule-grid {
+            display: grid;
+            gap: 16px;
+        }
+        
+        .day-schedule {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .day-schedule:hover {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .day-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        
+        .day-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-open {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        
+        .status-closed {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        .day-toggle {
+            width: 50px;
+            height: 24px;
+            background: rgba(100, 116, 139, 0.3);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .day-toggle.active {
+            background: rgba(59, 130, 246, 0.8);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .day-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .day-toggle.active::after {
+            transform: translateX(26px);
+        }
+        
+        .day-toggle:hover {
+            transform: scale(1.05);
+        }
+        
+        .time-slots {
+            display: grid;
+            gap: 8px;
+        }
+        
+        .time-slot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .time-slot:hover {
+            background: rgba(15, 23, 42, 0.7);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+        
+        .time-range {
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+        
+        .slot-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .edit-btn, .delete-btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .edit-btn {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+        
+        .edit-btn:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .delete-btn {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        .delete-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .no-slots {
+            text-align: center;
+            color: #64748b;
+            font-style: italic;
+            padding: 20px;
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 32px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            box-sizing: border-box;
+        }
+        
+        .modal-overlay.active .modal {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            color: #e2e8f0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e2e8f0;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #e2e8f0;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            min-height: 44px;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .form-row .form-group {
+            margin-bottom: 0;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(30, 41, 59, 0.8);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(30, 41, 59, 1);
+        }
+        
+        /* Responsividade */
+        @media (max-width: 1024px) {
+            .section-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .add-button {
+                align-self: flex-end;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0 16px;
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .logo {
+                font-size: 1.5rem;
+            }
+            
+            .back-button {
+                font-size: 0.85rem;
+                padding: 6px 12px;
+            }
+            
+            .container {
+                padding: 20px 16px;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .page-subtitle {
+                font-size: 1rem;
+            }
+            
+            .schedule-section {
+                padding: 20px;
+                margin-bottom: 24px;
+            }
+            
+            .section-title {
+                font-size: 1.3rem;
+                margin-bottom: 20px;
+            }
+            
+            .day-schedule {
+                padding: 16px;
+            }
+            
+            .day-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .day-name {
+                font-size: 1rem;
+            }
+            
+            .time-slot {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+                padding: 12px;
+            }
+            
+            .slot-actions {
+                align-self: flex-end;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal {
+                padding: 20px;
+                width: 95%;
+                margin: 20px;
+            }
+            
+            .modal-title {
+                font-size: 1.2rem;
+            }
+            
+            .form-group {
+                margin-bottom: 16px;
+            }
+            
+            .form-row {
+                gap: 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 1.8rem;
+            }
+            
+            .schedule-section {
+                padding: 16px;
+            }
+            
+            .day-schedule {
+                padding: 12px;
+            }
+            
+            .time-slot {
+                padding: 10px;
+            }
+            
+            .edit-btn, .delete-btn {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
+            
+            .modal {
+                padding: 16px;
+                width: 98%;
+                margin: 10px;
+            }
+            
+            .form-group {
+                margin-bottom: 14px;
+            }
+            
+            .form-input {
+                padding: 10px 14px;
+                font-size: 0.9rem;
+            }
+            
+            .modal-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .day-toggle {
+                width: 45px;
+                height: 22px;
+            }
+            
+            .day-toggle::after {
+                width: 14px;
+                height: 14px;
+            }
+            
+            .day-toggle.active::after {
+                transform: translateX(23px);
+            }
+            
+            .add-button {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo" onclick="window.location.href='BarbeariaDashboard.html'">EasyCut</div>
+            <div style="display: flex; gap: 10px;">
+                <button id="viewAsClientBtn" class="back-button" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3);">
+                    👁️ Ver como Cliente
+                </button>
+                <a href="BarbeariaDashboard.html" class="back-button">
+                    ← Voltar ao Dashboard
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1 class="page-title">Horários de Funcionamento</h1>
+        <p class="page-subtitle">Configure os horários de funcionamento da sua barbearia</p>
+
+        <!-- Schedule Section -->
+        <div class="schedule-section">
+            <div class="section-title">
+                <span>📅</span>
+                Horários por Dia da Semana
+                <button class="add-button" onclick="openAddModal()">
+                    <span>+</span>
+                    Adicionar Horário
+                </button>
+            </div>
+            
+            <div class="schedule-grid" id="scheduleGrid">
+                <!-- Os horários serão carregados dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Adicionar/Editar Horário -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Adicionar Horário</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <form id="scheduleForm">
+                <div class="form-group">
+                    <label class="form-label" for="daySelect">Dia da Semana</label>
+                    <select class="form-input" id="daySelect" required>
+                        <option value="">Selecione o dia</option>
+                        <option value="monday">Segunda-feira</option>
+                        <option value="tuesday">Terça-feira</option>
+                        <option value="wednesday">Quarta-feira</option>
+                        <option value="thursday">Quinta-feira</option>
+                        <option value="friday">Sexta-feira</option>
+                        <option value="saturday">Sábado</option>
+                        <option value="sunday">Domingo</option>
+                    </select>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="startTime">Horário de Abertura</label>
+                        <input type="time" class="form-input" id="startTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="endTime">Horário de Fechamento</label>
+                        <input type="time" class="form-input" id="endTime" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="statusSelect">Status</label>
+                    <select class="form-input" id="statusSelect" required>
+                        <option value="open">Aberto</option>
+                        <option value="closed">Fechado</option>
+                    </select>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        class ScheduleManager {
+            constructor() {
+                this.scheduleGrid = document.getElementById('scheduleGrid');
+                this.modalOverlay = document.getElementById('modalOverlay');
+                this.scheduleForm = document.getElementById('scheduleForm');
+                this.modalTitle = document.getElementById('modalTitle');
+                this.submitBtn = document.getElementById('submitBtn');
+                this.editingId = null;
+                this.currentSchedule = null; // Cache local dos horários
+                this.apiUrl = 'http://localhost:5001/api';
+                
+                this.daysOfWeek = [
+                    { key: 'monday', name: 'Segunda-feira' },
+                    { key: 'tuesday', name: 'Terça-feira' },
+                    { key: 'wednesday', name: 'Quarta-feira' },
+                    { key: 'thursday', name: 'Quinta-feira' },
+                    { key: 'friday', name: 'Sexta-feira' },
+                    { key: 'saturday', name: 'Sábado' },
+                    { key: 'sunday', name: 'Domingo' }
+                ];
+                
+                this.init();
+            }
+            
+            init() {
+                // Configurar botão de visualizar como cliente
+                const user = JSON.parse(localStorage.getItem('currentUser'));
+                if (user && user.id) {
+                    const btn = document.getElementById('viewAsClientBtn');
+                    btn.onclick = () => window.open(`BarbeariaDetalhes.html?id=${user.id}`, '_blank');
+                }
+
+                this.loadSchedules();
+                this.setupEventListeners();
+            }
+            
+            setupEventListeners() {
+                // Fechar modal ao clicar no overlay
+                this.modalOverlay.addEventListener('click', (e) => {
+                    if (e.target === this.modalOverlay) {
+                        this.closeModal();
+                    }
+                });
+                
+                // Fechar modal com ESC
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.closeModal();
+                    }
+                });
+                
+                // Submit do formulário
+                this.scheduleForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.saveSchedule();
+                });
+            }
+            
+            async loadSchedules() {
+                const user = JSON.parse(localStorage.getItem('currentUser'));
+                if (!user || user.tipo !== 'barbearia') {
+                    alert('Sessão inválida. Por favor, faça login novamente.');
+                    window.location.href = 'Login.html';
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${this.apiUrl}/barbearias/${user.id}/horarios`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.currentSchedule = data.schedule;
+                        this.renderSchedules(this.currentSchedule);
+                    } else {
+                        // Se falhar ou estiver vazio, usa padrão
+                        this.currentSchedule = this.getDefaultSchedules();
+                        this.renderSchedules(this.currentSchedule);
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar horários:', error);
+                    this.currentSchedule = this.getDefaultSchedules();
+                    this.renderSchedules(this.currentSchedule);
+                }
+            }
+            
+            getSchedules() {
+                return this.currentSchedule || this.getDefaultSchedules();
+            }
+
+            getDefaultSchedules() {
+                return {
+                    monday: { status: 'closed', slots: [] },
+                    tuesday: { status: 'closed', slots: [] },
+                    wednesday: { status: 'closed', slots: [] },
+                    thursday: { status: 'closed', slots: [] },
+                    friday: { status: 'closed', slots: [] },
+                    saturday: { status: 'closed', slots: [] },
+                    sunday: { status: 'closed', slots: [] }
+                };
+            }
+            
+            async saveSchedules(schedules) {
+                const user = JSON.parse(localStorage.getItem('currentUser'));
+                if (!user) return;
+
+                try {
+                    const response = await fetch(`${this.apiUrl}/barbearias/${user.id}/horarios`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ schedule: schedules })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        this.currentSchedule = schedules;
+                        // Opcional: Mostrar toast de sucesso
+                    } else {
+                        alert('Erro ao salvar: ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Erro ao salvar:', error);
+                    alert('Erro de conexão ao salvar horários.');
+                }
+            }
+            
+            renderSchedules(schedules) {
+                this.scheduleGrid.innerHTML = '';
+                
+                this.daysOfWeek.forEach(day => {
+                    const daySchedule = schedules[day.key] || { status: 'closed', slots: [] };
+                    const dayElement = this.createDayElement(day, daySchedule);
+                    this.scheduleGrid.appendChild(dayElement);
+                });
+            }
+            
+            createDayElement(day, schedule) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day-schedule';
+                
+                const isOpen = schedule.status === 'open';
+                let slotsHtml = '';
+
+                if (!isOpen) {
+                    slotsHtml = '<div class="no-slots" style="color: #ef4444;">Fechado</div>';
+                } else if (schedule.slots.length > 0) {
+                    slotsHtml = schedule.slots.map(slot => `
+                            <div class="time-slot">
+                                <span class="time-range">${slot.start} - ${slot.end}</span>
+                                <div class="slot-actions">
+                                    <button class="edit-btn" onclick="scheduleManager.editSlot('${day.key}', ${slot.id})">Editar</button>
+                                    <button class="delete-btn" onclick="scheduleManager.deleteSlot('${day.key}', ${slot.id})">Excluir</button>
+                                </div>
+                            </div>
+                        `).join('');
+                } else {
+                    slotsHtml = '<div class="no-slots">Nenhum horário configurado</div>';
+                }
+                
+                dayDiv.innerHTML = `
+                    <div class="day-header">
+                        <span class="day-name">${day.name}</span>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span class="day-status ${isOpen ? 'status-open' : 'status-closed'}">
+                                ${isOpen ? 'Aberto' : 'Fechado'}
+                            </span>
+                            <div class="day-toggle ${isOpen ? 'active' : ''}" 
+                                 onclick="scheduleManager.toggleDayStatus('${day.key}')">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="time-slots">
+                        ${slotsHtml}
+                    </div>
+                `;
+                
+                return dayDiv;
+            }
+            
+            async toggleDayStatus(dayKey) {
+                const schedules = this.getSchedules();
+                const currentStatus = schedules[dayKey]?.status || 'closed';
+                const newStatus = currentStatus === 'open' ? 'closed' : 'open';
+                
+                if (!schedules[dayKey]) {
+                    schedules[dayKey] = { status: newStatus, slots: [] };
+                } else {
+                    schedules[dayKey].status = newStatus;
+                }
+
+                // UX: Se estiver abrindo e não tiver horários, adicionar um padrão (09:00 - 18:00)
+                if (newStatus === 'open' && schedules[dayKey].slots.length === 0) {
+                    schedules[dayKey].slots.push({
+                        id: Date.now(),
+                        start: '09:00',
+                        end: '18:00'
+                    });
+                }
+                
+                await this.saveSchedules(schedules);
+                this.renderSchedules(schedules);
+            }
+            
+            openAddModal() {
+                this.editingId = null;
+                this.modalTitle.textContent = 'Adicionar Horário';
+                this.submitBtn.textContent = 'Salvar';
+                this.scheduleForm.reset();
+                document.getElementById('daySelect').disabled = false;
+                this.openModal();
+            }
+            
+            editSlot(dayKey, slotId) {
+                const schedules = this.getSchedules();
+                const daySchedule = schedules[dayKey];
+                const slot = daySchedule.slots.find(s => s.id === slotId);
+                
+                if (slot) {
+                    this.editingId = { dayKey, slotId };
+                    this.modalTitle.textContent = 'Editar Horário';
+                    this.submitBtn.textContent = 'Atualizar';
+                    
+                    document.getElementById('daySelect').value = dayKey;
+                    document.getElementById('startTime').value = slot.start;
+                    document.getElementById('endTime').value = slot.end;
+                    document.getElementById('statusSelect').value = daySchedule.status;
+                    document.getElementById('daySelect').disabled = true;
+                    
+                    this.openModal();
+                }
+            }
+            
+            async deleteSlot(dayKey, slotId) {
+                if (confirm('Tem certeza que deseja excluir este horário?')) {
+                    const schedules = this.getSchedules();
+                    const daySchedule = schedules[dayKey];
+                    
+                    if (daySchedule) {
+                        daySchedule.slots = daySchedule.slots.filter(s => s.id !== slotId);
+                        await this.saveSchedules(schedules);
+                        this.renderSchedules(schedules);
+                    }
+                }
+            }
+            
+            openModal() {
+                this.modalOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            closeModal() {
+                this.modalOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+                this.scheduleForm.reset();
+                this.editingId = null;
+            }
+            
+            async saveSchedule() {
+                const formData = new FormData(this.scheduleForm);
+                const dayKey = document.getElementById('daySelect').value;
+                const startTime = document.getElementById('startTime').value;
+                const endTime = document.getElementById('endTime').value;
+                const status = document.getElementById('statusSelect').value;
+                
+                if (!dayKey || !startTime || !endTime) {
+                    alert('Por favor, preencha todos os campos obrigatórios.');
+                    return;
+                }
+                
+                if (startTime >= endTime) {
+                    alert('O horário de abertura deve ser anterior ao horário de fechamento.');
+                    return;
+                }
+                
+                const schedules = this.getSchedules();
+                
+                if (!schedules[dayKey]) {
+                    schedules[dayKey] = { status: status, slots: [] };
+                }
+                
+                // Validação: Permitir apenas um horário por dia
+                if (!this.editingId && schedules[dayKey].slots.length > 0) {
+                    alert('Já existe um horário configurado para este dia. Por favor, edite o horário existente.');
+                    return;
+                }
+                
+                if (this.editingId) {
+                    // Editando slot existente
+                    const slotIndex = schedules[dayKey].slots.findIndex(s => s.id === this.editingId.slotId);
+                    if (slotIndex !== -1) {
+                        schedules[dayKey].slots[slotIndex] = {
+                            id: this.editingId.slotId,
+                            start: startTime,
+                            end: endTime
+                        };
+                    }
+                } else {
+                    // Adicionando novo slot
+                    const newId = Date.now();
+                    schedules[dayKey].slots.push({
+                        id: newId,
+                        start: startTime,
+                        end: endTime
+                    });
+                }
+                
+                schedules[dayKey].status = status;
+                await this.saveSchedules(schedules);
+                this.renderSchedules(schedules);
+                this.closeModal();
+                
+                // Mostrar mensagem de sucesso
+                this.showSuccessMessage(
+                    this.editingId ? 'Horário atualizado com sucesso!' : 'Horário adicionado com sucesso!'
+                );
+            }
+            
+            showSuccessMessage(message) {
+                // Criar elemento de notificação
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: rgba(16, 185, 129, 0.9);
+                    color: white;
+                    padding: 16px 24px;
+                    border-radius: 12px;
+                    font-weight: 600;
+                    z-index: 1001;
+                    transform: translateX(100%);
+                    transition: transform 0.3s ease;
+                `;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                // Animar entrada
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(0)';
+                }, 100);
+                
+                // Remover após 3 segundos
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }
+        }
+        
+        // Inicializar gerenciador de horários
+        let scheduleManager;
+        document.addEventListener('DOMContentLoaded', () => {
+            scheduleManager = new ScheduleManager();
+        });
+        
+        // Funções globais para compatibilidade
+        function openAddModal() {
+            scheduleManager.openAddModal();
+        }
+        
+        function closeModal() {
+            scheduleManager.closeModal();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>EasyCut - Tela Inicial</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .container {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                        0 0 0 1px rgba(255, 255, 255, 0.05);
+            padding: 48px 40px;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .logo-image {
+            width: 100%;
+            max-width: 280px;
+            height: auto;
+            margin-bottom: 24px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
+                        0 0 0 1px rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .logo-image:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4),
+                        0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+        .logo {
+            font-size: 2.4rem;
+            font-weight: 700;
+            margin-bottom: 32px;
+            background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+            text-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px 0;
+            margin: 16px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn:hover::before {
+            left: 100%;
+        }
+        .btn-loja {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        .btn-loja:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+        .btn-cliente {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        .btn-cliente:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        .login-link {
+            margin-top: 32px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            display: inline-block;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+        }
+        .login-link:hover {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.2);
+            transform: translateY(-1px);
+        }
+        /* Tablets e telas médias */
+        @media (max-width: 1024px) {
+            .container {
+                max-width: 400px;
+                margin: 15px;
+            }
+        }
+        
+        /* Tablets pequenos */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 32px;
+                max-width: 380px;
+                margin: 10px;
+            }
+            .logo-image {
+                max-width: 250px;
+            }
+            .logo {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Smartphones grandes */
+        @media (max-width: 600px) {
+            .container {
+                padding: 32px 24px;
+                max-width: calc(100vw - 16px);
+                margin: 8px;
+            }
+            .logo-image {
+                max-width: 220px;
+                margin-bottom: 22px;
+            }
+            .logo {
+                font-size: 1.9rem;
+                margin-bottom: 28px;
+            }
+            .btn {
+                padding: 15px 0;
+                margin: 14px 0;
+            }
+        }
+        
+        /* Smartphones médios */
+        @media (max-width: 480px) {
+            .container {
+                padding: 28px 20px;
+                max-width: calc(100vw - 10px);
+                margin: 5px;
+                border-radius: 20px;
+            }
+            .logo-image {
+                max-width: 200px;
+                margin-bottom: 20px;
+            }
+            .logo {
+                font-size: 1.8rem;
+                margin-bottom: 24px;
+            }
+            .btn {
+                font-size: 1rem;
+                padding: 14px 0;
+                margin: 12px 0;
+            }
+            .login-link {
+                font-size: 0.95rem;
+                margin-top: 24px;
+            }
+        }
+        
+        /* Smartphones pequenos */
+        @media (max-width: 360px) {
+            .container {
+                padding: 24px 16px;
+                max-width: calc(100vw - 6px);
+                margin: 3px;
+            }
+            .logo-image {
+                max-width: 180px;
+                margin-bottom: 18px;
+            }
+            .logo {
+                font-size: 1.6rem;
+                margin-bottom: 20px;
+            }
+            .btn {
+                font-size: 0.95rem;
+                padding: 13px 0;
+                margin: 10px 0;
+            }
+            .login-link {
+                font-size: 0.9rem;
+                margin-top: 20px;
+            }
+        }
+        
+        /* Orientação landscape em smartphones */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .container {
+                padding: 20px;
+                margin: 5px;
+                max-height: calc(100vh - 10px);
+                overflow-y: auto;
+            }
+            .logo-image {
+                max-width: 150px;
+                margin-bottom: 12px;
+            }
+            .logo {
+                font-size: 1.4rem;
+                margin-bottom: 16px;
+            }
+            .btn {
+                padding: 10px 0;
+                margin: 8px 0;
+                font-size: 0.9rem;
+            }
+            .login-link {
+                margin-top: 16px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="imagens/imgTelaInicial.jpg" alt="EasyCut Barbearia" class="logo-image">
+        <div class="logo">EasyCut</div>
+        <button class="btn btn-loja" onclick="window.location.href='CadastroBarbearia.html'">Cadastrar como Loja</button>
+        <button class="btn btn-cliente" onclick="window.location.href='CadastroCliente.html'">Cadastrar como Cliente</button>
+        <a href="Login.html" class="login-link">Já possui cadastro? Faça login</a>
+    

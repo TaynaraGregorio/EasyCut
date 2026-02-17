@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>EasyCut - Detalhes da Barbearia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #fff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .container {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                        0 0 0 1px rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+            margin: 20px auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 24px;
+        }
+        .back-link:hover {
+            color: #3b82f6;
+        }
+        
+        /* Seção da Barbearia */
+        .barbearia-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 24px;
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .barbearia-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 24px;
+            background: rgba(59, 130, 246, 0.2);
+            border: 3px solid rgba(59, 130, 246, 0.3);
+        }
+        .barbearia-info h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0 0 8px 0;
+        }
+        .barbearia-meta {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+        .barbearia-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fbbf24;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        
+        /* Indicador de Status */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-indicator.open {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+        
+        .status-indicator.closed {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: blink 1.5s infinite;
+        }
+        
+        .status-dot.open {
+            background: #10b981;
+        }
+        
+        .status-dot.closed {
+            background: #ef4444;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        @keyframes blink {
+            0%, 50% {
+                opacity: 1;
+            }
+            51%, 100% {
+                opacity: 0.3;
+            }
+        }
+        
+        /* Botão de Favoritos */
+        .favorite-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+        
+        .favorite-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            transform: scale(1.1);
+        }
+        
+        .favorite-btn.favorited {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        
+        .favorite-btn.favorited:hover {
+            background: rgba(239, 68, 68, 0.4);
+            transform: scale(1.1);
+        }
+        
+        .favorite-icon {
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .favorite-btn.favorited .favorite-icon {
+            animation: heartBeat 0.6s ease;
+        }
+        
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.2); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Toast de notificação */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(16, 185, 129, 0.9);
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            backdrop-filter: blur(10px);
+            max-width: 300px;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.error {
+            background: rgba(239, 68, 68, 0.9);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .toast-icon {
+            font-size: 1.2rem;
+        }
+        
+        .toast-message {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        /* Seções de Informação */
+        .info-section {
+            margin-bottom: 24px;
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .info-section h3 {
+            color: #e2e8f0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0 0 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .info-section p {
+            color: #94a3b8;
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+        
+        /* Serviços */
+        .services-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .service-tag {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .service-tag:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+        .service-tag.selected {
+            background: rgba(59, 130, 246, 0.4);
+            border-color: #3b82f6;
+            color: #fff;
+        }
+        
+        /* Horários */
+        .hours-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .hour-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .hour-item.closed {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+        .hour-item.today {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Sistema de Agendamento */
+        .scheduling-section {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .scheduling-section h3 {
+            color: #10b981;
+        }
+        
+        .date-picker {
+            margin-bottom: 20px;
+        }
+        .date-picker label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        .date-picker input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            background: rgba(30, 41, 59, 0.5);
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+        
+        .date-picker input::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+        
+        .date-picker input::-moz-calendar-picker-indicator {
+            display: none;
+        }
+        .date-picker input:focus {
+            outline: none;
+            border-color: #10b981;
+            background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .time-slot {
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        .time-slot:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        .time-slot.selected {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: #10b981;
+            color: #10b981;
+            font-weight: 600;
+        }
+        .time-slot.unavailable {
+            opacity: 0.3;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+        
+        /* Botões */
+        .btn {
+            width: 100%;
+            padding: 16px 0;
+            margin: 16px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn:hover::before {
+            left: 100%;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-secondary {
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.1);
+            border-color: rgba(148, 163, 184, 0.5);
+            color: #fff;
+        }
+        
+        /* Avaliações */
+        .reviews-section {
+            margin-top: 20px;
+        }
+        .review-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .review-author {
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        .review-rating {
+            color: #fbbf24;
+            font-size: 0.9rem;
+        }
+        .review-text {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        /* Galeria de Fotos */
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .photo-item {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .photo-item:hover {
+            transform: scale(1.05);
+        }
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Loading e Error */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            padding: 16px;
+            border-radius: 12px;
+            margin: 16px 0;
+            text-align: center;
+            font-size: 0.9rem;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            color: #6ee7b7;
+            padding: 16px;
+            border-radius: 12px;
+            margin: 16px 0;
+            text-align: center;
+            font-size: 0.9rem;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Modal de Horários */
+        .hours-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .hours-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .hours-modal-content {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.3s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .hours-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .hours-modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #3b82f6;
+            margin: 0;
+        }
+        
+        .hours-modal-close {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+        
+        .hours-modal-close:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: scale(1.1);
+        }
+        
+        .hours-list {
+            text-align: left;
+        }
+        
+        .hours-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            margin-bottom: 8px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .hours-item:hover {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .hours-item.today {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        
+        .hours-item.closed {
+            opacity: 0.6;
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        
+        .hours-day {
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 1rem;
+        }
+        
+        .hours-time {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        
+        .hours-time.closed {
+            color: #fca5a5;
+            text-decoration: line-through;
+        }
+        
+        .hours-time.today {
+            color: #10b981;
+            font-weight: 600;
+        }
+        
+        .hours-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .hours-status.open {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        
+        .hours-status.closed {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        .hours-status.today {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        /* Modal de Confirmação */
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .confirmation-content {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        .confirmation-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            animation: bounce 0.6s ease;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .confirmation-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 16px;
+        }
+        
+        .confirmation-details {
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .confirmation-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .confirmation-detail:last-child {
+            margin-bottom: 0;
+            font-weight: 600;
+            color: #10b981;
+            border-top: 1px solid rgba(16, 185, 129, 0.2);
+            padding-top: 8px;
+        }
+        
+        .confirmation-close {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 16px;
+        }
+        
+        .confirmation-close:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+        }
+        
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 28px;
+                border-radius: 20px;
+                max-width: 380px;
+            }
+            .barbearia-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .barbearia-image {
+                margin-right: 0;
+                margin-bottom: 16px;
+            }
+            
+            .status-indicator {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            .time-slots {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .favorite-btn {
+                top: 15px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+            }
+            
+            .favorite-icon {
+                font-size: 1.3rem;
+            }
+            
+            .hours-modal-content {
+                padding: 24px;
+                max-width: 90%;
+            }
+            
+            .hours-modal-title {
+                font-size: 1.3rem;
+            }
+            
+            .hours-item {
+                padding: 12px 16px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .hours-item > div {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 5px;
+                max-width: calc(100vw - 10px);
+            }
+            .logo {
+                font-size: 1.6rem;
+            }
+            .barbearia-info h1 {
+                font-size: 1.4rem;
+            }
+            .time-slots {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .favorite-btn {
+                top: 10px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+            }
+            
+            .favorite-icon {
+                font-size: 1.1rem;
+            }
+            
+            .toast {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                transform: translateY(-100px);
+            }
+            
+            .toast.show {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="#" class="back-link" onclick="window.history.back(); return false;">
+            ← Voltar
+        </a>
+        
+        <div class="header">
+            <div class="logo">EasyCut</div>
+            <div class="subtitle">Detalhes da Barbearia</div>
+        </div>
+
+        <div id="barbeariaContent">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <div>Carregando detalhes da barbearia...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class BarbeariaDetalhes {
+            constructor() {
+                this.barbeariaContent = document.getElementById('barbeariaContent');
+                this.barbeariaId = this.getBarbeariaIdFromUrl();
+                this.selectedServices = [];
+                this.selectedDate = null;
+                this.selectedTime = null;
+                this.barbeariaData = null;
+                this.barbeariaServicos = []; // serviços da barbearia do banco (id, name, price)
+                this.API_BASE = 'http://localhost:5001';
+                this.init();
+            }
+
+            init() {
+                if (this.barbeariaId) {
+                    this.loadBarbeariaDetails();
+                } else {
+                    this.showError('ID da barbearia não encontrado.');
+                }
+                
+                // Adicionar evento de clique para o campo de data
+                setTimeout(() => {
+                    this.setupDatePicker();
+                }, 100);
+            }
+
+            getBarbeariaIdFromUrl() {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get('id');
+            }
+
+            setupDatePicker() {
+                const dateInput = document.getElementById('appointmentDate');
+                if (dateInput) {
+                    // Garantir que o campo seja clicável
+                    dateInput.addEventListener('click', () => {
+                        dateInput.showPicker();
+                    });
+                    
+                    // Adicionar evento de foco para abrir o calendário
+                    dateInput.addEventListener('focus', () => {
+                        dateInput.showPicker();
+                    });
+                }
+            }
+
+            async loadBarbeariaDetails() {
+                try {
+                    const response = await fetch(`${this.API_BASE}/api/barbearias/${this.barbeariaId}`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.barbeariaData = data.barbearia;
+                        this.displayBarbeariaDetails(data.barbearia);
+                    } else {
+                        throw new Error(data.message);
+                    }
+                    // Carregar serviços da barbearia do banco (para agendamento real)
+                    try {
+                        const resServicos = await fetch(`${this.API_BASE}/api/barbearias/${this.barbeariaId}/servicos`);
+                        const dataServicos = await resServicos.json();
+                        if (dataServicos.success && dataServicos.servicos && dataServicos.servicos.length > 0) {
+                            this.barbeariaServicos = dataServicos.servicos;
+                            // Se a barbearia mock não tiver services, usar os do banco para exibição
+                            if (!this.barbeariaData.services || this.barbeariaData.services.length === 0) {
+                                this.barbeariaData.services = this.barbeariaServicos.map(s => s.name);
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Serviços da barbearia não carregados:', e);
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar detalhes:', error);
+                    this.displayMockBarbearia();
+                }
+            }
+
+            displayBarbeariaDetails(barbearia) {
+                this.barbeariaContent.innerHTML = `
+                    <div class="barbearia-header">
+                        <button class="favorite-btn" id="favoriteBtn" onclick="barbeariaDetalhes.toggleFavorite()" title="Adicionar aos favoritos">
+                            <span class="favorite-icon">🤍</span>
+                        </button>
+                        <img src="${barbearia.photos?.[0] || 'https://via.placeholder.com/100x100/3b82f6/ffffff?text=B'}" 
+                             alt="${barbearia.name}" class="barbearia-image">
+                        <div class="barbearia-info">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                                <h1 style="margin: 0;">${barbearia.name}</h1>
+                                ${this.getStatusIndicator(barbearia.opening_hours)}
+                            </div>
+                            <div class="barbearia-meta">📍 ${barbearia.address}</div>
+                            <div class="barbearia-meta">${barbearia.distance ? `${barbearia.distance.toFixed(1)} km de distância` : ''}</div>
+                            <div class="barbearia-rating">
+                                ⭐ ${barbearia.rating} 
+                                ${this.getPriceLevelText(barbearia.price_level)}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>📝 Sobre a Barbearia</h3>
+                        <p>${barbearia.description || 'Barbearia tradicional com mais de 10 anos de experiência no mercado. Oferecemos serviços de qualidade com profissionais especializados em cortes modernos e clássicos.'}</p>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>✂️ Serviços Oferecidos</h3>
+                        <p>Selecione os serviços que deseja agendar:</p>
+                        <div class="services-list">
+                            ${barbearia.services.map(service => 
+                                `<span class="service-tag" onclick="barbeariaDetalhes.toggleService('${service}')" title="Clique para selecionar">${service}</span>`
+                            ).join('')}
+                        </div>
+                        <div class="price-info" style="margin-top: 16px; padding: 12px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                            <p style="margin: 0; color: #10b981; font-size: 0.9rem;">
+                                💰 <strong>Preços:</strong> ${this.getPriceLevelText(barbearia.price_level)} - 
+                                Valores variam conforme o serviço selecionado
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>🕒 Horários de Funcionamento</h3>
+                        <button class="btn btn-secondary" onclick="barbeariaDetalhes.openHoursModal()" style="width: auto; margin: 0; padding: 12px 24px;">
+                            <span>🕒</span> Ver Horários de Funcionamento
+                        </button>
+                    </div>
+
+                    <div class="info-section scheduling-section">
+                        <h3>📅 Agendar Horário</h3>
+                        
+                        <div class="date-picker">
+                            <label for="appointmentDate">Selecione a data:</label>
+                            <input type="date" id="appointmentDate" min="${this.getMinDate()}" max="${this.getMaxDate()}" onchange="barbeariaDetalhes.selectDate(this.value)">
+                        </div>
+
+                        <div id="timeSlotsContainer" style="display: none;">
+                            <label>Horários disponíveis:</label>
+                            <div class="time-slots" id="timeSlots">
+                                <!-- Horários serão carregados dinamicamente -->
+                            </div>
+                        </div>
+
+                        <div id="selectedServicesSummary" style="display: none; margin-top: 20px; padding: 16px; background: rgba(59, 130, 246, 0.1); border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.3);">
+                            <h4 style="margin: 0 0 12px 0; color: #3b82f6;">📋 Resumo do Agendamento</h4>
+                            <div id="servicesList"></div>
+                            <div id="totalPrice" style="margin-top: 12px; font-size: 1.1rem; font-weight: 600; color: #10b981;"></div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" id="scheduleButton" onclick="barbeariaDetalhes.confirmSchedule()" disabled>
+                        <span>📅</span> Confirmar Agendamento
+                    </button>
+                    
+                    <button class="btn btn-secondary" onclick="barbeariaDetalhes.compartilharBarbearia()">
+                        <span>📤</span> Compartilhar Barbearia
+                    </button>
+
+                    <div class="info-section">
+                        <h3>📞 Contato</h3>
+                        ${barbearia.phone ? `<p><strong>📞 Telefone:</strong> ${barbearia.phone}</p>` : ''}
+                        ${barbearia.email ? `<p><strong>📧 Email:</strong> ${barbearia.email}</p>` : ''}
+                        ${barbearia.website ? `<p><strong>🌐 Website:</strong> <a href="${barbearia.website}" target="_blank" style="color: #3b82f6;">${barbearia.website}</a></p>` : ''}
+                        ${barbearia.whatsapp ? `<p><strong>💬 WhatsApp:</strong> <a href="https://wa.me/${barbearia.whatsapp}" target="_blank" style="color: #25D366;">${barbearia.whatsapp}</a></p>` : ''}
+                    </div>
+
+                    ${barbearia.photos && barbearia.photos.length > 1 ? `
+                    <div class="info-section">
+                        <h3>📸 Galeria de Fotos</h3>
+                        <div class="photos-grid">
+                            ${barbearia.photos.map(photo => 
+                                `<div class="photo-item" onclick="barbeariaDetalhes.openPhotoModal('${photo}')">
+                                    <img src="${photo}" alt="Foto da barbearia">
+                                </div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <div class="info-section">
+                        <h3>⭐ Avaliações</h3>
+                        <div class="reviews-section">
+                            ${this.renderReviews(barbearia.reviews)}
+                        </div>
+                    </div>
+                `;
+                
+                // Configurar o campo de data após renderizar
+                setTimeout(() => {
+                    this.setupDatePicker();
+                }, 100);
+                
+                // Verificar se a barbearia está nos favoritos
+                this.checkFavoriteStatus();
+            }
+
+            displayMockBarbearia() {
+                // Dados das barbearias fictícias baseadas na página VisualizarBarbearias.html
+                const mockBarbearias = {
+                    1: {
+                        id: 1,
+                        name: "Barber King",
+                        address: "Rua das Flores, 123, Centro, Ipatinga - MG",
+                        phone: "(31) 99999-9999",
+                        email: "contato@barberking.com",
+                        website: "https://barberking.com",
+                        whatsapp: "5531999999999",
+                        rating: 4.8,
+                        price_level: 2,
+                        distance: 0.8,
+                        description: "Barbearia premium com mais de 15 anos de experiência no mercado. Especializada em cortes modernos e tratamentos exclusivos. Ambiente sofisticado com profissionais altamente qualificados e atendimento personalizado de primeira qualidade.",
+                        opening_hours: {
+                            "monday": {"open": "08:00", "close": "18:00"},
+                            "tuesday": {"open": "08:00", "close": "18:00"},
+                            "wednesday": {"open": "08:00", "close": "18:00"},
+                            "thursday": {"open": "08:00", "close": "18:00"},
+                            "friday": {"open": "08:00", "close": "19:00"},
+                            "saturday": {"open": "08:00", "close": "17:00"},
+                            "sunday": {"open": "09:00", "close": "15:00"}
+                        },
+                        services: [
+                            "Design de sobrancelhas", "Barboterapia", "Pigmentação", "Relaxamento", 
+                            "Progressivas", "Limpeza de pele", "Massagem facial", "Toalha quente"
+                        ],
+                        photos: [
+                            "https://via.placeholder.com/300x200/3b82f6/ffffff?text=Barber+King+1",
+                            "https://via.placeholder.com/300x200/10b981/ffffff?text=Barber+King+2",
+                            "https://via.placeholder.com/300x200/8b5cf6/ffffff?text=Barber+King+3",
+                            "https://via.placeholder.com/300x200/f59e0b/ffffff?text=Barber+King+4"
+                        ],
+                        reviews: [
+                            {
+                                author: "João Silva",
+                                rating: 5,
+                                text: "Excelente atendimento! Corte perfeito e ambiente muito agradável. Recomendo!"
+                            },
+                            {
+                                author: "Maria Santos",
+                                rating: 4,
+                                text: "Muito bom! Profissionais qualificados e preços justos."
+                            },
+                            {
+                                author: "Pedro Costa",
+                                rating: 5,
+                                text: "Melhor barbearia da região! Ambiente premium e atendimento excepcional."
+                            }
+                        ]
+                    },
+                    2: {
+                        id: 2,
+                        name: "Barbearia do João",
+                        address: "Av. Central, 456, Cariru, Ipatinga - MG",
+                        phone: "(31) 98888-8888",
+                        email: "joao@barbeariadojoao.com",
+                        website: "https://barbeariadojoao.com",
+                        whatsapp: "5531988888888",
+                        rating: 4.6,
+                        price_level: 1,
+                        distance: 1.2,
+                        description: "Barbearia tradicional e acolhedora, conhecida pela simplicidade e qualidade. João, o proprietário, tem mais de 20 anos de experiência e oferece um atendimento familiar e personalizado. Ambiente descontraído e preços acessíveis.",
+                        opening_hours: {
+                            "monday": {"open": "09:00", "close": "19:00"},
+                            "tuesday": {"open": "09:00", "close": "19:00"},
+                            "wednesday": {"open": "09:00", "close": "19:00"},
+                            "thursday": {"open": "09:00", "close": "19:00"},
+                            "friday": {"open": "09:00", "close": "20:00"},
+                            "saturday": {"open": "08:00", "close": "18:00"},
+                            "sunday": {"closed": true}
+                        },
+                        services: [
+                            "Corte masculino", "Barba", "Sobrancelha", "Relaxamento"
+                        ],
+                        photos: [
+                            "https://via.placeholder.com/300x200/10b981/ffffff?text=Barbearia+João+1",
+                            "https://via.placeholder.com/300x200/3b82f6/ffffff?text=Barbearia+João+2"
+                        ],
+                        reviews: [
+                            {
+                                author: "Carlos Mendes",
+                                rating: 5,
+                                text: "João é um excelente profissional! Atendimento familiar e preços justos."
+                            },
+                            {
+                                author: "Ana Lima",
+                                rating: 4,
+                                text: "Barbearia tradicional e confiável. Sempre saio satisfeito!"
+                            }
+                        ]
+                    },
+                    3: {
+                        id: 3,
+                        name: "Studio Hair",
+                        address: "Rua do Comércio, 789, Cidade Nova, Ipatinga - MG",
+                        phone: "(31) 97777-7777",
+                        email: "studio@studiohair.com",
+                        website: "https://studiohair.com",
+                        whatsapp: "5531977777777",
+                        rating: 4.9,
+                        price_level: 3,
+                        distance: 2.1,
+                        description: "Studio moderno e elegante especializado em cortes contemporâneos e tratamentos capilares avançados. Equipe jovem e criativa que está sempre atualizada com as últimas tendências. Ambiente sofisticado e atendimento premium.",
+                        opening_hours: {
+                            "monday": {"open": "08:30", "close": "17:30"},
+                            "tuesday": {"open": "08:30", "close": "17:30"},
+                            "wednesday": {"open": "08:30", "close": "17:30"},
+                            "thursday": {"open": "08:30", "close": "17:30"},
+                            "friday": {"open": "08:30", "close": "18:30"},
+                            "saturday": {"open": "08:00", "close": "16:00"},
+                            "sunday": {"closed": true}
+                        },
+                        services: [
+                            "Corte", "Barba", "Design de sobrancelhas", "Massagem", "Tratamentos"
+                        ],
+                        photos: [
+                            "https://via.placeholder.com/300x200/8b5cf6/ffffff?text=Studio+Hair+1",
+                            "https://via.placeholder.com/300x200/10b981/ffffff?text=Studio+Hair+2",
+                            "https://via.placeholder.com/300x200/3b82f6/ffffff?text=Studio+Hair+3"
+                        ],
+                        reviews: [
+                            {
+                                author: "Lucas Oliveira",
+                                rating: 5,
+                                text: "Studio Hair é incrível! Cortes modernos e profissionais muito talentosos."
+                            },
+                            {
+                                author: "Fernanda Costa",
+                                rating: 5,
+                                text: "Melhor experiência que já tive! Ambiente lindo e atendimento perfeito."
+                            },
+                            {
+                                author: "Rafael Santos",
+                                rating: 4,
+                                text: "Excelente qualidade, mas um pouco caro. Vale a pena!"
+                            }
+                        ]
+                    },
+                    4: {
+                        id: 4,
+                        name: "Barbearia Central",
+                        address: "Praça da Liberdade, 321, Centro, Ipatinga - MG",
+                        phone: "(31) 96666-6666",
+                        email: "central@barbeariacentral.com",
+                        website: "https://barbeariacentral.com",
+                        whatsapp: "5531966666666",
+                        rating: 4.4,
+                        price_level: 2,
+                        distance: 3.5,
+                        description: "Barbearia tradicional no coração da cidade, conhecida pela praticidade e qualidade. Localização privilegiada com fácil acesso e estacionamento. Equipe experiente e atendimento rápido e eficiente.",
+                        opening_hours: {
+                            "monday": {"open": "07:00", "close": "20:00"},
+                            "tuesday": {"open": "07:00", "close": "20:00"},
+                            "wednesday": {"open": "07:00", "close": "20:00"},
+                            "thursday": {"open": "07:00", "close": "20:00"},
+                            "friday": {"open": "07:00", "close": "21:00"},
+                            "saturday": {"open": "07:00", "close": "19:00"},
+                            "sunday": {"open": "08:00", "close": "16:00"}
+                        },
+                        services: [
+                            "Corte masculino", "Barba", "Sobrancelha", "Relaxamento", "Progressivas"
+                        ],
+                        photos: [
+                            "https://via.placeholder.com/300x200/f59e0b/ffffff?text=Central+1",
+                            "https://via.placeholder.com/300x200/3b82f6/ffffff?text=Central+2"
+                        ],
+                        reviews: [
+                            {
+                                author: "Marcos Pereira",
+                                rating: 4,
+                                text: "Ótima localização e atendimento rápido. Sempre satisfeito!"
+                            },
+                            {
+                                author: "Roberto Alves",
+                                rating: 5,
+                                text: "Barbearia tradicional e confiável. Recomendo!"
+                            }
+                        ]
+                    }
+                };
+
+                const barbearia = mockBarbearias[this.barbeariaId];
+                if (barbearia) {
+                    this.barbeariaData = barbearia;
+                    this.displayBarbeariaDetails(barbearia);
+                } else {
+                    this.showError('Barbearia não encontrada.');
+                }
+            }
+
+            getPriceLevelText(priceLevel) {
+                const levels = {
+                    1: "($ - Econômico)",
+                    2: "($$ - Moderado)",
+                    3: "($$$ - Caro)",
+                    4: "($$$$ - Muito caro)"
+                };
+                return levels[priceLevel] || "";
+            }
+            
+            getStatusIndicator(openingHours) {
+                const now = new Date();
+                const currentDay = now.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
+                const currentTime = now.toTimeString().slice(0, 5); // HH:MM
+                
+                // Mapear dias da semana
+                const dayMap = {
+                    'domingo': 'sunday',
+                    'segunda-feira': 'monday',
+                    'terça-feira': 'tuesday',
+                    'quarta-feira': 'wednesday',
+                    'quinta-feira': 'thursday',
+                    'sexta-feira': 'friday',
+                    'sábado': 'saturday'
+                };
+                
+                const dayKey = dayMap[currentDay];
+                const todaySchedule = openingHours[dayKey];
+                
+                if (!todaySchedule || todaySchedule.closed) {
+                    return `
+                        <div class="status-indicator closed">
+                            <div class="status-dot closed"></div>
+                            Fechado
+                        </div>
+                    `;
+                }
+                
+                const isOpen = this.isTimeInRange(currentTime, todaySchedule.open, todaySchedule.close);
+                
+                if (isOpen) {
+                    return `
+                        <div class="status-indicator open">
+                            <div class="status-dot open"></div>
+                            Aberto
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="status-indicator closed">
+                            <div class="status-dot closed"></div>
+                            Fechado
+                        </div>
+                    `;
+                }
+            }
+            
+            isTimeInRange(currentTime, openTime, closeTime) {
+                const current = this.timeToMinutes(currentTime);
+                const open = this.timeToMinutes(openTime);
+                const close = this.timeToMinutes(closeTime);
+                
+                return current >= open && current <= close;
+            }
+            
+            timeToMinutes(timeString) {
+                const [hours, minutes] = timeString.split(':').map(Number);
+                return hours * 60 + minutes;
+            }
+
+            openHoursModal() {
+                const modal = document.createElement('div');
+                modal.className = 'hours-modal';
+                modal.innerHTML = `
+                    <div class="hours-modal-content">
+                        <div class="hours-modal-header">
+                            <h3 class="hours-modal-title">🕒 Horários de Funcionamento</h3>
+                            <button class="hours-modal-close" onclick="barbeariaDetalhes.closeHoursModal()">×</button>
+                        </div>
+                        <div class="hours-list">
+                            ${this.renderOpeningHoursModal(this.barbeariaData.opening_hours)}
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Mostrar modal com animação
+                setTimeout(() => {
+                    modal.classList.add('active');
+                }, 10);
+                
+                // Fechar modal ao clicar fora
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        this.closeHoursModal();
+                    }
+                });
+                
+                // Fechar modal com ESC
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.closeHoursModal();
+                    }
+                });
+            }
+            
+            closeHoursModal() {
+                const modal = document.querySelector('.hours-modal');
+                if (modal) {
+                    modal.classList.remove('active');
+                    setTimeout(() => {
+                        modal.remove();
+                    }, 300);
+                }
+            }
+            
+            renderOpeningHoursModal(hours) {
+                const days = {
+                    "monday": "Segunda-feira",
+                    "tuesday": "Terça-feira", 
+                    "wednesday": "Quarta-feira",
+                    "thursday": "Quinta-feira",
+                    "friday": "Sexta-feira",
+                    "saturday": "Sábado",
+                    "sunday": "Domingo"
+                };
+
+                const today = new Date().toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
+                const todayKey = Object.keys(days).find(key => days[key].toLowerCase().includes(today.split('-')[0]));
+
+                return Object.entries(hours).map(([day, schedule]) => {
+                    const dayName = days[day];
+                    const isToday = day === todayKey;
+                    const isClosed = schedule.closed;
+                    
+                    let timeText = '';
+                    let statusClass = '';
+                    let statusText = '';
+                    
+                    if (isClosed) {
+                        timeText = 'Fechado';
+                        statusClass = 'closed';
+                        statusText = 'Fechado';
+                    } else {
+                        timeText = `${schedule.open} - ${schedule.close}`;
+                        statusClass = isToday ? 'today' : 'open';
+                        statusText = isToday ? 'Hoje' : 'Aberto';
+                    }
+                    
+                    return `
+                        <div class="hours-item ${isClosed ? 'closed' : (isToday ? 'today' : '')}">
+                            <span class="hours-day">${dayName}</span>
+                            <div style="display: flex; align-items: center;">
+                                <span class="hours-time ${isClosed ? 'closed' : (isToday ? 'today' : '')}">${timeText}</span>
+                                <span class="hours-status ${statusClass}">${statusText}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            renderReviews(reviews) {
+                if (!reviews || reviews.length === 0) {
+                    return '<p>Nenhuma avaliação disponível ainda.</p>';
+                }
+
+                return reviews.map(review => `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <span class="review-author">${review.author}</span>
+                            <span class="review-rating">⭐ ${review.rating}</span>
+                        </div>
+                        <div class="review-text">${review.text}</div>
+                    </div>
+                `).join('');
+            }
+
+            toggleService(serviceName) {
+                const serviceElement = event.target;
+                const index = this.selectedServices.indexOf(serviceName);
+                
+                if (index > -1) {
+                    this.selectedServices.splice(index, 1);
+                    serviceElement.classList.remove('selected');
+                } else {
+                    this.selectedServices.push(serviceName);
+                    serviceElement.classList.add('selected');
+                }
+                
+                this.updateServicesSummary();
+                this.updateScheduleButton();
+
+                // Recarregar horários se uma data já estiver selecionada (pois a duração pode ter mudado)
+                if (this.selectedDate) {
+                    this.loadTimeSlots(this.selectedDate);
+                    this.selectedTime = null; // Resetar horário selecionado
+                }
+            }
+
+            getMinDate() {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                return tomorrow.toISOString().split('T')[0];
+            }
+
+            getMaxDate() {
+                const maxDate = new Date();
+                maxDate.setDate(maxDate.getDate() + 30);
+                return maxDate.toISOString().split('T')[0];
+            }
+
+            selectDate(date) {
+                this.selectedDate = date;
+                this.selectedTime = null;
+                this.loadTimeSlots(date);
+                this.updateScheduleButton();
+            }
+
+            calculateTotalDuration() {
+                if (this.selectedServices.length === 0) return 30;
+                
+                let totalDuration = 0;
+                
+                this.selectedServices.forEach(serviceName => {
+                    // Tentar encontrar o serviço na lista de serviços carregada da API
+                    const service = this.barbeariaServicos.find(s => s.name === serviceName);
+                    
+                    if (service && service.duration) {
+                        totalDuration += service.duration;
+                    } else {
+                        // Fallback: tentar estimar ou usar padrão de 30 min
+                        totalDuration += 30;
+                    }
+                });
+                
+                return totalDuration;
+            }
+
+            async loadTimeSlots(date) {
+                const timeSlotsContainer = document.getElementById('timeSlotsContainer');
+                const timeSlots = document.getElementById('timeSlots');
+                
+                if (!date) {
+                    timeSlotsContainer.style.display = 'none';
+                    return;
+                }
+
+                timeSlotsContainer.style.display = 'block';
+                timeSlots.innerHTML = '<div class="loading" style="padding: 20px;"><div class="loading-spinner" style="width: 24px; height: 24px; border-width: 2px;"></div></div>';
+                
+                // Resetar seleção de horário
+                this.selectedTime = null;
+                this.updateScheduleButton();
+
+                try {
+                    // Calcular duração total dos serviços selecionados
+                    const duration = this.calculateTotalDuration();
+                    
+                    // Buscar horários disponíveis na API
+                    const response = await fetch(`${this.API_BASE}/api/barbearias/${this.barbeariaId}/availability?date=${date}&duration=${duration}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        if (data.slots && data.slots.length > 0) {
+                            timeSlots.innerHTML = data.slots.map(time => `
+                                <div class="time-slot" onclick="barbeariaDetalhes.selectTime('${time}')">
+                                    ${time}
+                                </div>
+                            `).join('');
+                        } else {
+                            const msg = data.message === 'Fechado neste dia' ? 'Barbearia fechada neste dia' : 'Nenhum horário disponível para esta data';
+                            timeSlots.innerHTML = `<p style="color: #fca5a5; text-align: center; width: 100%; padding: 10px;">${msg}</p>`;
+                        }
+                    } else {
+                        timeSlots.innerHTML = `<p style="color: #fca5a5; text-align: center; width: 100%; padding: 10px;">${data.message || 'Erro ao carregar horários'}</p>`;
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar horários:', error);
+                    timeSlots.innerHTML = '<p style="color: #fca5a5; text-align: center; width: 100%; padding: 10px;">Erro de conexão ao buscar horários.</p>';
+                }
+            }
+
+            selectTime(time) {
+                // Remover seleção anterior
+                document.querySelectorAll('.time-slot').forEach(slot => {
+                    slot.classList.remove('selected');
+                });
+                
+                // Selecionar novo horário
+                event.target.classList.add('selected');
+                this.selectedTime = time;
+                this.updateScheduleButton();
+            }
+
+            updateServicesSummary() {
+                const summaryContainer = document.getElementById('selectedServicesSummary');
+                const servicesList = document.getElementById('servicesList');
+                const totalPrice = document.getElementById('totalPrice');
+                
+                if (this.selectedServices.length === 0) {
+                    summaryContainer.style.display = 'none';
+                    return;
+                }
+                
+                summaryContainer.style.display = 'block';
+                
+                const prices = this.getServicePrices();
+                let total = 0;
+                
+                const servicesHtml = this.selectedServices.map(service => {
+                    const price = prices[service] || 20;
+                    total += price;
+                    return `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; padding: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                            <span>✂️ ${service}</span>
+                            <span style="color: #10b981; font-weight: 600;">R$ ${price.toFixed(2)}</span>
+                        </div>
+                    `;
+                }).join('');
+                
+                servicesList.innerHTML = servicesHtml;
+                totalPrice.innerHTML = `💰 <strong>Total: R$ ${total.toFixed(2)}</strong>`;
+            }
+
+            updateScheduleButton() {
+                const scheduleButton = document.getElementById('scheduleButton');
+                const canSchedule = this.selectedServices.length > 0 && this.selectedDate && this.selectedTime;
+                
+                scheduleButton.disabled = !canSchedule;
+                
+                if (canSchedule) {
+                    const totalPrice = this.calculateTotalPrice();
+                    scheduleButton.innerHTML = `<span>📅</span> Agendar - ${this.selectedServices.join(', ')} - R$ ${totalPrice}`;
+                } else {
+                    scheduleButton.innerHTML = '<span>📅</span> Confirmar Agendamento';
+                }
+            }
+
+            async confirmSchedule() {
+                if (!this.selectedServices.length || !this.selectedDate || !this.selectedTime) {
+                    alert('Por favor, selecione pelo menos um serviço, uma data e um horário.');
+                    return;
+                }
+
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                const userType = localStorage.getItem('userType') || '';
+                if (!currentUser.id || userType !== 'cliente') {
+                    alert('Faça login como cliente para realizar agendamentos.');
+                    window.location.href = 'Login.html?redirect=' + encodeURIComponent(window.location.href);
+                    return;
+                }
+
+                const firstServiceName = this.selectedServices[0];
+                const svc = (this.barbeariaServicos || []).find(s => (s.name || '').trim().toLowerCase() === (firstServiceName || '').trim().toLowerCase());
+                if (!svc || !svc.id) {
+                    alert('Não foi possível identificar o serviço. Esta barbearia pode ainda não ter serviços cadastrados no sistema.');
+                    return;
+                }
+
+                const totalPrice = this.calculateTotalPrice();
+                const payload = {
+                    cliente_id: parseInt(currentUser.id, 10),
+                    barbearia_id: parseInt(this.barbeariaId, 10),
+                    servico_id: parseInt(svc.id, 10),
+                    data_agendamento: this.selectedDate,
+                    horario_inicio: this.selectedTime,
+                    valor_total: totalPrice,
+                    observacoes: this.selectedServices.join(', ')
+                };
+
+                try {
+                    const response = await fetch(`${this.API_BASE}/api/agendamentos`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await response.json();
+                    if (!data.success) {
+                        alert('Erro ao agendar: ' + (data.message || 'Tente novamente.'));
+                        return;
+                    }
+                    const formattedDate = new Date(this.selectedDate).toLocaleDateString('pt-BR');
+                    this.showConfirmationModal(formattedDate, totalPrice);
+                } catch (err) {
+                    console.error(err);
+                    alert('Erro de conexão. Verifique se o servidor está rodando e tente novamente.');
+                    return;
+                }
+
+                this.selectedServices = [];
+                this.selectedDate = null;
+                this.selectedTime = null;
+                document.querySelectorAll('.service-tag').forEach(tag => tag.classList.remove('selected'));
+                const dateEl = document.getElementById('appointmentDate');
+                if (dateEl) dateEl.value = '';
+                const timeContainer = document.getElementById('timeSlotsContainer');
+                if (timeContainer) timeContainer.style.display = 'none';
+                const summaryEl = document.getElementById('selectedServicesSummary');
+                if (summaryEl) summaryEl.style.display = 'none';
+                this.updateScheduleButton();
+            }
+            
+            getServicePrices() {
+                // Preços variados baseados no nível da barbearia
+                const priceLevels = {
+                    1: { // Econômico
+                        'Corte masculino': 15,
+                        'Barba': 10,
+                        'Sobrancelha': 8,
+                        'Relaxamento': 20
+                    },
+                    2: { // Moderado
+                        'Design de sobrancelhas': 25,
+                        'Barboterapia': 20,
+                        'Pigmentação': 40,
+                        'Relaxamento': 30,
+                        'Progressivas': 35,
+                        'Limpeza de pele': 25,
+                        'Massagem facial': 35,
+                        'Toalha quente': 15,
+                        'Corte masculino': 25,
+                        'Barba': 15,
+                        'Sobrancelha': 12
+                    },
+                    3: { // Caro
+                        'Corte': 40,
+                        'Barba': 25,
+                        'Design de sobrancelhas': 30,
+                        'Massagem': 50,
+                        'Tratamentos': 60
+                    }
+                };
+
+                return priceLevels[this.barbeariaData.price_level] || priceLevels[2];
+            }
+
+            calculateTotalPrice() {
+                const prices = this.getServicePrices();
+                
+                return this.selectedServices.reduce((total, service) => {
+                    return total + (prices[service] || 20);
+                }, 0);
+            }
+
+            openPhotoModal(photoUrl) {
+                // Implementar modal de fotos se necessário
+                window.open(photoUrl, '_blank');
+            }
+
+            compartilharBarbearia() {
+                const shareData = {
+                    title: `${this.barbeariaData.name} - EasyCut`,
+                    text: `Confira esta barbearia no EasyCut! ${this.barbeariaData.description}`,
+                    url: window.location.href
+                };
+
+                if (navigator.share) {
+                    navigator.share(shareData);
+                } else {
+                    // Fallback para copiar URL
+                    navigator.clipboard.writeText(window.location.href).then(() => {
+                        alert('Link copiado para a área de transferência!');
+                    });
+                }
+            }
+
+            showError(message) {
+                this.barbeariaContent.innerHTML = `
+                    <div class="error-message">${message}</div>
+                `;
+            }
+
+            showSuccess(message) {
+                const successDiv = document.createElement('div');
+                successDiv.className = 'success-message';
+                successDiv.textContent = message;
+                
+                this.barbeariaContent.insertBefore(successDiv, this.barbeariaContent.firstChild);
+                
+                setTimeout(() => {
+                    successDiv.remove();
+                }, 5000);
+            }
+
+            showConfirmationModal(formattedDate, totalPrice) {
+                const modal = document.createElement('div');
+                modal.className = 'confirmation-modal';
+                modal.innerHTML = `
+                    <div class="confirmation-content">
+                        <div class="confirmation-icon">✅</div>
+                        <div class="confirmation-title">Agendamento Confirmado!</div>
+                        
+                        <div class="confirmation-details">
+                            <div class="confirmation-detail">
+                                <span>🏪 Barbearia:</span>
+                                <span>${this.barbeariaData.name}</span>
+                            </div>
+                            <div class="confirmation-detail">
+                                <span>📅 Data:</span>
+                                <span>${formattedDate}</span>
+                            </div>
+                            <div class="confirmation-detail">
+                                <span>🕐 Horário:</span>
+                                <span>${this.selectedTime}</span>
+                            </div>
+                            <div class="confirmation-detail">
+                                <span>✂️ Serviços:</span>
+                                <span>${this.selectedServices.join(', ')}</span>
+                            </div>
+                            <div class="confirmation-detail">
+                                <span>💰 Total:</span>
+                                <span>R$ ${totalPrice.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        
+                        <p style="color: #94a3b8; font-size: 0.9rem; margin: 16px 0;">
+                            📞 Você receberá uma confirmação por WhatsApp em breve.
+                        </p>
+                        
+                        <button class="confirmation-close" onclick="barbeariaDetalhes.closeConfirmationModal()">
+                            Fechar
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Fechar modal ao clicar fora
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        this.closeConfirmationModal();
+                    }
+                });
+                
+                // Fechar modal com ESC
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.closeConfirmationModal();
+                    }
+                });
+            }
+
+            closeConfirmationModal() {
+                const modal = document.querySelector('.confirmation-modal');
+                if (modal) {
+                    modal.remove();
+                }
+            }
+            
+            // Métodos para gerenciar favoritos
+            checkFavoriteStatus() {
+                const favorites = this.getFavorites();
+                const favoriteBtn = document.getElementById('favoriteBtn');
+                const favoriteIcon = favoriteBtn.querySelector('.favorite-icon');
+                
+                if (favorites.includes(this.barbeariaId)) {
+                    favoriteBtn.classList.add('favorited');
+                    favoriteIcon.textContent = '❤️';
+                    favoriteBtn.title = 'Remover dos favoritos';
+                } else {
+                    favoriteBtn.classList.remove('favorited');
+                    favoriteIcon.textContent = '🤍';
+                    favoriteBtn.title = 'Adicionar aos favoritos';
+                }
+            }
+            
+            toggleFavorite() {
+                const favorites = this.getFavorites();
+                const favoriteBtn = document.getElementById('favoriteBtn');
+                const favoriteIcon = favoriteBtn.querySelector('.favorite-icon');
+                
+                if (favorites.includes(this.barbeariaId)) {
+                    // Remover dos favoritos
+                    const index = favorites.indexOf(this.barbeariaId);
+                    favorites.splice(index, 1);
+                    favoriteBtn.classList.remove('favorited');
+                    favoriteIcon.textContent = '🤍';
+                    favoriteBtn.title = 'Adicionar aos favoritos';
+                    this.showToast('Barbearia removida dos favoritos', 'error');
+                } else {
+                    // Adicionar aos favoritos
+                    favorites.push(this.barbeariaId);
+                    favoriteBtn.classList.add('favorited');
+                    favoriteIcon.textContent = '❤️';
+                    favoriteBtn.title = 'Remover dos favoritos';
+                    this.showToast('Barbearia adicionada aos favoritos!', 'success');
+                }
+                
+                // Salvar no localStorage
+                localStorage.setItem('favoriteBarbearias', JSON.stringify(favorites));
+            }
+            
+            getFavorites() {
+                return JSON.parse(localStorage.getItem('favoriteBarbearias') || '[]');
+            }
+            
+            showToast(message, type = 'success') {
+                // Remover toast existente se houver
+                const existingToast = document.querySelector('.toast');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+                
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <div class="toast-content">
+                        <span class="toast-icon">${type === 'success' ? '✅' : '❌'}</span>
+                        <span class="toast-message">${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(toast);
+                
+                // Mostrar toast
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 100);
+                
+                // Remover toast após 3 segundos
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 300);
+                }, 3000);
+            }
+        }
+
+        // Inicializar quando a página carregar
+        let barbeariaDetalhes;
+        document.addEventListener('DOMContentLoaded', () => {
+            barbeariaDetalhes = new BarbeariaDetalhes();
+        });
+    </script>
+</body>
+</html>

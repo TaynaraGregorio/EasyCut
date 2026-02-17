@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>EasyCut - Editar Perfil Cliente</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .container {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                        0 0 0 1px rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+            margin: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 24px;
+        }
+        
+        .back-link:hover {
+            color: #10b981;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 0.95rem;
+        }
+        
+        .required {
+            color: #ef4444;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            background: rgba(30, 41, 59, 0.5);
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #10b981;
+            background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        input::placeholder {
+            color: #64748b;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px 0;
+            margin: 24px 0 16px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.1);
+            border-color: rgba(148, 163, 184, 0.5);
+            color: #fff;
+        }
+        
+        .info-text {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 4px;
+            font-style: italic;
+        }
+        
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        .field-changed {
+            border-color: rgba(16, 185, 129, 0.5) !important;
+            background: rgba(16, 185, 129, 0.05) !important;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+        }
+        
+        .field-unchanged {
+            border-color: rgba(255, 255, 255, 0.1);
+            background: rgba(30, 41, 59, 0.5);
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 28px;
+                border-radius: 20px;
+                max-width: 380px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .logo {
+                font-size: 1.9rem;
+            }
+            
+            .subtitle {
+                font-size: 0.95rem;
+            }
+            
+            .btn {
+                padding: 14px 0;
+                font-size: 1.05rem;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                margin: 8px;
+                padding: 24px;
+                max-width: calc(100vw - 16px);
+            }
+            
+            .logo {
+                font-size: 1.7rem;
+            }
+            
+            .form-group {
+                margin-bottom: 18px;
+            }
+            
+            input {
+                padding: 12px 14px;
+                font-size: 0.98rem;
+            }
+            
+            .btn {
+                padding: 14px 0;
+                margin: 20px 0 14px 0;
+            }
+        }
+
+        /* Estilos para Blocos de Perfil (Igual Barbearia) */
+        .profile-blocks {
+            display: grid;
+            gap: 24px;
+        }
+        
+        .profile-block {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .profile-block:hover {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        
+        .block-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .block-icon {
+            font-size: 1.5rem;
+        }
+        
+        .block-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        
+        .block-subtitle {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-left: auto;
+        }
+
+        .btn-block-save {
+            width: 100%;
+            padding: 12px 0;
+            margin: 16px 0 0 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-block-save::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-block-save:hover::before {
+            left: 100%;
+        }
+        
+        .btn-block-save:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-block-save:disabled {
+            background: rgba(148, 163, 184, 0.3);
+            color: rgba(148, 163, 184, 0.7);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-block-save.saving {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .block-save-status {
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: center;
+            display: none;
+        }
+        
+        .block-save-status.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+        }
+        
+        .block-save-status.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+        
+        .block-unsaved-indicator {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: #f59e0b;
+            border-radius: 50%;
+            animation: pulse-orange 2s infinite;
+            display: none;
+        }
+        
+        @keyframes pulse-orange {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="javascript:history.back()" class="back-link" onclick="return confirmVoltar()">
+            ← Voltar
+        </a>
+        
+        <div class="header">
+            <div class="logo">EasyCut</div>
+            <div class="subtitle">Editar Perfil - Cliente</div>
+        </div>
+
+        <div class="success-message" id="successMessage"></div>
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- Informação sobre salvamento individual -->
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: center;">
+            <div style="color: #10b981; font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">
+                💡 Salvamento Individual
+            </div>
+            <div style="color: #94a3b8; font-size: 0.9rem;">
+                Cada seção pode ser salva independentemente. Faça suas alterações e clique no botão verde de cada bloco para salvar.
+            </div>
+        </div>
+
+        <form id="editProfileForm">
+            <div class="profile-blocks">
+                <!-- Bloco: Informações Pessoais -->
+                <div class="profile-block" id="block-personal-info">
+                    <div class="block-unsaved-indicator" id="indicator-personal-info"></div>
+                    <div class="block-header">
+                        <div class="block-icon">👤</div>
+                        <div class="block-title">Informações Pessoais</div>
+                        <div class="block-subtitle">Seus dados de cadastro</div>
+                    </div>
+
+                    <!-- Foto de Perfil -->
+                    <div class="form-group" style="text-align: center; margin-bottom: 32px;">
+                        <div style="position: relative; width: 120px; height: 120px; margin: 0 auto;">
+                            <img id="profilePreview" src="https://via.placeholder.com/120?text=Foto" alt="Foto de Perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #10b981; background: #1e293b;">
+                            <label for="profileUpload" style="position: absolute; bottom: 0; right: 0; background: #10b981; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.2s;">
+                                <span style="font-size: 1.2rem;">📷</span>
+                            </label>
+                            <input type="file" id="profileUpload" accept="image/*" style="display: none;">
+                        </div>
+                        <div class="info-text" style="margin-top: 8px;">Toque na câmera para alterar sua foto</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nomeCompleto">Nome Completo</label>
+                        <input type="text" id="nomeCompleto" name="nomeCompleto" placeholder="Digite seu nome completo">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" name="email" placeholder="seu@email.com">
+                        <div class="info-text">Este é seu login para acessar o sistema</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telefone">Telefone / WhatsApp</label>
+                        <input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-9999">
+                    </div>
+
+                    <button type="button" class="btn btn-block-save" data-block="personal-info">
+                        💾 Salvar Informações Pessoais
+                    </button>
+                    <div class="block-save-status" id="status-personal-info"></div>
+                </div>
+
+                <!-- Bloco: Segurança -->
+                <div class="profile-block" id="block-security">
+                    <div class="block-unsaved-indicator" id="indicator-security"></div>
+                    <div class="block-header">
+                        <div class="block-icon">🔒</div>
+                        <div class="block-title">Segurança</div>
+                        <div class="block-subtitle">Alterar senha</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="senhaAtual">Senha Atual <span class="required">*</span></label>
+                        <input type="password" id="senhaAtual" name="senhaAtual" placeholder="Digite sua senha atual" required>
+                        <div class="info-text">Necessária para confirmar as alterações</div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="novaSenha">Nova Senha</label>
+                            <input type="password" id="novaSenha" name="novaSenha" placeholder="Deixe em branco para manter">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmarNovaSenha">Confirmar Nova Senha</label>
+                            <input type="password" id="confirmarNovaSenha" name="confirmarNovaSenha" placeholder="Confirme a nova senha">
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-block-save" data-block="security">
+                        💾 Salvar Senha
+                    </button>
+                    <div class="block-save-status" id="status-security"></div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 32px;">
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='ClienteDashboard.html'">
+                    ← Voltar ao Dashboard
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5001/api';
+
+        let newProfileImageBase64 = null;
+
+        // Função para confirmar se o usuário quer voltar
+        function confirmVoltar() {
+            const nomeCompleto = document.getElementById('nomeCompleto').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const telefone = document.getElementById('telefone').value.trim();
+            const novaSenha = document.getElementById('novaSenha').value;
+            
+            const originalData = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            let hasChanges = false;
+            
+            // Verifica se há alterações nos campos preenchidos
+            if ((nomeCompleto && nomeCompleto !== originalData.nomeCompleto) ||
+                (email && email !== originalData.email) ||
+                (telefone && telefone !== originalData.telefone) ||
+                novaSenha ||
+                newProfileImageBase64) {
+                hasChanges = true;
+            }
+            
+            if (hasChanges) {
+                return confirm('Você tem alterações não salvas. Tem certeza que deseja voltar?');
+            }
+            return true;
+        }
+
+        // Validação de telefone
+        function formatPhone(value) {
+            return value.replace(/\D/g, '').replace(/(\d{2})(\d{4,5})(\d{4})/, '($1) $2-$3');
+        }
+
+        function validatePhoneInput(input) {
+            const phoneRegex = /^(\+55\s?)?(\(?[1-9]{2}\)?)\s?([0-9]{4,5})\-?([0-9]{4})$/;
+            const cleaned = input.value.replace(/\D/g, '');
+            
+            if (input.value && !phoneRegex.test(input.value) && !input.value.startsWith('+55')) {
+                input.style.borderColor = '#ef4444';
+                input.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+                return false;
+            } else if (cleaned.length < 10) {
+                input.style.borderColor = '#ef4444';
+                input.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+                return false;
+            } else {
+                input.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                input.style.boxShadow = 'none';
+                return true;
+            }
+        }
+
+        // Validação de nome completo
+        function validateFullName(name) {
+            const nameParts = name.trim().split(' ');
+            return nameParts.length >= 2 && nameParts.every(part => part.length > 0);
+        }
+
+        // Mostrar mensagens
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            document.getElementById('successMessage').style.display = 'none';
+            
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Carregar dados do usuário
+        async function loadUserData() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const userId = currentUser.id;
+
+            if (!userId) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/clientes/${userId}`);
+                const data = await response.json();
+
+                if (data.success && data.cliente) {
+                    const c = data.cliente;
+                    document.getElementById('nomeCompleto').value = c.nome_completo || '';
+                    document.getElementById('email').value = c.email || '';
+                    document.getElementById('telefone').value = c.telefone || '';
+                    if (c.foto_perfil) {
+                        document.getElementById('profilePreview').src = c.foto_perfil;
+                    }
+                }
+            } catch (e) {
+                console.error('Erro ao carregar dados:', e);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('telefone').addEventListener('input', function(e) {
+            e.target.value = formatPhone(e.target.value);
+        });
+
+        document.getElementById('telefone').addEventListener('blur', function(e) {
+            validatePhoneInput(e.target);
+        });
+
+        document.getElementById('profileUpload').addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profilePreview').src = e.target.result;
+                    newProfileImageBase64 = e.target.result;
+                    checkBlockChanges();
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // Funções para salvamento individual de blocos
+        function showBlockStatus(blockId, message, type) {
+            const statusElement = document.getElementById(`status-${blockId}`);
+            statusElement.textContent = message;
+            statusElement.className = `block-save-status ${type}`;
+            statusElement.style.display = 'block';
+            
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 3000);
+        }
+        
+        function setButtonLoading(button, isLoading) {
+            if (isLoading) {
+                button.disabled = true;
+                button.classList.add('saving');
+                button.textContent = '⏳ Salvando...';
+            } else {
+                button.disabled = false;
+                button.classList.remove('saving');
+                // Restaurar texto original baseado no data-block
+                const blockId = button.getAttribute('data-block');
+                const originalTexts = {
+                    'personal-info': '💾 Salvar Informações Pessoais',
+                    'security': '💾 Salvar Senha'
+                };
+                button.textContent = originalTexts[blockId];
+            }
+        }
+        
+        async function saveBlock(blockId) {
+            const button = document.querySelector(`[data-block="${blockId}"]`);
+            setButtonLoading(button, true);
+            
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            if (!currentUser.id) {
+                showBlockStatus(blockId, '❌ Erro: Usuário não identificado', 'error');
+                setButtonLoading(button, false);
+                return;
+            }
+            
+            try {
+                let payload = {};
+                
+                switch (blockId) {
+                    case 'personal-info':
+                        payload = {
+                            nome_completo: document.getElementById('nomeCompleto').value.trim(),
+                            email: document.getElementById('email').value.trim(),
+                            telefone: document.getElementById('telefone').value.trim()
+                        };
+                        
+                        if (newProfileImageBase64) {
+                            payload.foto_perfil = newProfileImageBase64;
+                            newProfileImageBase64 = null;
+                        }
+                        
+                        // Validações
+                        if (!validateFullName(payload.nome_completo)) {
+                            throw new Error('Por favor, digite seu nome completo (nome e sobrenome).');
+                        }
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(payload.email)) {
+                            throw new Error('Por favor, digite um e-mail válido.');
+                        }
+                        break;
+                        
+                    case 'security':
+                        throw new Error('Alteração de senha não suportada pelo servidor ainda.');
+                }
+                
+                const response = await fetch(`${API_BASE_URL}/clientes/${currentUser.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.message);
+                }
+                
+                showBlockStatus(blockId, '✅ Salvo com sucesso!', 'success');
+                
+                // Ocultar indicador de mudanças não salvas
+                const indicator = document.getElementById(`indicator-${blockId}`);
+                if (indicator) {
+                    indicator.style.display = 'none';
+                }
+                
+            } catch (error) {
+                console.error('Erro ao salvar bloco:', error);
+                showBlockStatus(blockId, `❌ ${error.message}`, 'error');
+            } finally {
+                setButtonLoading(button, false);
+            }
+        }
+
+        // Validação em tempo real do nome
+        document.getElementById('nomeCompleto').addEventListener('blur', function(e) {
+            if (e.target.value && !validateFullName(e.target.value)) {
+                e.target.style.borderColor = '#ef4444';
+                e.target.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+            } else {
+                e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                e.target.style.boxShadow = 'none';
+            }
+        });
+
+        // Event listeners para botões de salvamento individual
+        function setupBlockSaveButtons() {
+            document.querySelectorAll('.btn-block-save').forEach(button => {
+                button.addEventListener('click', function() {
+                    const blockId = this.getAttribute('data-block');
+                    saveBlock(blockId);
+                });
+            });
+        }
+
+        // Função para verificar mudanças em cada bloco
+        function checkBlockChanges() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            
+            // Mapear campos para blocos
+            const blockFields = {
+                'personal-info': ['nomeCompleto', 'email', 'telefone'],
+                'security': ['novaSenha']
+            };
+            
+            // Verificar cada bloco
+            Object.keys(blockFields).forEach(blockId => {
+                const fields = blockFields[blockId];
+                let hasChanges = false;
+                
+                for (const field of fields) {
+                    const currentValue = document.getElementById(field)?.value || '';
+                    const originalValue = currentUser[field] || '';
+                    if (currentValue !== originalValue) {
+                        hasChanges = true;
+                        break;
+                    }
+                }
+                
+                // Verificar foto de perfil para o bloco de informações pessoais
+                if (blockId === 'personal-info' && newProfileImageBase64) {
+                    hasChanges = true;
+                }
+                
+                // Mostrar/ocultar indicador
+                const indicator = document.getElementById(`indicator-${blockId}`);
+                if (indicator) {
+                    indicator.style.display = hasChanges ? 'block' : 'none';
+                }
+            });
+        }
+
+        // Função para configurar listeners de mudança
+        function setupChangeListeners() {
+            document.querySelectorAll('input').forEach(field => {
+                field.addEventListener('input', checkBlockChanges);
+                field.addEventListener('change', checkBlockChanges);
+            });
+        }
+
+        // Carregar dados quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserData();
+            setupBlockSaveButtons();
+            setupChangeListeners();
+            
+            // Verificar mudanças após carregar dados
+            setTimeout(checkBlockChanges, 100);
+        });
+    </script>
+</body>
+</html>

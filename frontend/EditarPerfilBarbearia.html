@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>EasyCut - Editar Perfil Barbearia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .container {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                        0 0 0 1px rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+            margin: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 24px;
+        }
+        
+        .back-link:hover {
+            color: #3b82f6;
+        }
+        
+        .profile-blocks {
+            display: grid;
+            gap: 24px;
+        }
+        
+        .profile-block {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .profile-block:hover {
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .block-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .block-icon {
+            font-size: 1.5rem;
+        }
+        
+        .block-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        
+        .block-subtitle {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-left: auto;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 0.95rem;
+        }
+        
+        .required {
+            color: #ef4444;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            background: rgba(30, 41, 59, 0.5);
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        input::placeholder, textarea::placeholder {
+            color: #64748b;
+        }
+        
+        select option {
+            background: rgba(30, 41, 59, 0.9);
+            color: #fff;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px 0;
+            margin: 24px 0 16px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.1);
+            border-color: rgba(148, 163, 184, 0.5);
+            color: #fff;
+        }
+        
+        .btn-block-save {
+            width: 100%;
+            padding: 12px 0;
+            margin: 16px 0 0 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-block-save::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-block-save:hover::before {
+            left: 100%;
+        }
+        
+        .btn-block-save:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-block-save:disabled {
+            background: rgba(148, 163, 184, 0.3);
+            color: rgba(148, 163, 184, 0.7);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-block-save.saving {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .block-save-status {
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: center;
+            display: none;
+        }
+        
+        .block-save-status.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+        }
+        
+        .block-save-status.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+        
+        .block-unsaved-indicator {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: #f59e0b;
+            border-radius: 50%;
+            animation: pulse-orange 2s infinite;
+            display: none;
+        }
+        
+        @keyframes pulse-orange {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .profile-block {
+            position: relative;
+        }
+        
+        .info-text {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 4px;
+            font-style: italic;
+        }
+        
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        /* Estilos para upload de imagens */
+        .image-upload-section {
+            margin-top: 8px;
+        }
+        
+        .image-upload-area {
+            border: 2px dashed rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(59, 130, 246, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .image-upload-area:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .image-upload-area.dragover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.15);
+            transform: scale(1.02);
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.7;
+        }
+        
+        .upload-text strong {
+            display: block;
+            color: #e2e8f0;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        
+        .upload-text p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        .image-preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .image-preview-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .image-preview-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .image-preview-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .image-preview-item .remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .image-preview-item .remove-btn:hover {
+            background: #ef4444;
+            transform: scale(1.1);
+        }
+        
+        .image-preview-item .image-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            color: white;
+            padding: 8px;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        
+        .image-preview-item .image-info .file-name {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        
+        .image-preview-item .image-info .file-size {
+            opacity: 0.8;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 28px;
+                border-radius: 20px;
+                max-width: 380px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .logo {
+                font-size: 1.9rem;
+            }
+            
+            .subtitle {
+                font-size: 0.95rem;
+            }
+            
+            .btn {
+                padding: 14px 0;
+                font-size: 1.05rem;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                margin: 8px;
+                padding: 24px;
+                max-width: calc(100vw - 16px);
+            }
+            
+            .logo {
+                font-size: 1.7rem;
+            }
+            
+            .form-group {
+                margin-bottom: 18px;
+            }
+            
+            input, textarea {
+                padding: 12px 14px;
+                font-size: 0.98rem;
+            }
+            
+            .btn {
+                padding: 14px 0;
+                margin: 20px 0 14px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="javascript:history.back()" class="back-link" onclick="return confirmVoltar()">
+            ← Voltar
+        </a>
+        
+        <div class="header">
+            <div class="logo">EasyCut</div>
+            <div class="subtitle">Editar Perfil - Barbearia</div>
+        </div>
+
+        <div class="success-message" id="successMessage"></div>
+        <div class="error-message" id="errorMessage"></div>
+        
+        <!-- Informação sobre salvamento individual -->
+        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: center;">
+            <div style="color: #3b82f6; font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">
+                💡 Salvamento Individual
+            </div>
+            <div style="color: #94a3b8; font-size: 0.9rem;">
+                Cada seção pode ser salva independentemente. Faça suas alterações e clique no botão verde de cada bloco para salvar.
+            </div>
+        </div>
+
+        <form id="editProfileForm">
+            <div class="profile-blocks">
+                <!-- Bloco: Informações Básicas -->
+                <div class="profile-block" id="block-basic-info">
+                    <div class="block-unsaved-indicator" id="indicator-basic-info"></div>
+                    <div class="block-header">
+                        <div class="block-icon">🏪</div>
+                        <div class="block-title">Informações Básicas</div>
+                        <div class="block-subtitle">Dados principais da barbearia</div>
+                    </div>
+                    
+                    <div class="form-group" style="text-align: center; margin-bottom: 24px;">
+                        <div style="position: relative; width: 120px; height: 120px; margin: 0 auto;">
+                            <img id="profilePreview" src="https://via.placeholder.com/120?text=Logo" alt="Logo da Barbearia" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #3b82f6; background: #1e293b;">
+                            <label for="profileUpload" style="position: absolute; bottom: 0; right: 0; background: #3b82f6; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.2s;">
+                                <span style="font-size: 1.2rem;">📷</span>
+                            </label>
+                            <input type="file" id="profileUpload" accept="image/*" style="display: none;">
+                        </div>
+                        <div class="info-text" style="margin-top: 8px;">Logo ou foto de perfil</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nomeBarbearia">Nome da Barbearia <span class="required">*</span></label>
+                        <input type="text" id="nomeBarbearia" name="nomeBarbearia" placeholder="Ex: Barbearia do João" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cnpjCpf">CNPJ/CPF <span class="required">*</span></label>
+                            <input type="text" id="cnpjCpf" name="cnpjCpf" placeholder="00.000.000/0000-00" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="responsavel">Nome do Responsável <span class="required">*</span></label>
+                            <input type="text" id="responsavel" name="responsavel" placeholder="Nome completo" required>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary btn-block-save" data-block="basic-info">
+                        💾 Salvar Informações Básicas
+                    </button>
+                    <div class="block-save-status" id="status-basic-info"></div>
+                </div>
+
+                <!-- Bloco: Contatos -->
+                <div class="profile-block" id="block-contacts">
+                    <div class="block-unsaved-indicator" id="indicator-contacts"></div>
+                    <div class="block-header">
+                        <div class="block-icon">📞</div>
+                        <div class="block-title">Contatos</div>
+                        <div class="block-subtitle">Informações de comunicação</div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Telefone Fixo</label>
+                            <input type="tel" id="phone" name="phone" placeholder="(11) 3333-3333">
+                        </div>
+                        <div class="form-group">
+                            <label for="whatsapp">WhatsApp <span class="required">*</span></label>
+                            <input type="tel" id="whatsapp" name="whatsapp" placeholder="(11) 99999-9999" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">E-mail <span class="required">*</span></label>
+                        <input type="email" id="email" name="email" placeholder="contato@barbearia.com" required>
+                        <div class="info-text">Este é seu login para acessar o sistema</div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="instagram">Instagram</label>
+                            <input type="text" id="instagram" name="instagram" placeholder="@barbearia">
+                        </div>
+                        <div class="form-group">
+                            <label for="facebook">Facebook</label>
+                            <input type="text" id="facebook" name="facebook" placeholder="facebook.com/barbearia">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="website">Site</label>
+                        <input type="url" id="website" name="website" placeholder="https://www.barbearia.com">
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary btn-block-save" data-block="contacts">
+                        💾 Salvar Contatos
+                    </button>
+                    <div class="block-save-status" id="status-contacts"></div>
+                </div>
+
+                <!-- Bloco: Localização -->
+                <div class="profile-block" id="block-location">
+                    <div class="block-unsaved-indicator" id="indicator-location"></div>
+                    <div class="block-header">
+                        <div class="block-icon">📍</div>
+                        <div class="block-title">Localização</div>
+                        <div class="block-subtitle">Endereço detalhado da barbearia</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="street">Rua/Avenida <span class="required">*</span></label>
+                        <input type="text" id="street" name="street" placeholder="Ex: Rua das Flores" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="number">Número <span class="required">*</span></label>
+                            <input type="text" id="number" name="number" placeholder="123" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="complement">Complemento</label>
+                            <input type="text" id="complement" name="complement" placeholder="Sala 1, Apto 2">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="neighborhood">Bairro <span class="required">*</span></label>
+                            <input type="text" id="neighborhood" name="neighborhood" placeholder="Centro" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="city">Cidade <span class="required">*</span></label>
+                            <input type="text" id="city" name="city" placeholder="São Paulo" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="state">Estado <span class="required">*</span></label>
+                            <select id="state" name="state" required>
+                                <option value="">Selecione o estado</option>
+                                <option value="AC">Acre</option>
+                                <option value="AL">Alagoas</option>
+                                <option value="AP">Amapá</option>
+                                <option value="AM">Amazonas</option>
+                                <option value="BA">Bahia</option>
+                                <option value="CE">Ceará</option>
+                                <option value="DF">Distrito Federal</option>
+                                <option value="ES">Espírito Santo</option>
+                                <option value="GO">Goiás</option>
+                                <option value="MA">Maranhão</option>
+                                <option value="MT">Mato Grosso</option>
+                                <option value="MS">Mato Grosso do Sul</option>
+                                <option value="MG">Minas Gerais</option>
+                                <option value="PA">Pará</option>
+                                <option value="PB">Paraíba</option>
+                                <option value="PR">Paraná</option>
+                                <option value="PE">Pernambuco</option>
+                                <option value="PI">Piauí</option>
+                                <option value="RJ">Rio de Janeiro</option>
+                                <option value="RN">Rio Grande do Norte</option>
+                                <option value="RS">Rio Grande do Sul</option>
+                                <option value="RO">Rondônia</option>
+                                <option value="RR">Roraima</option>
+                                <option value="SC">Santa Catarina</option>
+                                <option value="SP">São Paulo</option>
+                                <option value="SE">Sergipe</option>
+                                <option value="TO">Tocantins</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="zipCode">CEP <span class="required">*</span></label>
+                            <input type="text" id="zipCode" name="zipCode" placeholder="00000-000" required>
+                            <div class="info-text">💡 Digite o CEP completo para buscar o endereço automaticamente</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reference">Ponto de Referência</label>
+                        <input type="text" id="reference" name="reference" placeholder="Ex: Próximo ao shopping, em frente à farmácia">
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary btn-block-save" data-block="location">
+                        💾 Salvar Localização
+                    </button>
+                    <div class="block-save-status" id="status-location"></div>
+                </div>
+
+                <!-- Bloco: Descrição -->
+                <div class="profile-block" id="block-description">
+                    <div class="block-unsaved-indicator" id="indicator-description"></div>
+                    <div class="block-header">
+                        <div class="block-icon">📝</div>
+                        <div class="block-title">Descrição</div>
+                        <div class="block-subtitle">Sobre sua barbearia</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="descricao">Descrição da Barbearia</label>
+                        <textarea id="descricao" name="descricao" placeholder="Conte um pouco sobre sua barbearia, serviços oferecidos, etc."></textarea>
+                        <div class="info-text">Descrição que aparecerá para os clientes</div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary btn-block-save" data-block="description">
+                        💾 Salvar Descrição
+                    </button>
+                    <div class="block-save-status" id="status-description"></div>
+                </div>
+
+                <!-- Bloco: Imagens -->
+                <div class="profile-block" id="block-images">
+                    <div class="block-unsaved-indicator" id="indicator-images"></div>
+                    <div class="block-header">
+                        <div class="block-icon">📷</div>
+                        <div class="block-title">Imagens</div>
+                        <div class="block-subtitle">Fotos da barbearia</div>
+                    </div>
+                    
+                    <div class="image-upload-section">
+                        <div class="image-upload-area" id="imageUploadArea">
+                            <div class="upload-icon">📷</div>
+                            <div class="upload-text">
+                                <strong>Clique aqui ou arraste imagens</strong>
+                                <p>Formatos aceitos: JPG, PNG, GIF (máx. 5MB cada)</p>
+                            </div>
+                            <input type="file" id="imageInput" multiple accept="image/*" style="display: none;">
+                        </div>
+                        
+                        <div class="image-preview-container" id="imagePreviewContainer">
+                            <!-- Imagens serão exibidas aqui -->
+                        </div>
+                    </div>
+                    <div class="info-text">Adicione fotos da sua barbearia para atrair mais clientes</div>
+                    
+                    <button type="button" class="btn btn-primary btn-block-save" data-block="images">
+                        💾 Salvar Imagens
+                    </button>
+                    <div class="block-save-status" id="status-images"></div>
+                </div>
+
+                <!-- Bloco: Segurança -->
+                <div class="profile-block" id="block-security">
+                    <div class="block-unsaved-indicator" id="indicator-security"></div>
+                    <div class="block-header">
+                        <div class="block-icon">🔒</div>
+                        <div class="block-title">Segurança</div>
+                        <div class="block-subtitle">Alterar senha</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="senhaAtual">Senha Atual <span class="required">*</span></label>
+                        <input type="password" id="senhaAtual" name="senhaAtual" placeholder="Digite sua senha atual" required>
+                        <div class="info-text">Necessária para confirmar as alterações</div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="novaSenha">Nova Senha</label>
+                            <input type="password" id="novaSenha" name="novaSenha" placeholder="Deixe em branco para manter">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmarNovaSenha">Confirmar Nova Senha</label>
+                            <input type="password" id="confirmarNovaSenha" name="confirmarNovaSenha" placeholder="Confirme a nova senha">
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary btn-block-save" data-block="security">
+                        💾 Salvar Senha
+                    </button>
+                    <div class="block-save-status" id="status-security"></div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 32px;">
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='BarbeariaDashboard.html'">
+                    ← Voltar ao Dashboard
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5001/api';
+
+        // Função para confirmar se o usuário quer voltar
+        function confirmVoltar() {
+            // Verificar se há campos com alterações não salvas
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            let hasUnsavedChanges = false;
+            
+            // Verificar campos principais
+            const fieldsToCheck = [
+                'nomeBarbearia', 'cnpjCpf', 'responsavel', 'phone', 'whatsapp', 
+                'email', 'instagram', 'facebook', 'website', 'street', 'number', 
+                'complement', 'neighborhood', 'city', 'state', 'zipCode', 
+                'reference', 'descricao'
+            ];
+            
+            for (const field of fieldsToCheck) {
+                const currentValue = document.getElementById(field)?.value || '';
+                const originalValue = currentUser[field] || '';
+                if (currentValue !== originalValue) {
+                    hasUnsavedChanges = true;
+                    break;
+                }
+            }
+            
+            // Verificar se há nova senha sendo digitada
+            const novaSenha = document.getElementById('novaSenha')?.value || '';
+            if (novaSenha) {
+                hasUnsavedChanges = true;
+            }
+
+            // Verificar se há nova foto de perfil
+            if (newProfileImageBase64) {
+                hasUnsavedChanges = true;
+            }
+            
+            // Verificar se há imagens não salvas
+            if (uploadedImages.length > 0) {
+                const savedImages = currentUser.imagens || [];
+                if (uploadedImages.length !== savedImages.length) {
+                    hasUnsavedChanges = true;
+                }
+            }
+            
+            if (hasUnsavedChanges) {
+                return confirm('Você tem alterações não salvas. Tem certeza que deseja voltar?');
+            }
+            return true;
+        }
+
+        // Validação de CNPJ/CPF
+        function formatCNPJCPF(value) {
+            const numbers = value.replace(/\D/g, '');
+            if (numbers.length <= 11) {
+                return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+            } else {
+                return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+            }
+        }
+
+        function validateCNPJCPFInput(input) {
+            const value = input.value.trim();
+            if (!value) {
+                input.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                input.style.boxShadow = 'none';
+                return false;
+            }
+
+            const numbers = value.replace(/\D/g, '');
+            
+            // Validação básica de tamanho
+            if (numbers.length !== 11 && numbers.length !== 14) {
+                input.style.borderColor = '#ef4444';
+                input.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+                return false;
+            }
+
+            // Validação matemática básica (simplificada para frontend)
+            if (numbers.length === 11) {
+                // Validação básica de CPF
+                if (numbers === numbers[0].repeat(11)) {
+                    input.style.borderColor = '#ef4444';
+                    input.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+                    return false;
+                }
+            } else if (numbers.length === 14) {
+                // Validação básica de CNPJ
+                if (numbers === numbers[0].repeat(14)) {
+                    input.style.borderColor = '#ef4444';
+                    input.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+                    return false;
+                }
+            }
+
+            input.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            input.style.boxShadow = 'none';
+            return true;
+        }
+
+        // Validação de telefone
+        function formatPhone(value) {
+            return value.replace(/\D/g, '').replace(/(\d{2})(\d{4,5})(\d{4})/, '($1) $2-$3');
+        }
+
+        function validatePhoneInput(input) {
+            const phoneRegex = /^(\+55\s?)?(\(?[1-9]{2}\)?)\s?([0-9]{4,5})\-?([0-9]{4})$/;
+            const cleaned = input.value.replace(/\D/g, '');
+            
+            if (input.value && !phoneRegex.test(input.value) && !input.value.startsWith('+55')) {
+                input.style.borderColor = '#ef4444';
+                input.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+                return false;
+            } else if (cleaned.length < 10) {
+                input.style.borderColor = '#ef4444';
+                input.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+                return false;
+            } else {
+                input.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                input.style.boxShadow = 'none';
+                return true;
+            }
+        }
+
+        // Validação e busca por CEP
+        function formatCEP(value) {
+            let numbers = value.replace(/\D/g, '');
+            return numbers.replace(/(\d{5})(\d{3})/, '$1-$2');
+        }
+
+        async function searchAddressByCEP(cep) {
+            try {
+                const zipCodeInput = document.getElementById('zipCode');
+                zipCodeInput.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+                zipCodeInput.style.background = 'rgba(59, 130, 246, 0.1)';
+                
+                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await response.json();
+                
+                if (data.erro) {
+                    showError('CEP não encontrado. Verifique o número digitado.');
+                    resetZipCodeInput();
+                    return;
+                }
+                
+                // Preencher campos automaticamente
+                document.getElementById('street').value = data.logradouro || '';
+                document.getElementById('neighborhood').value = data.bairro || '';
+                document.getElementById('city').value = data.localidade || '';
+                document.getElementById('state').value = data.uf || '';
+                
+                showSuccess('Endereço encontrado e preenchido automaticamente!');
+                
+            } catch (error) {
+                console.error('Erro ao buscar CEP:', error);
+                showError('Erro ao buscar CEP. Verifique sua conexão e tente novamente.');
+            } finally {
+                resetZipCodeInput();
+            }
+        }
+
+        function resetZipCodeInput() {
+            const zipCodeInput = document.getElementById('zipCode');
+            zipCodeInput.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            zipCodeInput.style.background = 'rgba(30, 41, 59, 0.5)';
+        }
+
+        // Mostrar mensagens
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            document.getElementById('successMessage').style.display = 'none';
+            
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Carregar dados do usuário
+        async function loadUserData() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const userId = currentUser.id;
+
+            if (!userId) {
+                console.warn('ID de usuário não encontrado. Verifique se está logado.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/barbearias/${userId}`);
+                const data = await response.json();
+
+                if (data.success && data.barbearia) {
+                    const b = data.barbearia;
+                    
+                    // Helper para setar valor
+                    const setVal = (id, val) => {
+                        const el = document.getElementById(id);
+                        if (el) el.value = val || '';
+                    };
+
+                    setVal('nomeBarbearia', b.nome_barbearia);
+                    setVal('cnpjCpf', b.cnpj_cpf);
+                    setVal('responsavel', b.nome_responsavel);
+                    
+                    // Contatos: phone -> telefone_fixo, whatsapp -> whatsapp
+                    setVal('phone', b.telefone_fixo);
+                    setVal('whatsapp', b.whatsapp);
+                    setVal('email', b.email);
+                    setVal('instagram', b.instagram);
+                    setVal('facebook', b.facebook);
+                    setVal('website', b.website);
+                    
+                    setVal('street', b.logradouro);
+                    setVal('number', b.numero);
+                    setVal('complement', b.complemento);
+                    setVal('neighborhood', b.bairro);
+                    setVal('city', b.cidade);
+                    setVal('state', b.estado);
+                    setVal('zipCode', b.cep);
+                    setVal('reference', b.ponto_referencia);
+                    
+                    setVal('descricao', b.descricao);
+                    
+                    if (b.foto_perfil) {
+                        document.getElementById('profilePreview').src = b.foto_perfil;
+                    }
+
+                    // Carregar fotos da galeria
+                    const fotosResponse = await fetch(`${API_BASE_URL}/barbearias/${userId}/fotos`);
+                    const fotosData = await fotosResponse.json();
+                    if (fotosData.success) {
+                        processLoadedPhotos(fotosData.fotos);
+                    }
+                    
+                    // Nota: Imagens da galeria não estão sendo carregadas do banco ainda
+                    // pois a tabela barbearias não possui campo para múltiplas imagens.
+                }
+            } catch (error) {
+                console.error('Erro ao carregar dados da API:', error);
+                showError('Erro ao conectar com o servidor.');
+            }
+        }
+
+        // Processar fotos vindas do banco para o formato de visualização
+        function processLoadedPhotos(fotos) {
+            uploadedImages = fotos.map(f => ({
+                id: Date.now() + Math.random(),
+                dbId: f.id,
+                url: f.foto,
+                name: `Foto ${f.id}`,
+                size: 0, // Tamanho desconhecido vindo do banco
+                isStored: true
+            }));
+            
+            renderImagePreviews();
+            checkBlockChanges();
+        }
+
+        // Event listeners
+        document.getElementById('cnpjCpf').addEventListener('input', function(e) {
+            e.target.value = formatCNPJCPF(e.target.value);
+        });
+
+        document.getElementById('cnpjCpf').addEventListener('blur', function(e) {
+            validateCNPJCPFInput(e.target);
+        });
+
+        document.getElementById('whatsapp').addEventListener('input', function(e) {
+            e.target.value = formatPhone(e.target.value);
+        });
+
+        document.getElementById('whatsapp').addEventListener('blur', function(e) {
+            validatePhoneInput(e.target);
+        });
+
+        // Event listeners para novos campos
+        document.getElementById('phone').addEventListener('input', function(e) {
+            e.target.value = formatPhone(e.target.value);
+        });
+
+        document.getElementById('phone').addEventListener('blur', function(e) {
+            validatePhoneInput(e.target);
+        });
+
+        document.getElementById('zipCode').addEventListener('input', function(e) {
+            e.target.value = formatCEP(e.target.value);
+            
+            // Buscar endereço quando CEP estiver completo
+            if (e.target.value.length === 9) {
+                searchAddressByCEP(e.target.value.replace('-', ''));
+            }
+        });
+
+        // Removido: Event listener do formulário principal não é mais necessário
+        // O salvamento agora é feito individualmente por blocos
+
+        // Variáveis para gerenciar imagens
+        let uploadedImages = [];
+        let newProfileImageBase64 = null;
+        let deletedImageIds = []; // Rastrear imagens do banco deletadas
+
+        // Listener para foto de perfil
+        document.getElementById('profileUpload').addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profilePreview').src = e.target.result;
+                    newProfileImageBase64 = e.target.result;
+                    checkBlockChanges();
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+        
+        // Função para formatar tamanho do arquivo
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Função para validar arquivo de imagem
+        function validateImageFile(file) {
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            
+            if (!validTypes.includes(file.type)) {
+                showError('Formato de arquivo não suportado. Use JPG, PNG ou GIF.');
+                return false;
+            }
+            
+            if (file.size > maxSize) {
+                showError('Arquivo muito grande. Tamanho máximo: 5MB.');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Função para criar preview da imagem
+        function createImagePreview(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageId = Date.now() + Math.random();
+                const imageData = {
+                    id: imageId,
+                    dbId: null, // null para novas imagens
+                    file: file,
+                    url: e.target.result,
+                    name: file.name,
+                    size: file.size,
+                    isStored: false // Flag para saber se já está no banco
+                };
+                
+                uploadedImages.push(imageData);
+                renderImagePreviews();
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Função para renderizar previews das imagens
+        function renderImagePreviews() {
+            const container = document.getElementById('imagePreviewContainer');
+            
+            if (uploadedImages.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            // Limpar container primeiro
+            container.innerHTML = '';
+            
+            // Criar elementos individualmente para garantir que os eventos funcionem
+            uploadedImages.forEach((image, index) => {
+                const imageItem = document.createElement('div');
+                imageItem.className = 'image-preview-item';
+                imageItem.innerHTML = `
+                    <img src="${image.url}" alt="${image.name}">
+                    <button class="remove-btn" title="Remover imagem">×</button>
+                    <div class="image-info">
+                        <div class="file-name">${image.name}</div>
+                        <div class="file-size">${formatFileSize(image.size)}</div>
+                    </div>
+                `;
+                
+                // Adicionar evento de clique diretamente ao botão
+                const removeBtn = imageItem.querySelector('.remove-btn');
+                removeBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Botão clicado! Removendo imagem:', index);
+                    removeImageByIndex(index);
+                });
+                
+                container.appendChild(imageItem);
+            });
+        }
+        
+        // Função para remover imagem por índice
+        function removeImageByIndex(index) {
+            console.log('Removendo imagem no índice:', index);
+            console.log('Imagens antes:', uploadedImages.length);
+            
+            if (index >= 0 && index < uploadedImages.length) {
+                const image = uploadedImages[index];
+                // Se a imagem já estava salva no banco, adicionar à lista de exclusão
+                if (image.isStored && image.dbId) {
+                    deletedImageIds.push(image.dbId);
+                }
+                
+                uploadedImages.splice(index, 1);
+                console.log('Imagens depois:', uploadedImages.length);
+                renderImagePreviews();
+            } else {
+                console.error('Índice inválido:', index);
+            }
+        }
+        
+        // Função para processar arquivos selecionados
+        function processSelectedFiles(files) {
+            Array.from(files).forEach(file => {
+                if (validateImageFile(file)) {
+                    createImagePreview(file);
+                }
+            });
+        }
+        
+        // Configurar eventos de upload
+        function setupImageUpload() {
+            const uploadArea = document.getElementById('imageUploadArea');
+            const imageInput = document.getElementById('imageInput');
+            
+            // Clique na área de upload
+            uploadArea.addEventListener('click', () => {
+                imageInput.click();
+            });
+            
+            // Seleção de arquivos
+            imageInput.addEventListener('change', (e) => {
+                processSelectedFiles(e.target.files);
+            });
+            
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                processSelectedFiles(e.dataTransfer.files);
+            });
+        }
+        
+        // Funções para salvamento individual de blocos
+        function showBlockStatus(blockId, message, type) {
+            const statusElement = document.getElementById(`status-${blockId}`);
+            statusElement.textContent = message;
+            statusElement.className = `block-save-status ${type}`;
+            statusElement.style.display = 'block';
+            
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 3000);
+        }
+        
+        function setButtonLoading(button, isLoading) {
+            if (isLoading) {
+                button.disabled = true;
+                button.classList.add('saving');
+                button.textContent = '⏳ Salvando...';
+            } else {
+                button.disabled = false;
+                button.classList.remove('saving');
+                // Restaurar texto original baseado no data-block
+                const blockId = button.getAttribute('data-block');
+                const originalTexts = {
+                    'basic-info': '💾 Salvar Informações Básicas',
+                    'contacts': '💾 Salvar Contatos',
+                    'location': '💾 Salvar Localização',
+                    'description': '💾 Salvar Descrição',
+                    'images': '💾 Salvar Imagens',
+                    'security': '💾 Salvar Senha'
+                };
+                button.textContent = originalTexts[blockId];
+            }
+        }
+        
+        async function saveBlock(blockId) {
+            const button = document.querySelector(`[data-block="${blockId}"]`);
+            setButtonLoading(button, true);
+            
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            if (!currentUser.id) {
+                showBlockStatus(blockId, '❌ Erro: Usuário não identificado', 'error');
+                setButtonLoading(button, false);
+                return;
+            }
+            
+            try {
+                let payload = {};
+                
+                switch (blockId) {
+                    case 'basic-info':
+                        payload = {
+                            nome_barbearia: document.getElementById('nomeBarbearia').value,
+                            nome_responsavel: document.getElementById('responsavel').value
+                            // cnpj_cpf não é atualizável
+                        };
+                        
+                        if (newProfileImageBase64) {
+                            payload.foto_perfil = newProfileImageBase64;
+                            // Resetar variável após salvar
+                            newProfileImageBase64 = null;
+                        }
+                        
+                        // Validação específica
+                        if (!validateCNPJCPFInput(document.getElementById('cnpjCpf'))) {
+                            throw new Error('CNPJ/CPF inválido');
+                        }
+                        break;
+                        
+                    case 'contacts':
+                        payload = {
+                            whatsapp: document.getElementById('whatsapp').value,
+                            telefone_fixo: document.getElementById('phone').value,
+                            instagram: document.getElementById('instagram').value,
+                            facebook: document.getElementById('facebook').value,
+                            website: document.getElementById('website').value
+                        };
+                        
+                        // Validação específica
+                        if (!validatePhoneInput(document.getElementById('whatsapp'))) {
+                            throw new Error('WhatsApp inválido');
+                        }
+                        if (payload.telefone_fixo && !validatePhoneInput(document.getElementById('phone'))) {
+                            throw new Error('Telefone fixo inválido');
+                        }
+                        break;
+                        
+                    case 'location':
+                        payload = {
+                            logradouro: document.getElementById('street').value,
+                            numero: document.getElementById('number').value,
+                            complemento: document.getElementById('complement').value,
+                            bairro: document.getElementById('neighborhood').value,
+                            cidade: document.getElementById('city').value,
+                            estado: document.getElementById('state').value,
+                            cep: document.getElementById('zipCode').value,
+                            ponto_referencia: document.getElementById('reference').value
+                        };
+                        break;
+                        
+                    case 'description':
+                        payload = {
+                            descricao: document.getElementById('descricao').value
+                        };
+                        break;
+                        
+                    case 'images':
+                        // 1. Deletar imagens removidas
+                        for (const id of deletedImageIds) {
+                            await fetch(`${API_BASE_URL}/barbearias/${currentUser.id}/fotos/${id}`, {
+                                method: 'DELETE'
+                            });
+                        }
+                        deletedImageIds = []; // Limpar lista após deletar
+
+                        // 2. Enviar novas imagens
+                        const newImages = uploadedImages.filter(img => !img.isStored);
+                        for (const img of newImages) {
+                            await fetch(`${API_BASE_URL}/barbearias/${currentUser.id}/fotos`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ foto: img.url })
+                            });
+                        }
+
+                        // Recarregar imagens para atualizar IDs e status
+                        const fotosResponse = await fetch(`${API_BASE_URL}/barbearias/${currentUser.id}/fotos`);
+                        const fotosData = await fotosResponse.json();
+                        if (fotosData.success) {
+                            processLoadedPhotos(fotosData.fotos);
+                        }
+                        
+                        showBlockStatus(blockId, '✅ Galeria atualizada com sucesso!', 'success');
+                        setButtonLoading(button, false);
+                        return; // Retorno antecipado pois a lógica é diferente dos outros blocos
+                        
+                    case 'security':
+                        throw new Error('Alteração de senha não suportada pelo servidor ainda.');
+                }
+                
+                const response = await fetch(`${API_BASE_URL}/barbearias/${currentUser.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.message);
+                }
+                
+                showBlockStatus(blockId, '✅ Salvo com sucesso!', 'success');
+                
+                // Ocultar indicador de mudanças não salvas
+                const indicator = document.getElementById(`indicator-${blockId}`);
+                if (indicator) {
+                    indicator.style.display = 'none';
+                }
+                
+            } catch (error) {
+                console.error('Erro ao salvar bloco:', error);
+                showBlockStatus(blockId, `❌ ${error.message}`, 'error');
+            } finally {
+                setButtonLoading(button, false);
+            }
+        }
+        
+        // Event listeners para botões de salvamento individual
+        function setupBlockSaveButtons() {
+            document.querySelectorAll('.btn-block-save').forEach(button => {
+                button.addEventListener('click', function() {
+                    const blockId = this.getAttribute('data-block');
+                    saveBlock(blockId);
+                });
+            });
+        }
+        
+        // Função para verificar mudanças em cada bloco
+        function checkBlockChanges() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            
+            // Mapear campos para blocos
+            const blockFields = {
+                'basic-info': ['nomeBarbearia', 'cnpjCpf', 'responsavel'],
+                'contacts': ['phone', 'whatsapp', 'email', 'instagram', 'facebook', 'website'],
+                'location': ['street', 'number', 'complement', 'neighborhood', 'city', 'state', 'zipCode', 'reference'],
+                'description': ['descricao'],
+                'security': ['novaSenha']
+            };
+            
+            // Verificar cada bloco
+            Object.keys(blockFields).forEach(blockId => {
+                const fields = blockFields[blockId];
+                let hasChanges = false;
+                
+                for (const field of fields) {
+                    const currentValue = document.getElementById(field)?.value || '';
+                    const originalValue = currentUser[field] || '';
+                    if (currentValue !== originalValue) {
+                        hasChanges = true;
+                        break;
+                    }
+                }
+                
+                // Verificar foto de perfil para o bloco básico
+                if (blockId === 'basic-info' && newProfileImageBase64) {
+                    hasChanges = true;
+                }
+                
+                // Verificar imagens para o bloco de imagens
+                if (blockId === 'images' && uploadedImages) {
+                    // Se houver novas imagens (não salvas)
+                    const hasNewImages = uploadedImages.some(img => !img.isStored);
+                    // Ou se houver imagens deletadas
+                    const hasDeletedImages = deletedImageIds.length > 0;
+                    
+                    if (hasNewImages || hasDeletedImages) {
+                        hasChanges = true;
+                    }
+                }
+                
+                // Mostrar/ocultar indicador
+                const indicator = document.getElementById(`indicator-${blockId}`);
+                if (indicator) {
+                    indicator.style.display = hasChanges ? 'block' : 'none';
+                }
+            });
+        }
+        
+        // Função para configurar listeners de mudança
+        function setupChangeListeners() {
+            // Listener para todos os campos de input
+            document.querySelectorAll('input, textarea, select').forEach(field => {
+                field.addEventListener('input', checkBlockChanges);
+                field.addEventListener('change', checkBlockChanges);
+            });
+            
+            // Listener especial para imagens
+            const originalRenderImagePreviews = renderImagePreviews;
+            renderImagePreviews = function() {
+                originalRenderImagePreviews();
+                checkBlockChanges();
+            };
+        }
+        
+        // Carregar dados quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserData();
+            setupImageUpload();
+            setupBlockSaveButtons();
+            setupChangeListeners();
+            
+            // Verificar mudanças após carregar dados
+            setTimeout(checkBlockChanges, 100);
+        });
+    </script>
+</body>
+</html>
