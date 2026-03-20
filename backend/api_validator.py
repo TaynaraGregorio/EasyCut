@@ -6,9 +6,14 @@ Exemplo de como integrar a validação Python com os formulários HTML
 """
 
 from flask import Flask, request, jsonify, render_template_string
-from .form_validator import FormValidator
-from .phone_validator import PhoneValidator
-from .cpf_cnpj_validator import CPFCNPJValidator
+try:
+    from .form_validator import FormValidator
+    from .phone_validator import PhoneValidator
+    from .cpf_cnpj_validator import CPFCNPJValidator
+except ImportError:
+    from form_validator import FormValidator
+    from phone_validator import PhoneValidator
+    from cpf_cnpj_validator import CPFCNPJValidator
 import json
 
 app = Flask(__name__)
@@ -188,7 +193,10 @@ def validate_email_only():
         data = request.get_json()
         email = data.get('email', '')
         
-        from .email_validator import EmailValidator
+        try:
+            from .email_validator import EmailValidator
+        except ImportError:
+            from email_validator import EmailValidator
         email_validator = EmailValidator()
         result = email_validator.validate_email_for_form(email)
         

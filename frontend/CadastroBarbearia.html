@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>EasyCut - Cadastro de Barbearia</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="imagens/favicon001.png" type="image/png">
     <style>
         body {
             margin: 0;
@@ -437,15 +438,10 @@
             </div>
 
             <button type="submit" class="btn btn-primary">Cadastrar Barbearia</button>
-            <button type="button" class="btn btn-secondary" onclick="window.location.href='../TelaInicial.html'">Cancelar</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='Login.html'">Cancelar</button>
         </form>
     </div>
 
-    <!-- EmailJS Script -->
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    <script src="assets/no-server-fix.js"></script>
-    <script src="assets/email-service-real.js"></script>
-    <script src="assets/emailjs-config.js"></script>
     <script>
         // Função para confirmar se o usuário quer voltar
         function confirmVoltar() {
@@ -567,6 +563,72 @@
             strengthDiv.textContent = message;
         }
 
+        // Função para mostrar erro geral no formulário
+        function showFormError(formElement, message) {
+            const errorContainer = document.createElement('div');
+            errorContainer.className = 'validation-message error-message';
+            errorContainer.innerHTML = `
+                <div style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #f5c6cb;">
+                    <strong>✗ Erro no cadastro:</strong> ${message}
+                </div>
+            `;
+            formElement.insertBefore(errorContainer, formElement.firstChild);
+            errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Função para mostrar mensagem de sucesso
+        function showSuccessMessage(formElement, message) {
+            const successMsg = document.createElement('div');
+            successMsg.className = 'validation-message success-message';
+            successMsg.innerHTML = `
+                <div style="background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; margin: 16px 0; border: 1px solid #c3e6cb;">
+                    <strong>✓ ${message}</strong>
+                </div>
+            `;
+            const submitBtn = formElement.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.parentNode.insertBefore(successMsg, submitBtn);
+            } else {
+                formElement.appendChild(successMsg);
+            }
+        }
+
+        // Função para mostrar erro abaixo do campo
+        function showFieldError(input, message) {
+            const parent = input.parentElement;
+            // Remove erro anterior se houver
+            const existingError = parent.querySelector('.field-error-msg');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            input.style.borderColor = '#ef4444';
+            input.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'field-error-msg';
+            msgDiv.textContent = message;
+            msgDiv.style.color = '#ef4444';
+            msgDiv.style.fontSize = '0.85rem';
+            msgDiv.style.marginTop = '4px';
+            
+            if (input.nextSibling) {
+                parent.insertBefore(msgDiv, input.nextSibling);
+            } else {
+                parent.appendChild(msgDiv);
+            }
+        }
+
+        function clearFieldErrors() {
+            document.querySelectorAll('.field-error-msg, .validation-message').forEach(el => el.remove());
+            document.querySelectorAll('input').forEach(input => {
+                if (input.style.borderColor === 'rgb(239, 68, 68)' || input.style.borderColor === '#ef4444') {
+                    input.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                    input.style.boxShadow = 'none';
+                }
+            });
+        }
+
         // Event listeners
         document.getElementById('cnpjCpf').addEventListener('input', function(e) {
             e.target.value = formatCNPJCPF(e.target.value);
@@ -591,42 +653,56 @@
         });
 
         // Validação do formulário
-        document.getElementById('cadastroForm').addEventListener('submit', async function(e) {
+        const form = document.getElementById('cadastroForm');
+        form.setAttribute('novalidate', true);
+
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
+            clearFieldErrors();
             
-            const senha = document.getElementById('senha').value;
-            const confirmarSenha = document.getElementById('confirmarSenha').value;
-            const whatsapp = document.getElementById('whatsapp').value;
-            const cnpjCpf = document.getElementById('cnpjCpf').value;
-            const aceitarTermos = document.getElementById('aceitarTermos').checked;
+            let hasError = false;
+            const senha = document.getElementById('senha');
+            const confirmarSenha = document.getElementById('confirmarSenha');
+            const whatsapp = document.getElementById('whatsapp');
+            const cnpjCpf = document.getElementById('cnpjCpf');
+            const aceitarTermos = document.getElementById('aceitarTermos');
             
             // Validação do CNPJ/CPF
-            if (!validateCNPJCPFInput(document.getElementById('cnpjCpf'))) {
-                alert('Por favor, digite um CNPJ/CPF válido.');
-                return;
+            if (!validateCNPJCPFInput(cnpjCpf)) {
+                showFieldError(cnpjCpf, 'Por favor, digite um CNPJ/CPF válido.');
+                hasError = true;
             }
             
             // Validação dos telefones
-            if (!validatePhoneInput(document.getElementById('whatsapp'))) {
-                alert('Por favor, digite um WhatsApp válido.');
-                return;
+            if (!validatePhoneInput(whatsapp)) {
+                showFieldError(whatsapp, 'Por favor, digite um WhatsApp válido.');
+                hasError = true;
             }
             
-            if (senha !== confirmarSenha) {
-                alert('As senhas não coincidem!');
-                return;
+            if (senha.value !== confirmarSenha.value) {
+                showFieldError(confirmarSenha, 'As senhas não coincidem!');
+                hasError = true;
             }
             
-            if (senha.length < 8) {
-                alert('A senha deve ter pelo menos 8 caracteres.');
-                return;
+            if (senha.value.length < 8) {
+                showFieldError(senha, 'A senha deve ter pelo menos 8 caracteres.');
+                hasError = true;
             }
             
             // Validação dos termos de uso
-            if (!aceitarTermos) {
-                alert('Você deve aceitar os Termos de Uso para continuar.');
-                return;
+            if (!aceitarTermos.checked) {
+                const container = aceitarTermos.closest('.form-group');
+                const msg = document.createElement('div');
+                msg.className = 'field-error-msg';
+                msg.textContent = 'Você deve aceitar os Termos de Uso para continuar.';
+                msg.style.color = '#ef4444';
+                msg.style.fontSize = '0.85rem';
+                msg.style.marginTop = '4px';
+                container.appendChild(msg);
+                hasError = true;
             }
+            
+            if (hasError) return;
             
             // Coletar dados do formulário
             const formData = new FormData(this);
@@ -646,38 +722,58 @@
             submitBtn.disabled = true;
             submitBtn.textContent = 'Enviando...';
             
-            try {
-                // Enviar email de confirmação
-                const result = await emailService.sendConfirmationEmail(userData);
-                
-                if (result.success) {
-                    alert('Cadastro realizado! Verifique seu email para confirmar a conta.\n\n' + result.message);
-                    
-                    // Para testes, mostrar o link de confirmação
-                    if (result.token) {
-                        console.log('🔗 Link de confirmação para testes:', 
-                            `${window.location.origin}/frontend/ConfirmarEmail.html?token=${result.token}&type=confirmation`);
-                    }
-                    
+            // --- NOVA INTEGRAÇÃO COM BACKEND (Igual ao CadastroCliente) ---
+            fetch('http://localhost:5001/api/barbearias', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccessMessage(form, 'Cadastro realizado com sucesso! Você será redirecionado para o login.');
                     // Limpar formulário
-                    this.reset();
-                    document.getElementById('passwordStrength').textContent = '';
-                    
-                    // Redirecionar para login após 3 segundos
+                    e.target.reset();
+                    // Redirecionar para login
                     setTimeout(() => {
                         window.location.href = 'Login.html';
-                    }, 3000);
+                    }, 2000);
                 } else {
-                    alert('Erro ao enviar email de confirmação: ' + result.message);
+                    // Mapear erros do backend para os campos
+                    let mapped = false;
+                    const msg = (data.message || '').toLowerCase();
+                    
+                    if (msg.includes('email')) {
+                        showFieldError(document.getElementById('email'), data.message);
+                        mapped = true;
+                    }
+                    
+                    if (msg.includes('cnpj') || msg.includes('cpf') || msg.includes('documento')) {
+                        showFieldError(document.getElementById('cnpjCpf'), data.message);
+                        mapped = true;
+                    }
+                    
+                    if (msg.includes('whatsapp') || msg.includes('telefone')) {
+                        showFieldError(document.getElementById('whatsapp'), data.message);
+                        mapped = true;
+                    }
+                    
+                    if (!mapped) {
+                        showFormError(form, data.message || 'Erro desconhecido ao cadastrar.');
+                    }
                 }
-            } catch (error) {
-                console.error('Erro no cadastro:', error);
-                alert('Erro ao processar cadastro. Tente novamente.');
-            } finally {
+            })
+            .catch((error) => {
+                console.error('Erro:', error);
+                showFormError(form, 'Erro de conexão com o servidor. Verifique se o backend está rodando.');
+            })
+            .finally(() => {
                 // Restaurar botão
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
-            }
+            });
         });
     </script>
 </body>

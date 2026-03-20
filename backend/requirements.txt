@@ -23,3 +23,6 @@ pytest-cov>=4.0.0
 # Para formatação de código (opcional)
 black>=22.0.0
 flake8>=5.0.0
+
+# Conector MySQL
+mysql-connector-python>=8.0.0

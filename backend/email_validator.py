@@ -5,7 +5,7 @@ EasyCut - Validador de Email
 Validação de emails usando a biblioteca email-validator
 """
 
-from email_validator import validate_email, EmailNotValidError
+import email_validator as ext_email_validator
 import re
 from typing import Tuple, Dict, Any
 
@@ -70,7 +70,7 @@ class EmailValidator:
                 return result
             
             # Validação avançada com email-validator
-            validated_email = validate_email(
+            validated_email = ext_email_validator.validate_email(
                 email,
                 check_deliverability=check_deliverability
             )
@@ -86,7 +86,7 @@ class EmailValidator:
                 'smtputf8': validated_email.smtputf8
             }
             
-        except EmailNotValidError as e:
+        except ext_email_validator.EmailNotValidError as e:
             result['error_message'] = str(e)
             result['validation_details']['error_code'] = e.code
             

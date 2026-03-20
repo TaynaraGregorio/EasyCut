@@ -5,23 +5,27 @@
 
 class EmailService {
     constructor() {
-        // Configuração EmailJS - SUBSTITUA PELOS SEUS VALORES
-        this.emailjsConfig = {
-            serviceId: 'service_easycut', // Substitua pelo seu Service ID
-            templateIdConfirmation: 'template_confirmation', // Template de confirmação
-            templateIdPasswordReset: 'template_password_reset', // Template de recuperação
-            userId: 'user_easycut' // Substitua pelo seu User ID
-        };
-        
         // URL que funciona em qualquer ambiente
         this.baseUrl = this.getWorkingUrl();
+// Exemplo de como deve ficar no seu Login.html (dentro do script)
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    // ... pegar email e senha ...
+    
+    // Adicione 'await' aqui
+    const result = await emailService.authenticateUser(email, senha);
+    
+    if (result.success) {
+        window.location.href = 'TelaInicial.html'; // ou para onde deve ir
+    } else {
+        alert(result.message);
+    }
+});
+        this.apiUrl = 'http://localhost:5001'; // URL da API Backend
         this.isEmailJSLoaded = false;
         
         // Inicializar dados de usuários no localStorage se não existirem
         this.initUserData();
-        
-        // Verificar se EmailJS está carregado
-        this.checkEmailJS();
     }
     
     /**
@@ -111,19 +115,6 @@ class EmailService {
         }
     }
     
-    checkEmailJS() {
-        // Verificar se EmailJS está disponível
-        if (typeof emailjs !== 'undefined') {
-            this.isEmailJSLoaded = true;
-            emailjs.init(this.emailjsConfig.userId);
-            console.log('✅ EmailJS carregado com sucesso!');
-            console.log('📧 Pronto para enviar emails reais!');
-        } else {
-            console.log('⚠️ EmailJS não encontrado. Usando modo simulação.');
-            console.log('🔧 Para envio real, configure EmailJS primeiro.');
-        }
-    }
-    
     /**
      * Envia email de confirmação para novo usuário
      */
@@ -142,40 +133,8 @@ class EmailService {
             // Salvar token de confirmação
             this.saveEmailToken(token, tempUser, 'confirmation');
             
-            if (this.isEmailJSLoaded) {
-                // ENVIO REAL COM EMAILJS
-                const templateParams = {
-                    to_email: userData.email,
-                    to_name: userData.nomeCompleto || userData.nomeBarbearia || 'Usuário',
-                    confirmation_link: confirmationLink,
-                    from_name: 'EasyCut'
-                };
-                
-                try {
-                    await emailjs.send(
-                        this.emailjsConfig.serviceId,
-                        this.emailjsConfig.templateIdConfirmation,
-                        templateParams
-                    );
-                    
-                    console.log('✅ Email de confirmação enviado via EmailJS!');
-                    console.log('📧 Email enviado para:', userData.email);
-                    
-                    return {
-                        success: true,
-                        message: 'Email de confirmação enviado! Verifique sua caixa de entrada.',
-                        token: token
-                    };
-                    
-                } catch (emailError) {
-                    console.error('Erro ao enviar email via EmailJS:', emailError);
-                    // Fallback para modo simulação
-                    return this.fallbackConfirmation(userData, confirmationLink, token);
-                }
-            } else {
-                // Modo simulação (fallback)
-                return this.fallbackConfirmation(userData, confirmationLink, token);
-            }
+            // Modo simulação (fallback)
+            return this.fallbackConfirmation(userData, confirmationLink, token);
             
         } catch (error) {
             console.error('Erro ao processar confirmação:', error);
@@ -191,45 +150,8 @@ class EmailService {
      */
     async sendAppointmentConfirmationEmail(appointmentData) {
         try {
-            if (this.isEmailJSLoaded) {
-                // ENVIO REAL COM EMAILJS
-                const templateParams = {
-                    to_email: appointmentData.clienteEmail,
-                    to_name: appointmentData.clienteNome,
-                    barbearia_name: appointmentData.barbeariaName,
-                    barbearia_address: appointmentData.barbeariaAddress,
-                    appointment_date: appointmentData.data,
-                    appointment_time: appointmentData.horario,
-                    services: appointmentData.servicos.join(', '),
-                    total_price: appointmentData.precoTotal,
-                    from_name: 'EasyCut'
-                };
-                
-                try {
-                    await emailjs.send(
-                        this.emailjsConfig.serviceId,
-                        this.emailjsConfig.templateIdAppointment, // Novo template
-                        templateParams
-                    );
-                    
-                    console.log('✅ Email de agendamento enviado via EmailJS!');
-                    console.log('📧 Email enviado para:', appointmentData.clienteEmail);
-                    
-                    return {
-                        success: true,
-                        message: 'Email de confirmação de agendamento enviado!',
-                        appointmentId: appointmentData.id
-                    };
-                    
-                } catch (emailError) {
-                    console.error('Erro ao enviar email de agendamento via EmailJS:', emailError);
-                    // Fallback para modo simulação
-                    return this.fallbackAppointmentConfirmation(appointmentData);
-                }
-            } else {
-                // Modo simulação (fallback)
-                return this.fallbackAppointmentConfirmation(appointmentData);
-            }
+            // Modo simulação (fallback)
+            return this.fallbackAppointmentConfirmation(appointmentData);
             
         } catch (error) {
             console.error('Erro ao processar confirmação de agendamento:', error);
@@ -279,40 +201,8 @@ class EmailService {
             // Salvar token de recuperação
             this.savePasswordToken(token, email);
             
-            if (this.isEmailJSLoaded) {
-                // ENVIO REAL COM EMAILJS
-                const templateParams = {
-                    to_email: email,
-                    to_name: user.nomeCompleto || user.nomeBarbearia || 'Usuário',
-                    reset_link: resetLink,
-                    from_name: 'EasyCut'
-                };
-                
-                try {
-                    await emailjs.send(
-                        this.emailjsConfig.serviceId,
-                        this.emailjsConfig.templateIdPasswordReset,
-                        templateParams
-                    );
-                    
-                    console.log('✅ Email de recuperação enviado via EmailJS!');
-                    console.log('📧 Email enviado para:', email);
-                    
-                    return {
-                        success: true,
-                        message: 'Email de recuperação enviado! Verifique sua caixa de entrada.',
-                        token: token
-                    };
-                    
-                } catch (emailError) {
-                    console.error('Erro ao enviar email via EmailJS:', emailError);
-                    // Fallback para modo simulação
-                    return this.fallbackPasswordReset(email, resetLink, token);
-                }
-            } else {
-                // Modo simulação (fallback)
-                return this.fallbackPasswordReset(email, resetLink, token);
-            }
+            // Modo simulação (fallback)
+            return this.fallbackPasswordReset(email, resetLink, token);
             
         } catch (error) {
             console.error('Erro ao enviar email de recuperação:', error);
@@ -466,9 +356,81 @@ class EmailService {
     /**
      * Autentica usuário (login)
      */
-    authenticateUser(email, password) {
+    async authenticateUser(email, password) {
         try {
-            const users = JSON.parse(localStorage.getItem('users'));
+            // 1. Tentar autenticação via API (Banco de Dados)
+            try {
+                const response = await fetch(`${this.apiUrl}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, senha: password })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        // Salvar sessão no localStorage para persistência
+                        localStorage.setItem('currentUser', JSON.stringify(data.user));
+                        localStorage.setItem('userType', data.user.tipo);
+                        return data;
+                    }
+                }
+            } catch (apiError) {
+                console.log('API offline ou erro de conexão, tentando método local...', apiError);
+            }
+
+            // Credenciais especiais para acesso direto (demo/teste)
+            const demoCredentials = {
+                'barbearia@gmail.com': {
+                    password: 'barbearia123',
+                    tipo: 'barbearia',
+                    nomeBarbearia: 'Barbearia Demo',
+                    email: 'barbearia@gmail.com',
+                    emailVerified: true
+                },
+                'cliente@gmail.com': {
+                    password: 'cliente123',
+                    tipo: 'cliente',
+                    nomeCompleto: 'Cliente Demo',
+                    email: 'cliente@gmail.com',
+                    emailVerified: true
+                }
+            };
+            
+            // Verificar se é uma credencial demo
+            if (demoCredentials[email]) {
+                const demoUser = demoCredentials[email];
+                if (demoUser.password === password) {
+                    // Criar objeto de usuário completo
+                    const user = {
+                        ...demoUser,
+                        senha: password,
+                        lastLogin: new Date().toISOString(),
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    // Salvar informações do usuário no localStorage
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    localStorage.setItem('userType', user.tipo);
+                    localStorage.setItem('userName', user.nomeCompleto || user.nomeBarbearia || user.email);
+                    
+                    console.log('✅ Login demo realizado:', user.tipo);
+                    
+                    return {
+                        success: true,
+                        message: 'Login realizado com sucesso!',
+                        user: user
+                    };
+                } else {
+                    return {
+                        success: false,
+                        message: 'Senha incorreta.'
+                    };
+                }
+            }
+            
+            // Autenticação normal (buscar no localStorage)
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
             const user = users.find(u => u.email === email && u.emailVerified);
             
             if (!user) {
@@ -552,21 +514,6 @@ class EmailService {
     /**
      * Configurar EmailJS (método público)
      */
-    configureEmailJS(serviceId, templateIdConfirmation, templateIdPasswordReset, templateIdAppointment, userId) {
-        this.emailjsConfig = {
-            serviceId: serviceId,
-            templateIdConfirmation: templateIdConfirmation,
-            templateIdPasswordReset: templateIdPasswordReset,
-            templateIdAppointment: templateIdAppointment,
-            userId: userId
-        };
-        
-        if (typeof emailjs !== 'undefined') {
-            emailjs.init(userId);
-            this.isEmailJSLoaded = true;
-            console.log('✅ EmailJS configurado com sucesso!');
-        }
-    }
 }
 
 // Instância global do serviço de email

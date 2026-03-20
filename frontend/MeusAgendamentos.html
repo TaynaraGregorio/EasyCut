@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meus Agendamentos - EasyCut</title>
+    <link rel="icon" href="imagens/favicon001.png" type="image/png">
     <style>
         * {
             margin: 0;
@@ -1183,7 +1184,7 @@
     </div>
 
     <script>
-        // Dados dos agendamentos (mock)
+        const API_BASE = 'http://localhost:5001';
         let allAppointments = [];
         let filteredAppointments = [];
 
@@ -1192,46 +1193,57 @@
         let rescheduleSelectedDate = null;
         let rescheduleSelectedTime = null;
 
-        // Função para gerar dados mock de agendamentos
-        function generateMockAppointments() {
-            const barbearias = [
-                "Barbearia do João", "Corte & Estilo", "Barbearia Moderna", 
-                "Estilo Masculino", "Barbearia Clássica", "Corte Premium"
-            ];
-            
-            const services = [
-                "Corte masculino", "Barba", "Sobrancelha", "Design de sobrancelhas",
-                "Barboterapia", "Massagem facial", "Tratamentos capilares"
-            ];
-            
-            const statuses = ["confirmed", "pending", "cancelled", "completed"];
-            
-            const appointments = [];
-            const today = new Date();
-            
-            for (let i = 0; i < 15; i++) {
-                const randomDays = Math.floor(Math.random() * 30) - 10; // -10 a +20 dias
-                const appointmentDate = new Date(today);
-                appointmentDate.setDate(today.getDate() + randomDays);
-                
-                const randomHour = 8 + Math.floor(Math.random() * 12); // 8h às 20h
-                const randomMinute = Math.floor(Math.random() * 4) * 15; // 0, 15, 30, 45
-                
-                appointments.push({
-                    id: `appointment_${i + 1}`,
-                    barbearia: barbearias[Math.floor(Math.random() * barbearias.length)],
-                    service: services[Math.floor(Math.random() * services.length)],
-                    date: appointmentDate.toISOString().split('T')[0],
-                    time: `${randomHour.toString().padStart(2, '0')}:${randomMinute.toString().padStart(2, '0')}`,
-                    status: statuses[Math.floor(Math.random() * statuses.length)],
-                    price: (30 + Math.floor(Math.random() * 50)).toFixed(2),
-                    duration: 30 + Math.floor(Math.random() * 3) * 15, // 30, 45, 60, 75 min
-                    notes: Math.random() > 0.7 ? "Observações especiais do cliente" : "",
-                    createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
-                });
+        function getClienteId() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const userType = localStorage.getItem('userType') || '';
+            if (userType !== 'cliente' || !currentUser.id) return null;
+            return parseInt(currentUser.id, 10);
+        }
+
+        // Carrega agendamentos do cliente do banco (lista vazia se não tiver nenhum)
+        async function loadAgendamentosFromApi() {
+            const clienteId = getClienteId();
+            if (!clienteId) {
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'block';
+                document.getElementById('emptyState').querySelector('.empty-state-title').textContent = 'Faça login como cliente';
+                document.getElementById('emptyState').querySelector('.empty-state-text').textContent = 'Para ver seus agendamentos, faça login com sua conta de cliente.';
+                allAppointments = [];
+                filteredAppointments = [];
+                renderStats();
+                renderAppointments();
+                return;
             }
-            
-            return appointments.sort((a, b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('emptyState').style.display = 'none';
+            try {
+                const response = await fetch(`${API_BASE}/api/clientes/${clienteId}/agendamentos`);
+                const data = await response.json();
+                if (data.success && data.agendamentos) {
+                    allAppointments = data.agendamentos.map(a => ({
+                        id: a.id,
+                        barbearia: a.barbearia || '',
+                        service: a.service || '',
+                        date: a.date || '',
+                        time: a.time || '',
+                        status: a.status || 'pending',
+                        price: a.price != null ? String(a.price) : '0',
+                        duration: a.duration != null ? a.duration : 30,
+                        notes: a.notes || '',
+                        rating: a.rating
+                    }));
+                } else {
+                    allAppointments = [];
+                }
+            } catch (err) {
+                console.error(err);
+                allAppointments = [];
+            }
+            filteredAppointments = [...allAppointments];
+            document.getElementById('loadingState').style.display = 'none';
+            renderStats();
+            renderAppointments();
+            if (typeof populateBarbeariaFilter === 'function') populateBarbeariaFilter();
         }
 
         // Função para formatar data
@@ -1379,7 +1391,7 @@
                         ` : ''}
                         ${appointment.status === 'completed' ? `
                             ${appointment.rating ? `
-                                <button class="btn btn-secondary btn-small" onclick="viewAppointmentDetails('${appointment.id}')">
+                                <button class="btn btn-secondary btn-small" onclick="viewAppointmentDetails('${appointment.id}', 'rating')">
                                     👁️ Ver Avaliação
                                 </button>
                             ` : `
@@ -1388,7 +1400,7 @@
                                 </button>
                             `}
                         ` : ''}
-                        <button class="btn btn-secondary btn-small" onclick="viewAppointmentDetails('${appointment.id}')">
+                        <button class="btn btn-secondary btn-small" onclick="viewAppointmentDetails('${appointment.id}', 'details')">
                             👁️ Detalhes
                         </button>
                     </div>
@@ -1603,22 +1615,31 @@
             }
         }
 
-        // Função para prosseguir com o cancelamento
-        function proceedWithCancel(appointmentId) {
+        // Função para prosseguir com o cancelamento (atualiza no banco)
+        async function proceedWithCancel(appointmentId) {
             const appointment = allAppointments.find(a => a.id === appointmentId);
             if (!appointment) return;
 
-            // Atualizar status do agendamento
-            appointment.status = 'cancelled';
-
-            // Fechar modal
             cancelCancelConfirmation();
 
-            // Atualizar lista
-            applyFilters();
-
-            // Mostrar mensagem de sucesso
-            showSuccessMessage('Agendamento cancelado com sucesso!');
+            try {
+                const response = await fetch(`${API_BASE}/api/agendamentos/${appointmentId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'cancelled' })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    appointment.status = 'cancelled';
+                    applyFilters();
+                    showSuccessMessage('Agendamento cancelado com sucesso!');
+                } else {
+                    alert('Erro ao cancelar: ' + (data.message || 'Tente novamente.'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Erro de conexão ao cancelar.');
+            }
         }
 
         // Função para reagendar
@@ -2580,32 +2601,6 @@
                                 transition: all 0.3s ease;
                             "></textarea>
                         </div>
-                        
-                        <!-- Seção adicional para demonstrar scroll -->
-                        <div style="background: rgba(15, 23, 42, 0.4); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-                            <h5 style="color: #f1f5f9; margin-bottom: 12px; font-size: 1rem;">📝 Informações Adicionais</h5>
-                            <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 8px;">
-                                • Tempo de espera: Satisfatório
-                            </p>
-                            <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 8px;">
-                                • Ambiente: Limpo e organizado
-                            </p>
-                            <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 8px;">
-                                • Atendimento: Cordial e profissional
-                            </p>
-                            <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 8px;">
-                                • Qualidade do serviço: Excelente
-                            </p>
-                        </div>
-                        
-                        <!-- Seção de sugestões -->
-                        <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-                            <h5 style="color: #22c55e; margin-bottom: 12px; font-size: 1rem;">💡 Sugestões</h5>
-                            <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 8px;">
-                                Sua avaliação nos ajuda a melhorar nossos serviços. 
-                                Compartilhe sugestões ou elogios específicos sobre sua experiência.
-                            </p>
-                        </div>
                     </div>
                     
                     <div style="display: flex; gap: 12px;">
@@ -2644,10 +2639,32 @@
             document.body.appendChild(ratingModal);
             
             // Configurar eventos das estrelas
-            setupStarRating();
+            setupStarRating(appointment.rating || 0);
             
             // Configurar funcionalidade de arrastar
             setupModalDrag(ratingModal);
+            
+            // Preencher dados se for edição
+            if (appointment.rating) {
+                const ratingText = document.getElementById('ratingText');
+                const submitBtn = document.getElementById('submitRatingBtn');
+                const commentInput = document.getElementById('ratingComment');
+                
+                const ratingTexts = {
+                    1: 'Péssimo', 2: 'Ruim', 3: 'Regular', 4: 'Bom', 5: 'Excelente'
+                };
+                ratingText.textContent = ratingTexts[appointment.rating];
+                
+                if (appointment.ratingComment) {
+                    commentInput.value = appointment.ratingComment;
+                }
+                
+                submitBtn.disabled = false;
+                submitBtn.style.background = 'linear-gradient(135deg, #fbbf24, #f59e0b)';
+                submitBtn.style.color = 'white';
+                submitBtn.style.cursor = 'pointer';
+                submitBtn.textContent = '💾 Salvar Alterações';
+            }
             
             // Animar entrada
             setTimeout(() => {
@@ -2826,11 +2843,11 @@
         }
 
         // Função para configurar sistema de estrelas
-        function setupStarRating() {
+        function setupStarRating(initialRating = 0) {
             const stars = document.querySelectorAll('.star');
             const ratingText = document.getElementById('ratingText');
             const submitBtn = document.getElementById('submitRatingBtn');
-            let currentRating = 0;
+            let currentRating = initialRating;
             
             const ratingTexts = {
                 1: 'Péssimo',
@@ -2869,6 +2886,9 @@
                     }
                 });
             }
+            
+            // Inicializar estado visual
+            highlightStars(currentRating);
         }
 
         // Função para cancelar avaliação
@@ -2886,7 +2906,7 @@
         }
 
         // Função para enviar avaliação
-        function submitRating(appointmentId) {
+        async function submitRating(appointmentId) {
             const appointment = allAppointments.find(a => a.id === appointmentId);
             if (!appointment) return;
 
@@ -2907,32 +2927,60 @@
                 return;
             }
 
-            // Salvar avaliação
-            appointment.rating = rating;
-            appointment.ratingComment = comment;
-            appointment.ratedAt = new Date().toISOString();
+            try {
+                const submitBtn = document.getElementById('submitRatingBtn');
+                if(submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Enviando...';
+                }
 
-            // Fechar modal
-            const modal = document.getElementById('ratingModal');
-            if (modal) {
-                // Disparar evento de fechamento para limpar event listeners
-                modal.dispatchEvent(new CustomEvent('modalClose'));
+                const response = await fetch(`${API_BASE}/api/agendamentos/${appointmentId}/avaliacao`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rating: rating, comment: comment })
+                });
                 
-                modal.style.opacity = '0';
-                setTimeout(() => {
-                    document.body.removeChild(modal);
-                }, 300);
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Atualizar objeto local para refletir na UI imediatamente
+                    appointment.rating = rating;
+                    appointment.ratingComment = comment;
+                    appointment.ratedAt = new Date().toISOString();
+
+                    // Fechar modal
+                    const modal = document.getElementById('ratingModal');
+                    if (modal) {
+                        modal.dispatchEvent(new CustomEvent('modalClose'));
+                        modal.style.opacity = '0';
+                        setTimeout(() => {
+                            document.body.removeChild(modal);
+                        }, 300);
+                    }
+
+                    // Atualizar lista
+                    applyFilters();
+                    showSuccessMessage('Avaliação enviada com sucesso! Obrigado pelo feedback.');
+                } else {
+                    alert('Erro ao enviar avaliação: ' + data.message);
+                    if(submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '⭐ Enviar Avaliação';
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Erro de conexão ao enviar avaliação.');
+                const submitBtn = document.getElementById('submitRatingBtn');
+                if(submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '⭐ Enviar Avaliação';
+                }
             }
-
-            // Atualizar lista
-            applyFilters();
-
-            // Mostrar mensagem de sucesso
-            showSuccessMessage('Avaliação enviada com sucesso! Obrigado pelo feedback.');
         }
 
         // Função para ver detalhes
-        function viewAppointmentDetails(appointmentId) {
+        function viewAppointmentDetails(appointmentId, mode = 'details') {
             const appointment = allAppointments.find(a => a.id === appointmentId);
             if (!appointment) return;
 
@@ -3042,11 +3090,13 @@
                 `;
             } else if (appointment.status === 'completed') {
                 if (appointment.rating) {
-                    actionsHTML = `
-                        <button class="btn btn-secondary modal-btn" onclick="closeModal()">
-                            ✅ Fechar
-                        </button>
-                    `;
+                    if (mode === 'rating') {
+                        actionsHTML = `
+                            <button class="btn btn-primary modal-btn" onclick="editRatingFromModal('${appointment.id}')">
+                                ✏️ Editar Avaliação
+                            </button>
+                        `;
+                    }
                 } else {
                     actionsHTML = `
                         <button class="btn btn-success modal-btn" onclick="rateAppointmentFromModal('${appointment.id}')">
@@ -3088,6 +3138,11 @@
         }
 
         function rateAppointmentFromModal(appointmentId) {
+            closeModal();
+            rateAppointment(appointmentId);
+        }
+
+        function editRatingFromModal(appointmentId) {
             closeModal();
             rateAppointment(appointmentId);
         }
@@ -3151,7 +3206,7 @@
                     }
                 } catch (error) {
                     console.error('Erro no fallback:', error);
-                    window.location.href = 'TelaInicial.html';
+                    window.location.href = 'Login.html';
                 }
             }
         }
@@ -3167,18 +3222,8 @@
                 });
             }
             
-            // Mostrar loading
             document.getElementById('loadingState').style.display = 'block';
-            
-            // Simular carregamento
-            setTimeout(() => {
-                allAppointments = generateMockAppointments();
-                filteredAppointments = [...allAppointments];
-                
-                renderStats();
-                renderAppointments();
-                populateBarbeariaFilter();
-            }, 1000);
+            loadAgendamentosFromApi();
         });
     </script>
 </body>

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>EasyCut - Confirmar Email</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="imagens/favicon001.png" type="image/png">
     <style>
         body {
             margin: 0;
@@ -237,17 +238,16 @@
             <a href="Login.html" class="btn btn-success" id="loginBtn">
                 <span>🚀</span> Fazer Login
             </a>
-            <a href="TelaInicial.html" class="btn btn-secondary">
+            <a href="Login.html" class="btn btn-secondary">
                 <span>🏠</span> Página Inicial
             </a>
         </div>
         
-        <a href="TelaInicial.html" class="back-link">
+        <a href="Login.html" class="back-link">
             ← Voltar para início
         </a>
     </div>
 
-    <script src="assets/email-service-real.js"></script>
     <script src="assets/confirmation-fix.js"></script>
     <script src="assets/link-test.js"></script>
     <script>
@@ -271,13 +271,11 @@
             
             // Confirmar email
             setTimeout(() => {
-                const result = emailService.confirmEmail(token);
+                // Funcionalidade de email removida
+                // const result = emailService.confirmEmail(token);
                 
-                if (result.success) {
-                    showSuccess(result.message, result.user);
-                } else {
-                    showError(result.message);
-                }
+                // Simular sucesso
+                showSuccess('Email confirmado com sucesso! (Simulação)', null);
             }, 2000); // Simular delay de processamento
             
             function showSuccess(message, user) {
@@ -304,10 +302,10 @@
                 
                 // Mostrar botão para reenviar confirmação
                 actionButtons.innerHTML = `
-                    <a href="TelaInicial.html" class="btn btn-primary">
+                    <a href="Login.html" class="btn btn-primary">
                         <span>🔄</span> Tentar Novamente
                     </a>
-                    <a href="TelaInicial.html" class="btn btn-secondary">
+                    <a href="Login.html" class="btn btn-secondary">
                         <span>🏠</span> Página Inicial
                     </a>
                 `;

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>EasyCut - Dashboard Barbearia</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="imagens/favicon001.png" type="image/png">
     <style>
         body {
             margin: 0;
@@ -309,6 +310,27 @@
             color: #64748b;
             font-size: 0.8rem;
         }
+
+        /* Scrollbar para Atividade Recente */
+        #recentActivity {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        #recentActivity::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #recentActivity::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 3px;
+        }
+
+        #recentActivity::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.5);
+            border-radius: 3px;
+        }
         
         /* Menu Overlay */
         .menu-overlay {
@@ -352,13 +374,42 @@
             padding: 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
+            position: relative;
         }
         
         .menu-user-info {
             display: flex;
             align-items: center;
             gap: 12px;
+            margin-top: 60px;
             margin-bottom: 16px;
+        }
+
+        .menu-back-button {
+            position: absolute;
+            left: 16px;
+            top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: rgba(15, 23, 42, 0.9);
+            color: #e2e8f0;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .menu-back-button span {
+            font-size: 1rem;
+        }
+
+        .menu-back-button:hover {
+            background: rgba(30, 64, 175, 0.9);
+            border-color: rgba(59, 130, 246, 0.7);
+            color: #fff;
         }
         
         .menu-avatar {
@@ -464,6 +515,99 @@
             color: #ef4444;
         }
         
+        /* Modal de Logout */
+        .logout-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .logout-modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .logout-modal {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 32px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .logout-modal-overlay.active .logout-modal {
+            transform: scale(1);
+        }
+
+        .logout-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .logout-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 12px;
+        }
+
+        .logout-message {
+            color: #94a3b8;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .logout-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-logout {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            flex: 1;
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+        }
+
         /* Responsividade */
         @media (max-width: 768px) {
             .header-content {
@@ -552,6 +696,18 @@
                 <h3 class="action-title">Horários</h3>
                 <p class="action-description">Configure os horários de funcionamento</p>
             </div>
+            
+            <div class="action-card" onclick="handleAction('reviews')">
+                <span class="action-icon">⭐</span>
+                <h3 class="action-title">Avaliações</h3>
+                <p class="action-description">Visualize e responda às avaliações dos clientes</p>
+            </div>
+
+            <div class="action-card" onclick="handleAction('nearbyBarbers')">
+                <span class="action-icon">📍</span>
+                <h3 class="action-title">Barbearias Próximas</h3>
+                <p class="action-description">Visualize barbearias próximas e seus detalhes</p>
+            </div>
         </div>
 
         <!-- Stats Section -->
@@ -581,30 +737,7 @@
         <div class="recent-section">
             <h2 class="recent-title">Atividade Recente</h2>
             <div id="recentActivity">
-                <div class="recent-item">
-                    <div class="recent-icon">📅</div>
-                    <div class="recent-content">
-                        <h4>Novo agendamento</h4>
-                        <p>João Silva - Corte + Barba às 14:00</p>
-                    </div>
-                    <div class="recent-date">10 min atrás</div>
-                </div>
-                <div class="recent-item">
-                    <div class="recent-icon">⭐</div>
-                    <div class="recent-content">
-                        <h4>Nova avaliação</h4>
-                        <p>Pedro Santos - 5 estrelas</p>
-                    </div>
-                    <div class="recent-date">1 hora atrás</div>
-                </div>
-                <div class="recent-item">
-                    <div class="recent-icon">💰</div>
-                    <div class="recent-content">
-                        <h4>Pagamento recebido</h4>
-                        <p>R$ 45,00 - Serviço completo</p>
-                    </div>
-                    <div class="recent-date">2 horas atrás</div>
-                </div>
+                <p style="text-align: center; color: #94a3b8; padding: 20px;">Carregando atividades...</p>
             </div>
         </div>
     </div>
@@ -615,6 +748,10 @@
     <!-- Menu Panel -->
     <div class="menu-panel" id="menuPanel">
         <div class="menu-header">
+            <button type="button" class="menu-back-button" id="menuBackButton">
+                <span>←</span>
+                <span>Voltar</span>
+            </button>
             <div class="menu-user-info">
                 <div class="menu-avatar" id="menuUserAvatar">B</div>
                 <div class="menu-user-details">
@@ -629,6 +766,19 @@
         </div>
     </div>
 
+    <!-- Modal de Logout -->
+    <div class="logout-modal-overlay" id="logoutModal">
+        <div class="logout-modal">
+            <div class="logout-icon">🚪</div>
+            <h3 class="logout-title">Sair da Conta</h3>
+            <p class="logout-message">Tem certeza que deseja sair? Você precisará fazer login novamente para acessar sua conta.</p>
+            <div class="logout-actions">
+                <button class="btn-logout btn-cancel" onclick="dashboard.closeLogoutModal()">Cancelar</button>
+                <button class="btn-logout btn-confirm" onclick="dashboard.confirmLogout()">Sair</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         class BarbeariaDashboard {
             constructor() {
@@ -636,11 +786,13 @@
                 this.menuOverlay = document.getElementById('menuOverlay');
                 this.menuPanel = document.getElementById('menuPanel');
                 this.menuContent = document.getElementById('menuContent');
+                this.menuBackButton = document.getElementById('menuBackButton');
                 this.userAvatar = document.getElementById('userAvatar');
                 this.userName = document.getElementById('userName');
                 this.menuUserAvatar = document.getElementById('menuUserAvatar');
                 this.menuUserName = document.getElementById('menuUserName');
                 this.isMenuOpen = false;
+                this.API_BASE_URL = 'http://localhost:5001/api';
                 
                 this.init();
             }
@@ -648,8 +800,8 @@
             init() {
                 this.setupEventListeners();
                 this.loadUserData();
-                this.loadStats();
                 this.renderMenuContent();
+                this.loadStats();
             }
             
             setupEventListeners() {
@@ -662,6 +814,13 @@
                 this.menuOverlay.addEventListener('click', () => {
                     this.closeMenu();
                 });
+
+                // Botão de voltar/fechar no topo do menu (especialmente útil no celular)
+                if (this.menuBackButton) {
+                    this.menuBackButton.addEventListener('click', () => {
+                        this.closeMenu();
+                    });
+                }
                 
                 // Fechar menu com ESC
                 document.addEventListener('keydown', (e) => {
@@ -697,20 +856,199 @@
             
             loadUserData() {
                 const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-                const userName = currentUser.nomeBarbearia || 'Barbearia';
+                // Tenta obter o nome de várias fontes: propriedade 'nome' (API), 'nomeBarbearia' (Demo/Legacy) ou localStorage
+                const userName = currentUser.nome || currentUser.nomeBarbearia || localStorage.getItem('userName') || 'Barbearia';
                 
                 this.userName.textContent = userName;
                 this.menuUserName.textContent = userName;
-                this.userAvatar.textContent = userName.charAt(0).toUpperCase();
-                this.menuUserAvatar.textContent = userName.charAt(0).toUpperCase();
+                
+                if (currentUser.foto) {
+                    this.userAvatar.textContent = '';
+                    this.userAvatar.style.backgroundImage = `url('${currentUser.foto}')`;
+                    this.userAvatar.style.backgroundSize = 'cover';
+                    this.userAvatar.style.backgroundPosition = 'center';
+                    
+                    this.menuUserAvatar.textContent = '';
+                    this.menuUserAvatar.style.backgroundImage = `url('${currentUser.foto}')`;
+                    this.menuUserAvatar.style.backgroundSize = 'cover';
+                    this.menuUserAvatar.style.backgroundPosition = 'center';
+                } else {
+                    this.userAvatar.textContent = userName.charAt(0).toUpperCase();
+                    this.menuUserAvatar.textContent = userName.charAt(0).toUpperCase();
+                }
             }
             
-            loadStats() {
-                // Simular dados de estatísticas
-                document.getElementById('todayAppointments').textContent = '8';
-                document.getElementById('monthlyRevenue').textContent = 'R$ 2.400';
-                document.getElementById('averageRating').textContent = '4.7';
-                document.getElementById('totalClients').textContent = '156';
+            async loadStats() {
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                if (!currentUser.id) return;
+
+                try {
+                    // 1. Carregar Agendamentos
+                    const response = await fetch(`${this.API_BASE_URL}/barbearias/${currentUser.id}/agendamentos`);
+                    const data = await response.json();
+                    
+                    let appointments = [];
+                    if (data.success && data.agendamentos) {
+                        appointments = data.agendamentos;
+                    }
+
+                    // 2. Carregar Avaliações
+                    const reviewsResponse = await fetch(`${this.API_BASE_URL}/barbearias/${currentUser.id}/avaliacoes`);
+                    const reviewsData = await reviewsResponse.json();
+                    
+                    let reviews = [];
+                    if (reviewsData.success && reviewsData.reviews) {
+                        reviews = reviewsData.reviews;
+                    }
+
+                    // Calcular e Renderizar Estatísticas
+                    this.calculateAndRenderStats(appointments, reviews);
+                    
+                    // Renderizar Atividade Recente
+                    this.renderRecentActivity(appointments, reviews);
+                    
+                    // Atualizar badge do menu
+                    const badge = document.getElementById('menuAppointmentsBadge');
+                    if (badge) badge.textContent = appointments.length;
+
+                } catch (error) {
+                    console.error('Erro ao carregar dados do dashboard:', error);
+                }
+            }
+
+            calculateAndRenderStats(appointments, reviews) {
+                const now = new Date();
+                const todayStr = now.toISOString().split('T')[0];
+                const currentMonth = now.getMonth();
+                const currentYear = now.getFullYear();
+
+                // Agendamentos Hoje
+                const todayCount = appointments.filter(a => a.date === todayStr).length;
+                document.getElementById('todayAppointments').textContent = todayCount;
+
+                // Receita Mensal (apenas concluídos)
+                const monthlyRevenue = appointments.reduce((acc, curr) => {
+                    const apptDate = new Date(curr.date);
+                    const isCompleted = curr.status === 'completed' || curr.status === 'concluído';
+                    const isThisMonth = apptDate.getMonth() === currentMonth && apptDate.getFullYear() === currentYear;
+                    
+                    if (isCompleted && isThisMonth) {
+                        return acc + (parseFloat(curr.totalPrice) || 0);
+                    }
+                    return acc;
+                }, 0);
+                document.getElementById('monthlyRevenue').textContent = `R$ ${monthlyRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+
+                // Avaliação Média
+                let avgRating = 0;
+                if (reviews.length > 0) {
+                    const totalRating = reviews.reduce((acc, curr) => acc + (parseFloat(curr.rating) || 0), 0);
+                    avgRating = totalRating / reviews.length;
+                }
+                document.getElementById('averageRating').textContent = avgRating.toFixed(1);
+
+                // Clientes Ativos (únicos por nome)
+                const uniqueClients = new Set(appointments.map(a => a.clientName));
+                document.getElementById('totalClients').textContent = uniqueClients.size;
+            }
+
+            renderRecentActivity(appointments, reviews) {
+                const activityContainer = document.getElementById('recentActivity');
+                if (!activityContainer) return;
+
+                let activities = [];
+
+                // Processar agendamentos
+                appointments.forEach(appt => {
+                    let dateTimeStr = appt.date;
+                    if (appt.time) dateTimeStr += `T${appt.time}`;
+                    const dateTime = new Date(dateTimeStr);
+
+                    let title = 'Novo agendamento';
+                    let icon = '📅';
+                    
+                    if (appt.status === 'completed' || appt.status === 'concluído') {
+                        title = 'Serviço concluído';
+                        icon = '💰';
+                    } else if (appt.status === 'cancelled' || appt.status === 'cancelado') {
+                        title = 'Agendamento cancelado';
+                        icon = '❌';
+                    }
+
+                    activities.push({
+                        date: dateTime,
+                        title: title,
+                        description: `${appt.clientName} - ${appt.services.join(', ')}`,
+                        icon: icon
+                    });
+                });
+
+                // Processar avaliações
+                reviews.forEach(review => {
+                    const reviewDate = new Date(review.date); 
+                    activities.push({
+                        date: reviewDate,
+                        title: 'Nova avaliação',
+                        description: `${review.clientName} - ${review.rating} estrelas`,
+                        icon: '⭐'
+                    });
+                });
+
+                // Filtrar atividades (últimas 48 horas e futuras)
+                const now = new Date();
+                const cutoffTime = new Date(now.getTime() - (48 * 60 * 60 * 1000));
+
+                activities = activities.filter(activity => {
+                    return activity.date >= cutoffTime;
+                });
+
+                // Ordenar por data decrescente
+                activities.sort((a, b) => b.date - a.date);
+
+                // Mostrar mais atividades com rolagem (limite de 50)
+                const recent = activities.slice(0, 50);
+
+                if (recent.length === 0) {
+                    activityContainer.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 20px;">Nenhuma atividade nas últimas 48 horas.</p>';
+                    return;
+                }
+
+                activityContainer.innerHTML = recent.map(item => `
+                    <div class="recent-item">
+                        <div class="recent-icon">${item.icon}</div>
+                        <div class="recent-content">
+                            <h4>${item.title}</h4>
+                            <p>${item.description}</p>
+                        </div>
+                        <div class="recent-date">${this.formatRelativeDate(item.date)}</div>
+                    </div>
+                `).join('');
+            }
+
+            formatRelativeDate(date) {
+                if (!date || isNaN(date.getTime())) return '';
+                
+                const now = new Date();
+                const diff = now - date;
+                const isFuture = diff < 0;
+                const absDiff = Math.abs(diff);
+                
+                const days = Math.floor(absDiff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((absDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((absDiff % (1000 * 60 * 60)) / (1000 * 60));
+
+                if (days === 0) {
+                    if (hours === 0) {
+                        if (minutes < 1) return 'Agora mesmo';
+                        return isFuture ? `Em ${minutes} min` : `${minutes} min atrás`;
+                    }
+                    return isFuture ? `Em ${hours} h` : `${hours} h atrás`;
+                }
+                
+                if (days === 1) return isFuture ? 'Amanhã' : 'Ontem';
+                if (days < 7) return isFuture ? `Em ${days} dias` : `${days} dias atrás`;
+                
+                return date.toLocaleDateString('pt-BR');
             }
             
             renderMenuContent() {
@@ -725,13 +1063,9 @@
                             <div class="menu-item-icon">✂️</div>
                             <div class="menu-item-text">Gerenciar Serviços</div>
                         </div>
-                        <div class="menu-item" onclick="dashboard.handleMenuClick('manageLocation')">
+                        <div class="menu-item" onclick="dashboard.handleMenuClick('nearbyBarbers')">
                             <div class="menu-item-icon">📍</div>
-                            <div class="menu-item-text">Localização</div>
-                        </div>
-                        <div class="menu-item" onclick="dashboard.handleMenuClick('manageContacts')">
-                            <div class="menu-item-icon">📞</div>
-                            <div class="menu-item-text">Contatos</div>
+                            <div class="menu-item-text">Barbearias Próximas</div>
                         </div>
                     </div>
                     
@@ -740,7 +1074,7 @@
                         <div class="menu-item" onclick="dashboard.handleMenuClick('appointments')">
                             <div class="menu-item-icon">📅</div>
                             <div class="menu-item-text">Agendamentos</div>
-                            <div class="menu-item-badge">12</div>
+                            <div class="menu-item-badge" id="menuAppointmentsBadge">0</div>
                         </div>
                         <div class="menu-item" onclick="dashboard.handleMenuClick('schedule')">
                             <div class="menu-item-icon">⏰</div>
@@ -749,11 +1083,7 @@
                     </div>
                     
                     <div class="menu-section">
-                        <h4>Relatórios</h4>
-                        <div class="menu-item" onclick="dashboard.handleMenuClick('reports')">
-                            <div class="menu-item-icon">📊</div>
-                            <div class="menu-item-text">Relatórios</div>
-                        </div>
+                        <h4>Análise</h4>
                         <div class="menu-item" onclick="dashboard.handleMenuClick('reviews')">
                             <div class="menu-item-icon">⭐</div>
                             <div class="menu-item-text">Avaliações</div>
@@ -781,23 +1111,17 @@
                     case 'manageServices':
                         window.location.href = 'ServicosBarbearia.html';
                         break;
-                    case 'manageLocation':
-                        this.showComingSoon('Gerenciar Localização');
-                        break;
-                    case 'manageContacts':
-                        this.showComingSoon('Gerenciar Contatos');
-                        break;
                     case 'appointments':
                         window.location.href = 'AgendamentosBarbearia.html';
                         break;
                     case 'schedule':
-                        this.showComingSoon('Gerenciar Horários');
-                        break;
-                    case 'reports':
-                        this.showComingSoon('Relatórios');
+                        window.location.href = 'HorariosBarbearia.html';
                         break;
                     case 'reviews':
-                        this.showComingSoon('Avaliações');
+                        window.location.href = 'AvaliacoesBarbearia.html';
+                        break;
+                    case 'nearbyBarbers':
+                        window.location.href = 'VisualizarBarbearias.html';
                         break;
                     case 'logout':
                         this.handleLogout();
@@ -812,15 +1136,24 @@
             }
             
             handleLogout() {
-                if (confirm('Tem certeza que deseja sair?')) {
-                    // Limpar dados do usuário
-                    localStorage.removeItem('currentUser');
-                    localStorage.removeItem('userType');
-                    localStorage.removeItem('userName');
-                    
-                    // Redirecionar para tela inicial
-                    window.location.href = 'TelaInicial.html';
-                }
+                this.openLogoutModal();
+            }
+
+            openLogoutModal() {
+                const modal = document.getElementById('logoutModal');
+                if (modal) modal.classList.add('active');
+            }
+
+            closeLogoutModal() {
+                const modal = document.getElementById('logoutModal');
+                if (modal) modal.classList.remove('active');
+            }
+
+            confirmLogout() {
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('userType');
+                localStorage.removeItem('userName');
+                window.location.href = 'Login.html';
             }
         }
         
@@ -837,7 +1170,13 @@
                     window.location.href = 'ServicosBarbearia.html';
                     break;
                 case 'schedule':
-                    dashboard.showComingSoon('Gerenciar Horários');
+                    window.location.href = 'HorariosBarbearia.html';
+                    break;
+                case 'reviews':
+                    window.location.href = 'AvaliacoesBarbearia.html';
+                    break;
+                case 'nearbyBarbers':
+                    window.location.href = 'VisualizarBarbearias.html';
                     break;
                 default:
                     console.log('Ação não implementada:', action);
@@ -852,8 +1191,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-

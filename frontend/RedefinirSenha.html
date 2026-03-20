@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>EasyCut - Redefinir Senha</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="imagens/favicon001.png" type="image/png">
     <style>
         body {
             margin: 0;
@@ -275,7 +276,6 @@
         </a>
     </div>
 
-    <script src="assets/email-service-real.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -346,17 +346,15 @@
                 
                 // Simular delay de processamento
                 setTimeout(() => {
-                    const result = emailService.resetPassword(token, newPassword);
+                    // Funcionalidade de email removida
+                    // const result = emailService.resetPassword(token, newPassword);
                     
-                    if (result.success) {
-                        showSuccess(result.message);
-                        // Redirecionar para login após 2 segundos
-                        setTimeout(() => {
-                            window.location.href = 'Login.html';
-                        }, 2000);
-                    } else {
-                        showError(result.message);
-                    }
+                    // Simular sucesso
+                    showSuccess('Senha redefinida com sucesso! (Simulação)');
+                    // Redirecionar para login após 2 segundos
+                    setTimeout(() => {
+                        window.location.href = 'Login.html';
+                    }, 2000);
                     
                     setLoading(false);
                 }, 1500);

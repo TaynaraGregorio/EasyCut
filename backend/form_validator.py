@@ -5,9 +5,14 @@ EasyCut - Exemplo de Integração com Formulários HTML
 Como usar o validador de email com os formulários de cadastro
 """
 
-from .email_validator import EmailValidator
-from .phone_validator import PhoneValidator
-from .cpf_cnpj_validator import CPFCNPJValidator
+try:
+    from .email_validator import EmailValidator
+    from .phone_validator import PhoneValidator
+    from .cpf_cnpj_validator import CPFCNPJValidator
+except ImportError:
+    from email_validator import EmailValidator
+    from phone_validator import PhoneValidator
+    from cpf_cnpj_validator import CPFCNPJValidator
 import json
 from typing import Dict, Any
 

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamentos - EasyCut</title>
+    <link rel="icon" href="imagens/favicon001.png" type="image/png">
     <style>
         * {
             margin: 0;
@@ -539,6 +540,76 @@
             min-width: 120px;
         }
 
+        /* Formulário dentro de modal (novo agendamento) */
+        .modal-subtitle {
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            margin-top: 4px;
+        }
+
+        .modal-form-group {
+            margin-bottom: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .modal-form-group label {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        .modal-form-group input,
+        .modal-form-group select,
+        .modal-form-group textarea {
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: rgba(15, 23, 42, 0.85);
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 38px;
+        }
+
+        .modal-form-group input:focus,
+        .modal-form-group select:focus,
+        .modal-form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+
+        .modal-form-group input.error,
+        .modal-form-group textarea.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+        }
+
+        .error-message-field {
+            color: #ef4444;
+            font-size: 0.8rem;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error-message-field.show {
+            display: block;
+        }
+
+        .modal-form-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        @media (max-width: 576px) {
+            .modal-form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
         /* Responsividade */
         @media (max-width: 1200px) {
             .container {
@@ -847,117 +918,55 @@
     </div>
 
     <script>
-        // Dados dos agendamentos (mock)
+        const API_BASE = 'http://localhost:5001';
         let allAppointments = [];
         let filteredAppointments = [];
-        
-        // Sistema de agendamentos dinâmico
-        let appointmentCounter = 0;
         let todayAppointmentsCount = 0;
 
-        // Função para gerar dados mock de agendamentos
-        function generateMockAppointments() {
-            const today = new Date();
-            const appointments = [
-                {
-                    id: "apt_1",
-                    clientName: "João Silva",
-                    clientPhone: "(31) 99999-9999",
-                    date: today.toISOString().split('T')[0],
-                    time: "09:00",
-                    services: ["Corte Masculino", "Barba"],
-                    totalPrice: 45,
-                    status: "confirmed",
-                    notes: "Cliente preferencial",
-                    createdAt: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString()
-                },
-                {
-                    id: "apt_2",
-                    clientName: "Pedro Santos",
-                    clientPhone: "(31) 88888-8888",
-                    date: today.toISOString().split('T')[0],
-                    time: "10:30",
-                    services: ["Corte Masculino"],
-                    totalPrice: 25,
-                    status: "pending",
-                    notes: "",
-                    createdAt: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString()
-                },
-                {
-                    id: "apt_3",
-                    clientName: "Carlos Oliveira",
-                    clientPhone: "(31) 77777-7777",
-                    date: today.toISOString().split('T')[0],
-                    time: "14:00",
-                    services: ["Corte Masculino", "Barba", "Sobrancelha"],
-                    totalPrice: 60,
-                    status: "confirmed",
-                    notes: "Primeira vez",
-                    createdAt: new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString()
-                },
-                {
-                    id: "apt_4",
-                    clientName: "Marcos Costa",
-                    clientPhone: "(31) 66666-6666",
-                    date: today.toISOString().split('T')[0],
-                    time: "16:00",
-                    services: ["Barboterapia"],
-                    totalPrice: 35,
-                    status: "completed",
-                    notes: "",
-                    createdAt: new Date(today.getTime() - 4 * 24 * 60 * 60 * 1000).toISOString()
-                },
-                {
-                    id: "apt_5",
-                    clientName: "Rafael Lima",
-                    clientPhone: "(31) 55555-5555",
-                    date: today.toISOString().split('T')[0],
-                    time: "18:30",
-                    services: ["Corte Masculino"],
-                    totalPrice: 25,
-                    status: "cancelled",
-                    notes: "Cancelado pelo cliente",
-                    createdAt: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString()
-                },
-                {
-                    id: "apt_6",
-                    clientName: "André Ferreira",
-                    clientPhone: "(31) 44444-4444",
-                    date: new Date(today.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                    time: "09:30",
-                    services: ["Corte Masculino", "Barba"],
-                    totalPrice: 45,
-                    status: "confirmed",
-                    notes: "",
-                    createdAt: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString()
-                },
-                {
-                    id: "apt_7",
-                    clientName: "Bruno Alves",
-                    clientPhone: "(31) 33333-3333",
-                    date: today.toISOString().split('T')[0],
-                    time: "19:00",
-                    services: ["Design de Sobrancelhas"],
-                    totalPrice: 30,
-                    status: "pending",
-                    notes: "",
-                    createdAt: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString()
-                },
-                {
-                    id: "apt_8",
-                    clientName: "Fernanda Costa",
-                    clientPhone: "(31) 22222-2222",
-                    date: today.toISOString().split('T')[0],
-                    time: "20:00",
-                    services: ["Corte Feminino"],
-                    totalPrice: 40,
-                    status: "completed",
-                    notes: "",
-                    createdAt: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString()
-                }
-            ];
+        function getBarbeariaId() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            if (localStorage.getItem('userType') !== 'barbearia' || !currentUser.id) return null;
+            return parseInt(currentUser.id, 10);
+        }
 
-            return appointments;
+        async function loadAgendamentosFromApi() {
+            const barbeariaId = getBarbeariaId();
+            if (!barbeariaId) {
+                document.getElementById('loadingState').style.display = 'none';
+                allAppointments = [];
+                filteredAppointments = [];
+                renderStats();
+                renderAppointments();
+                return;
+            }
+            document.getElementById('loadingState').style.display = 'block';
+            try {
+                const response = await fetch(`${API_BASE}/api/barbearias/${barbeariaId}/agendamentos`);
+                const data = await response.json();
+                if (data.success && data.agendamentos) {
+                    allAppointments = data.agendamentos.map(a => ({
+                        id: String(a.id),
+                        clientName: a.clientName || '',
+                        clientPhone: a.clientPhone || '',
+                        date: a.date || '',
+                        time: a.time || '',
+                        services: Array.isArray(a.services) ? a.services : [a.services].filter(Boolean),
+                        totalPrice: a.totalPrice != null ? a.totalPrice : 0,
+                        status: a.status || 'pending',
+                        notes: a.notes || '',
+                        createdBy: a.createdBy || 'cliente'
+                    }));
+                } else {
+                    allAppointments = [];
+                }
+            } catch (err) {
+                console.error(err);
+                allAppointments = [];
+            }
+            filteredAppointments = [...allAppointments];
+            document.getElementById('loadingState').style.display = 'none';
+            renderStats();
+            renderAppointments();
         }
 
         // Função para renderizar estatísticas
@@ -1157,54 +1166,53 @@
             renderAppointments();
         }
 
-        // Função para confirmar agendamento
+        async function updateAgendamentoStatus(appointmentId, newStatus) {
+            try {
+                const response = await fetch(`${API_BASE}/api/agendamentos/${appointmentId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    await loadAgendamentosFromApi();
+                    showSuccessMessage(data.message || 'Status atualizado com sucesso!');
+                } else {
+                    alert('Erro: ' + (data.message || 'Não foi possível atualizar.'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Erro de conexão.');
+            }
+        }
+
         function confirmAppointment(appointmentId) {
             const appointment = allAppointments.find(apt => apt.id === appointmentId);
             if (!appointment) return;
-
             showConfirmationModal(
                 'Confirmar Agendamento',
                 `Tem certeza que deseja confirmar o agendamento de ${appointment.clientName}?`,
-                () => {
-                    appointment.status = 'confirmed';
-                    updateAppointments();
-                    renderStats(); // Atualizar estatísticas imediatamente
-                    showSuccessMessage('Agendamento confirmado com sucesso!');
-                }
+                () => updateAgendamentoStatus(appointmentId, 'confirmed')
             );
         }
 
-        // Função para concluir agendamento
         function completeAppointment(appointmentId) {
             const appointment = allAppointments.find(apt => apt.id === appointmentId);
             if (!appointment) return;
-
             showConfirmationModal(
                 'Concluir Agendamento',
                 `Tem certeza que deseja marcar como concluído o agendamento de ${appointment.clientName}?`,
-                () => {
-                    appointment.status = 'completed';
-                    updateAppointments();
-                    renderStats(); // Atualizar estatísticas imediatamente
-                    showSuccessMessage('Agendamento concluído com sucesso!');
-                }
+                () => updateAgendamentoStatus(appointmentId, 'completed')
             );
         }
 
-        // Função para cancelar agendamento
         function cancelAppointment(appointmentId) {
             const appointment = allAppointments.find(apt => apt.id === appointmentId);
             if (!appointment) return;
-
             showConfirmationModal(
                 'Cancelar Agendamento',
                 `Tem certeza que deseja cancelar o agendamento de ${appointment.clientName}?`,
-                () => {
-                    appointment.status = 'cancelled';
-                    updateAppointments();
-                    renderStats(); // Atualizar estatísticas imediatamente
-                    showSuccessMessage('Agendamento cancelado com sucesso!');
-                }
+                () => updateAgendamentoStatus(appointmentId, 'cancelled')
             );
         }
 
@@ -1319,35 +1327,14 @@
             }
         });
 
-        // Inicializar página
         document.addEventListener('DOMContentLoaded', function() {
-            // Configurar botão de voltar
             const backButton = document.getElementById('backButton');
-            if (backButton) {
-                backButton.addEventListener('click', function() {
-                    console.log('Botão voltar clicado via event listener');
-                    handleBackButton();
-                });
-            }
-            
-            // Definir data padrão como hoje
+            if (backButton) backButton.addEventListener('click', handleBackButton);
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('dateFilter').value = today;
-            
-            // Mostrar loading
+            const dateFilter = document.getElementById('dateFilter');
+            if (dateFilter) dateFilter.value = today;
             document.getElementById('loadingState').style.display = 'block';
-            
-            // Simular carregamento
-            setTimeout(() => {
-                allAppointments = generateMockAppointments();
-                filteredAppointments = [...allAppointments];
-                
-                // Inicializar contador dinâmico
-                appointmentCounter = allAppointments.length;
-                
-                renderStats();
-                renderAppointments();
-            }, 1000);
+            loadAgendamentosFromApi();
         });
     </script>
 </body>

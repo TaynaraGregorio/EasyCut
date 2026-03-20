@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Serviços - EasyCut</title>
+    <link rel="icon" href="imagens/favicon001.png" type="image/png">
     <style>
         * {
             margin: 0;
@@ -876,82 +877,59 @@
     </div>
 
     <script>
-        // Dados dos serviços (mock)
+        const API_BASE = 'http://localhost:5001';
         let allServices = [];
         let editingServiceId = null;
+        let barbeariaId = null;
 
-        // Função para gerar dados mock de serviços
-        function generateMockServices() {
-            const services = [
-                {
-                    id: "svc_1",
-                    name: "Corte Masculino",
-                    price: 25.00,
-                    duration: 30,
-                    category: "corte",
-                    description: "Corte masculino tradicional com tesoura e máquina",
-                    status: "active",
-                    createdAt: "2024-01-01T10:00:00Z",
-                    updatedAt: "2024-01-01T10:00:00Z"
-                },
-                {
-                    id: "svc_2",
-                    name: "Barba Completa",
-                    price: 20.00,
-                    duration: 25,
-                    category: "barba",
-                    description: "Aparar e modelar barba completa",
-                    status: "active",
-                    createdAt: "2024-01-01T10:00:00Z",
-                    updatedAt: "2024-01-01T10:00:00Z"
-                },
-                {
-                    id: "svc_3",
-                    name: "Design de Sobrancelhas",
-                    price: 15.00,
-                    duration: 20,
-                    category: "sobrancelha",
-                    description: "Design e modelagem de sobrancelhas",
-                    status: "active",
-                    createdAt: "2024-01-01T10:00:00Z",
-                    updatedAt: "2024-01-01T10:00:00Z"
-                },
-                {
-                    id: "svc_4",
-                    name: "Barboterapia",
-                    price: 35.00,
-                    duration: 45,
-                    category: "tratamento",
-                    description: "Tratamento completo para barba com produtos especiais",
-                    status: "active",
-                    createdAt: "2024-01-01T10:00:00Z",
-                    updatedAt: "2024-01-01T10:00:00Z"
-                },
-                {
-                    id: "svc_5",
-                    name: "Corte + Barba",
-                    price: 40.00,
-                    duration: 50,
-                    category: "corte",
-                    description: "Pacote completo: corte masculino + barba",
-                    status: "active",
-                    createdAt: "2024-01-01T10:00:00Z",
-                    updatedAt: "2024-01-01T10:00:00Z"
-                },
-                {
-                    id: "svc_6",
-                    name: "Corte Feminino",
-                    price: 35.00,
-                    duration: 40,
-                    category: "corte",
-                    description: "Corte feminino com técnicas modernas",
-                    status: "inactive",
-                    createdAt: "2024-01-01T10:00:00Z",
-                    updatedAt: "2024-01-01T10:00:00Z"
+        // Obtém o ID da barbearia logada (localStorage após login)
+        function getBarbeariaId() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const userType = localStorage.getItem('userType') || '';
+            if (userType !== 'barbearia' || !currentUser.id) {
+                return null;
+            }
+            return parseInt(currentUser.id, 10);
+        }
+
+        // Carrega serviços do banco de dados (lista vazia se nenhum cadastrado)
+        async function loadServicesFromApi() {
+            barbeariaId = getBarbeariaId();
+            if (!barbeariaId) {
+                alert('Sessão inválida. Faça login como barbearia.');
+                window.location.href = 'Login.html';
+                return;
+            }
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('servicesGrid').innerHTML = '';
+            try {
+                const response = await fetch(`${API_BASE}/api/barbearias/${barbeariaId}/servicos`);
+                const data = await response.json();
+                if (!data.success) {
+                    showSuccessMessage('Erro ao carregar serviços: ' + (data.message || 'Erro desconhecido'), 'error');
+                    allServices = [];
+                } else {
+                    allServices = (data.servicos || []).map(s => ({
+                        id: String(s.id),
+                        name: s.name,
+                        price: s.price,
+                        duration: s.duration,
+                        category: s.category || 'outros',
+                        description: s.description || '',
+                        status: s.status || 'active',
+                        createdAt: null,
+                        updatedAt: null
+                    }));
                 }
-            ];
-
-            return services;
+            } catch (err) {
+                console.error(err);
+                showSuccessMessage('Erro de conexão com o servidor. Verifique se o backend está rodando.', 'error');
+                allServices = [];
+            }
+            document.getElementById('loadingState').style.display = 'none';
+            renderStats();
+            renderServices();
         }
 
         // Função para renderizar estatísticas
@@ -1063,6 +1041,7 @@
 
         // Função para formatar data
         function formatDate(dateString) {
+            if (!dateString) return '-';
             const date = new Date(dateString);
             return date.toLocaleDateString('pt-BR');
         }
@@ -1096,8 +1075,8 @@
             document.body.style.overflow = 'hidden';
         }
 
-        // Função para salvar serviço
-        function saveService() {
+        // Função para salvar serviço (envia para o banco de dados)
+        async function saveService() {
             const form = document.getElementById('serviceForm');
             const formData = new FormData(form);
             
@@ -1106,45 +1085,57 @@
                 price: parseFloat(formData.get('price')),
                 duration: parseInt(formData.get('duration')),
                 category: formData.get('category'),
-                description: formData.get('description'),
-                status: formData.get('status')
+                description: formData.get('description') || '',
+                status: formData.get('status') || 'active'
             };
 
-            // Validação básica
-            if (!serviceData.name || !serviceData.price || !serviceData.duration) {
+            if (!serviceData.name || serviceData.price === undefined || serviceData.duration === undefined) {
                 showSuccessMessage('Por favor, preencha todos os campos obrigatórios!', 'error');
                 return;
             }
 
-            if (editingServiceId) {
-                // Editar serviço existente
-                const serviceIndex = allServices.findIndex(svc => svc.id === editingServiceId);
-                if (serviceIndex !== -1) {
-                    allServices[serviceIndex] = {
-                        ...allServices[serviceIndex],
-                        ...serviceData,
-                        updatedAt: new Date().toISOString()
-                    };
-                    showSuccessMessage('Serviço atualizado com sucesso!');
-                }
-            } else {
-                // Adicionar novo serviço
-                const newService = {
-                    id: `svc_${Date.now()}`,
-                    ...serviceData,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                };
-                allServices.push(newService);
-                showSuccessMessage('Serviço adicionado com sucesso!');
+            if (!barbeariaId) {
+                showSuccessMessage('Sessão inválida. Faça login novamente.', 'error');
+                return;
             }
 
-            closeModal();
-            renderStats();
-            renderServices();
+            try {
+                if (editingServiceId) {
+                    const response = await fetch(`${API_BASE}/api/barbearias/${barbeariaId}/servicos/${editingServiceId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(serviceData)
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        showSuccessMessage('Serviço atualizado com sucesso!');
+                        closeModal();
+                        await loadServicesFromApi();
+                    } else {
+                        showSuccessMessage('Erro: ' + (data.message || 'Não foi possível atualizar'), 'error');
+                    }
+                } else {
+                    const response = await fetch(`${API_BASE}/api/barbearias/${barbeariaId}/servicos`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(serviceData)
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        showSuccessMessage('Serviço cadastrado com sucesso!');
+                        closeModal();
+                        await loadServicesFromApi();
+                    } else {
+                        showSuccessMessage('Erro: ' + (data.message || 'Não foi possível cadastrar'), 'error');
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                showSuccessMessage('Erro de conexão com o servidor.', 'error');
+            }
         }
 
-        // Função para alternar status do serviço
+        // Função para alternar status do serviço (atualiza no banco)
         function toggleServiceStatus(serviceId) {
             const service = allServices.find(svc => svc.id === serviceId);
             if (!service) return;
@@ -1155,17 +1146,28 @@
             showConfirmationModal(
                 `${newStatus === 'active' ? 'Ativar' : 'Desativar'} Serviço`,
                 `Tem certeza que deseja ${action} o serviço "${service.name}"?`,
-                () => {
-                    service.status = newStatus;
-                    service.updatedAt = new Date().toISOString();
-                    renderStats();
-                    renderServices();
-                    showSuccessMessage(`Serviço ${action}do com sucesso!`);
+                async () => {
+                    try {
+                        const response = await fetch(`${API_BASE}/api/barbearias/${barbeariaId}/servicos/${serviceId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ...service, status: newStatus })
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            showSuccessMessage(`Serviço ${action}do com sucesso!`);
+                            await loadServicesFromApi();
+                        } else {
+                            showSuccessMessage('Erro: ' + (data.message || 'Não foi possível alterar'), 'error');
+                        }
+                    } catch (err) {
+                        showSuccessMessage('Erro de conexão.', 'error');
+                    }
                 }
             );
         }
 
-        // Função para excluir serviço
+        // Função para excluir serviço (remove do banco)
         function deleteService(serviceId) {
             const service = allServices.find(svc => svc.id === serviceId);
             if (!service) return;
@@ -1173,24 +1175,30 @@
             showConfirmationModal(
                 'Excluir Serviço',
                 `Tem certeza que deseja excluir o serviço "${service.name}"? Esta ação não pode ser desfeita.`,
-                () => {
-                    allServices = allServices.filter(svc => svc.id !== serviceId);
-                    renderStats();
-                    renderServices();
-                    showSuccessMessage('Serviço excluído com sucesso!');
+                async () => {
+                    try {
+                        const response = await fetch(`${API_BASE}/api/barbearias/${barbeariaId}/servicos/${serviceId}`, {
+                            method: 'DELETE'
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            showSuccessMessage('Serviço excluído com sucesso!');
+                            await loadServicesFromApi();
+                        } else {
+                            showSuccessMessage('Erro: ' + (data.message || 'Não foi possível excluir'), 'error');
+                        }
+                    } catch (err) {
+                        showSuccessMessage('Erro de conexão.', 'error');
+                    }
                 }
             );
         }
 
-        // Função para atualizar serviços
+        // Função para atualizar serviços (recarrega do banco)
         function refreshServices() {
-            document.getElementById('loadingState').style.display = 'block';
-            
-            setTimeout(() => {
-                renderStats();
-                renderServices();
+            loadServicesFromApi().then(() => {
                 showSuccessMessage('Lista de serviços atualizada!');
-            }, 500);
+            });
         }
 
         // Função para mostrar modal de confirmação
@@ -1304,27 +1312,13 @@
             }
         });
 
-        // Inicializar página
+        // Inicializar página (carrega serviços do banco; lista vazia se nenhum cadastrado)
         document.addEventListener('DOMContentLoaded', function() {
-            // Configurar botão de voltar
             const backButton = document.getElementById('backButton');
             if (backButton) {
-                backButton.addEventListener('click', function() {
-                    console.log('Botão voltar clicado via event listener');
-                    handleBackButton();
-                });
+                backButton.addEventListener('click', handleBackButton);
             }
-            
-            // Mostrar loading
-            document.getElementById('loadingState').style.display = 'block';
-            
-            // Simular carregamento
-            setTimeout(() => {
-                allServices = generateMockServices();
-                
-                renderStats();
-                renderServices();
-            }, 1000);
+            loadServicesFromApi();
         });
     </script>
 </body>

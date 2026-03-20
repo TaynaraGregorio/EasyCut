@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>EasyCut - Termos de Uso</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="imagens/favicon001.png" type="image/png">
     <style>
         body {
             margin: 0;
@@ -327,10 +328,10 @@
                         backButton.href = 'CadastroBarbearia.html';
                         break;
                     case 'inicial':
-                        backButton.href = 'TelaInicial.html';
+                        backButton.href = 'Login.html';
                         break;
                     default:
-                        backButton.href = 'TelaInicial.html';
+                        backButton.href = 'Login.html';
                 }
                 backButton.onclick = null; // Remove o onclick padrão
             } else if (document.referrer) {
@@ -341,15 +342,15 @@
                     backButton.href = 'CadastroCliente.html';
                 } else if (referrer.includes('CadastroBarbearia.html')) {
                     backButton.href = 'CadastroBarbearia.html';
-                } else if (referrer.includes('TelaInicial.html')) {
-                    backButton.href = 'TelaInicial.html';
+                } else if (referrer.includes('Login.html')) {
+                    backButton.href = 'Login.html';
                 } else {
-                    backButton.href = 'TelaInicial.html';
+                    backButton.href = 'Login.html';
                 }
                 backButton.onclick = null;
             } else {
-                // Se não há referrer nem parâmetros, redirecionar para tela inicial
-                backButton.href = 'TelaInicial.html';
+                // Se não há referrer nem parâmetros, redirecionar para login
+                backButton.href = 'Login.html';
                 backButton.onclick = null;
             }
         });

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>EasyCut - Dashboard Cliente</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="imagens/favicon001.png" type="image/png">
     <style>
         body {
             margin: 0;
@@ -352,13 +353,42 @@
             padding: 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
+            position: relative;
         }
         
         .menu-user-info {
             display: flex;
             align-items: center;
             gap: 12px;
+            margin-top: 60px;
             margin-bottom: 16px;
+        }
+
+        .menu-back-button {
+            position: absolute;
+            left: 16px;
+            top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: rgba(15, 23, 42, 0.9);
+            color: #e2e8f0;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .menu-back-button span {
+            font-size: 1rem;
+        }
+
+        .menu-back-button:hover {
+            background: rgba(5, 150, 105, 0.9);
+            border-color: rgba(16, 185, 129, 0.7);
+            color: #fff;
         }
         
         .menu-avatar {
@@ -464,6 +494,99 @@
             color: #ef4444;
         }
         
+        /* Modal de Logout */
+        .logout-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .logout-modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .logout-modal {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 32px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .logout-modal-overlay.active .logout-modal {
+            transform: scale(1);
+        }
+
+        .logout-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .logout-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 12px;
+        }
+
+        .logout-message {
+            color: #94a3b8;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .logout-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-logout {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            flex: 1;
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+        }
+
         /* Responsividade */
         @media (max-width: 768px) {
             .header-content {
@@ -570,10 +693,6 @@
                     <div class="stat-number" id="totalSpent">R$ 0</div>
                     <div class="stat-label">Total Gasto</div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="averageRating">0.0</div>
-                    <div class="stat-label">Avaliação Média</div>
-                </div>
             </div>
         </div>
 
@@ -581,30 +700,7 @@
         <div class="recent-section">
             <h2 class="recent-title">Atividade Recente</h2>
             <div id="recentActivity">
-                <div class="recent-item">
-                    <div class="recent-icon">📅</div>
-                    <div class="recent-content">
-                        <h4>Agendamento realizado</h4>
-                        <p>Barbearia do João - Corte + Barba</p>
-                    </div>
-                    <div class="recent-date">Hoje</div>
-                </div>
-                <div class="recent-item">
-                    <div class="recent-icon">⭐</div>
-                    <div class="recent-content">
-                        <h4>Avaliação enviada</h4>
-                        <p>Studio Hair - 5 estrelas</p>
-                    </div>
-                    <div class="recent-date">Ontem</div>
-                </div>
-                <div class="recent-item">
-                    <div class="recent-icon">❤️</div>
-                    <div class="recent-content">
-                        <h4>Barbearia favoritada</h4>
-                        <p>Elite Barber adicionada aos favoritos</p>
-                    </div>
-                    <div class="recent-date">3 dias atrás</div>
-                </div>
+                <p style="text-align: center; color: #94a3b8; padding: 20px;">Carregando atividades...</p>
             </div>
         </div>
     </div>
@@ -615,6 +711,10 @@
     <!-- Menu Panel -->
     <div class="menu-panel" id="menuPanel">
         <div class="menu-header">
+            <button type="button" class="menu-back-button" id="menuBackButton">
+                <span>←</span>
+                <span>Voltar</span>
+            </button>
             <div class="menu-user-info">
                 <div class="menu-avatar" id="menuUserAvatar">U</div>
                 <div class="menu-user-details">
@@ -629,6 +729,19 @@
         </div>
     </div>
 
+    <!-- Modal de Logout -->
+    <div class="logout-modal-overlay" id="logoutModal">
+        <div class="logout-modal">
+            <div class="logout-icon">🚪</div>
+            <h3 class="logout-title">Sair da Conta</h3>
+            <p class="logout-message">Tem certeza que deseja sair? Você precisará fazer login novamente para acessar sua conta.</p>
+            <div class="logout-actions">
+                <button class="btn-logout btn-cancel" onclick="dashboard.closeLogoutModal()">Cancelar</button>
+                <button class="btn-logout btn-confirm" onclick="dashboard.confirmLogout()">Sair</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         class ClienteDashboard {
             constructor() {
@@ -636,11 +749,13 @@
                 this.menuOverlay = document.getElementById('menuOverlay');
                 this.menuPanel = document.getElementById('menuPanel');
                 this.menuContent = document.getElementById('menuContent');
+                this.menuBackButton = document.getElementById('menuBackButton');
                 this.userAvatar = document.getElementById('userAvatar');
                 this.userName = document.getElementById('userName');
                 this.menuUserAvatar = document.getElementById('menuUserAvatar');
                 this.menuUserName = document.getElementById('menuUserName');
                 this.isMenuOpen = false;
+                this.API_BASE_URL = 'http://localhost:5001/api';
                 
                 this.init();
             }
@@ -648,8 +763,8 @@
             init() {
                 this.setupEventListeners();
                 this.loadUserData();
-                this.loadStats();
                 this.renderMenuContent();
+                this.loadStats();
             }
             
             setupEventListeners() {
@@ -662,6 +777,13 @@
                 this.menuOverlay.addEventListener('click', () => {
                     this.closeMenu();
                 });
+
+                // Botão de voltar/fechar no topo do menu (especialmente útil no celular)
+                if (this.menuBackButton) {
+                    this.menuBackButton.addEventListener('click', () => {
+                        this.closeMenu();
+                    });
+                }
                 
                 // Fechar menu com ESC
                 document.addEventListener('keydown', (e) => {
@@ -697,20 +819,170 @@
             
             loadUserData() {
                 const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-                const userName = currentUser.nomeCompleto || 'Usuário';
+                // Tenta obter o nome de várias fontes: propriedade 'nome' (API), 'nomeCompleto' (Demo/Legacy) ou localStorage
+                const userName = currentUser.nome || currentUser.nomeCompleto || localStorage.getItem('userName') || 'Usuário';
                 
                 this.userName.textContent = userName;
                 this.menuUserName.textContent = userName;
-                this.userAvatar.textContent = userName.charAt(0).toUpperCase();
-                this.menuUserAvatar.textContent = userName.charAt(0).toUpperCase();
+                
+                if (currentUser.foto) {
+                    this.userAvatar.textContent = '';
+                    this.userAvatar.style.backgroundImage = `url('${currentUser.foto}')`;
+                    this.userAvatar.style.backgroundSize = 'cover';
+                    this.userAvatar.style.backgroundPosition = 'center';
+                    
+                    this.menuUserAvatar.textContent = '';
+                    this.menuUserAvatar.style.backgroundImage = `url('${currentUser.foto}')`;
+                    this.menuUserAvatar.style.backgroundSize = 'cover';
+                    this.menuUserAvatar.style.backgroundPosition = 'center';
+                } else {
+                    this.userAvatar.textContent = userName.charAt(0).toUpperCase();
+                    this.menuUserAvatar.textContent = userName.charAt(0).toUpperCase();
+                }
             }
             
-            loadStats() {
-                // Simular dados de estatísticas
-                document.getElementById('totalAppointments').textContent = '12';
-                document.getElementById('favoriteBarbershops').textContent = '3';
-                document.getElementById('totalSpent').textContent = 'R$ 240';
-                document.getElementById('averageRating').textContent = '4.8';
+            async loadStats() {
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                if (!currentUser.id) return;
+
+                try {
+                    // 1. Carregar Agendamentos (para estatísticas e badge do menu)
+                    const response = await fetch(`${this.API_BASE_URL}/clientes/${currentUser.id}/agendamentos`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.agendamentos) {
+                        const count = data.agendamentos.length;
+                        
+                        // Atualizar estatística no dashboard
+                        const totalAppointmentsEl = document.getElementById('totalAppointments');
+                        if (totalAppointmentsEl) totalAppointmentsEl.textContent = count;
+                        
+                        // Atualizar badge no menu
+                        const badge = document.getElementById('menuAppointmentsBadge');
+                        if (badge) badge.textContent = count;
+                        
+                        // Calcular total gasto
+                        const totalSpent = data.agendamentos.reduce((acc, curr) => {
+                            if (curr.status === 'cancelled') return acc;
+                            return acc + parseFloat(curr.price || 0);
+                        }, 0);
+                        const totalSpentEl = document.getElementById('totalSpent');
+                        if (totalSpentEl) totalSpentEl.textContent = `R$ ${totalSpent.toFixed(2)}`;
+                        
+                        // Renderizar atividade recente com dados reais
+                        this.renderRecentActivity(data.agendamentos);
+                    }
+                    
+                    // 2. Carregar Favoritos
+                    const favResponse = await fetch(`${this.API_BASE_URL}/clientes/${currentUser.id}/favoritos`);
+                    const favData = await favResponse.json();
+                    if (favData.success && favData.favoritos) {
+                        document.getElementById('favoriteBarbershops').textContent = favData.favoritos.length;
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar estatísticas:', error);
+                }
+            }
+            
+            renderRecentActivity(agendamentos) {
+                const activityContainer = document.getElementById('recentActivity');
+                if (!activityContainer) return;
+                
+                if (!agendamentos || agendamentos.length === 0) {
+                    activityContainer.innerHTML = '<p style="text-align:center; color: #94a3b8; padding: 20px;">Nenhuma atividade recente.</p>';
+                    return;
+                }
+
+                // Criar lista de atividades
+                let activities = [];
+
+                agendamentos.forEach(appt => {
+                    // Adicionar agendamento
+                    const dateStr = appt.date;
+                    const timeStr = appt.time || '00:00';
+                    const dateTime = new Date(`${dateStr}T${timeStr}`);
+
+                    activities.push({
+                        type: 'appointment',
+                        date: dateTime,
+                        title: 'Agendamento',
+                        description: `${appt.barbearia} - ${appt.service}`,
+                        status: appt.status
+                    });
+
+                    // Adicionar avaliação se houver
+                    if (appt.rating) {
+                        activities.push({
+                            type: 'review',
+                            date: dateTime, // Usando data do agendamento como referência
+                            title: 'Avaliação enviada',
+                            description: `${appt.barbearia} - ${appt.rating} estrelas`
+                        });
+                    }
+                });
+
+                // Filtrar atividades das últimas 48 horas
+                const now = new Date();
+                const cutoffTime = new Date(now.getTime() - (48 * 60 * 60 * 1000));
+
+                activities = activities.filter(activity => {
+                    return activity.date >= cutoffTime;
+                });
+
+                // Ordenar por data (mais recente primeiro)
+                activities.sort((a, b) => b.date - a.date);
+
+                // Pegar os 5 mais recentes
+                const recentActivities = activities.slice(0, 5);
+
+                if (recentActivities.length === 0) {
+                    activityContainer.innerHTML = '<p style="text-align:center; color: #94a3b8; padding: 20px;">Nenhuma atividade nas últimas 48 horas.</p>';
+                    return;
+                }
+
+                activityContainer.innerHTML = recentActivities.map(activity => {
+                    let icon = '📅';
+                    if (activity.type === 'review') icon = '⭐';
+                    
+                    const dateStr = this.formatRelativeDate(activity.date);
+
+                    return `
+                        <div class="recent-item">
+                            <div class="recent-icon">${icon}</div>
+                            <div class="recent-content">
+                                <h4>${activity.title}</h4>
+                                <p>${activity.description}</p>
+                            </div>
+                            <div class="recent-date">${dateStr}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            formatRelativeDate(date) {
+                if (!date || isNaN(date.getTime())) return '';
+                
+                const now = new Date();
+                const diff = now - date;
+                const isFuture = diff < 0;
+                const absDiff = Math.abs(diff);
+                
+                const days = Math.floor(absDiff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((absDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((absDiff % (1000 * 60 * 60)) / (1000 * 60));
+
+                if (days === 0) {
+                    if (hours === 0) {
+                        if (minutes < 1) return 'Agora mesmo';
+                        return isFuture ? `Em ${minutes} min` : `${minutes} min atrás`;
+                    }
+                    return isFuture ? `Em ${hours} h` : `${hours} h atrás`;
+                }
+                
+                if (days === 1) return isFuture ? 'Amanhã' : 'Ontem';
+                if (days < 7) return isFuture ? `Em ${days} dias` : `${days} dias atrás`;
+                
+                return date.toLocaleDateString('pt-BR');
             }
             
             renderMenuContent() {
@@ -721,10 +993,6 @@
                             <div class="menu-item-icon">👤</div>
                             <div class="menu-item-text">Editar Perfil</div>
                         </div>
-                        <div class="menu-item" onclick="dashboard.handleMenuClick('changePassword')">
-                            <div class="menu-item-icon">🔒</div>
-                            <div class="menu-item-text">Alterar Senha</div>
-                        </div>
                     </div>
                     
                     <div class="menu-section">
@@ -732,7 +1000,7 @@
                         <div class="menu-item" onclick="dashboard.handleMenuClick('myAppointments')">
                             <div class="menu-item-icon">📅</div>
                             <div class="menu-item-text">Meus Agendamentos</div>
-                            <div class="menu-item-badge">3</div>
+                            <div class="menu-item-badge" id="menuAppointmentsBadge">0</div>
                         </div>
                     </div>
                     
@@ -762,9 +1030,6 @@
                     case 'editProfile':
                         window.location.href = 'EditarPerfilCliente.html';
                         break;
-                    case 'changePassword':
-                        window.location.href = 'RedefinirSenha.html';
-                        break;
                     case 'myAppointments':
                         window.location.href = 'MeusAgendamentos.html';
                         break;
@@ -784,15 +1049,24 @@
             }
             
             handleLogout() {
-                if (confirm('Tem certeza que deseja sair?')) {
-                    // Limpar dados do usuário
-                    localStorage.removeItem('currentUser');
-                    localStorage.removeItem('userType');
-                    localStorage.removeItem('userName');
-                    
-                    // Redirecionar para tela inicial
-                    window.location.href = 'TelaInicial.html';
-                }
+                this.openLogoutModal();
+            }
+
+            openLogoutModal() {
+                const modal = document.getElementById('logoutModal');
+                if (modal) modal.classList.add('active');
+            }
+
+            closeLogoutModal() {
+                const modal = document.getElementById('logoutModal');
+                if (modal) modal.classList.remove('active');
+            }
+
+            confirmLogout() {
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('userType');
+                localStorage.removeItem('userName');
+                window.location.href = 'Login.html';
             }
         }
         
