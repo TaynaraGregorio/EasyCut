@@ -1192,6 +1192,8 @@
         let rescheduleSelectedServices = [];
         let rescheduleSelectedDate = null;
         let rescheduleSelectedTime = null;
+        let currentRescheduleBarbeariaId = null;
+        let currentRescheduleServicesList = []; // Lista completa de serviços da barbearia atual
 
         function getClienteId() {
             const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
@@ -1223,6 +1225,7 @@
                     allAppointments = data.agendamentos.map(a => ({
                         id: a.id,
                         barbearia: a.barbearia || '',
+                        barbearia_id: a.barbearia_id,
                         service: a.service || '',
                         date: a.date || '',
                         time: a.time || '',
@@ -1230,8 +1233,13 @@
                         price: a.price != null ? String(a.price) : '0',
                         duration: a.duration != null ? a.duration : 30,
                         notes: a.notes || '',
-                        rating: a.rating
-                    }));
+                        rating: a.rating,
+                        createdAt: a.created_at
+                    })).sort((a, b) => {
+                        const dateA = new Date(a.createdAt || 0);
+                        const dateB = new Date(b.createdAt || 0);
+                        return dateB - dateA;
+                    });
                 } else {
                     allAppointments = [];
                 }
@@ -1654,12 +1662,10 @@
         }
 
         // Função para abrir modal de reagendamento
-        function openRescheduleModal(appointment) {
+        async function openRescheduleModal(appointment) {
+            currentRescheduleBarbeariaId = appointment.barbearia_id;
             const modal = document.getElementById('rescheduleModal');
             const content = document.getElementById('rescheduleContent');
-
-            // Calcular preço correto do serviço atual
-            const currentServicePrice = getCurrentServicePrice(appointment.service);
 
             // Criar interface igual ao agendamento normal
             content.innerHTML = `
@@ -1668,7 +1674,7 @@
                     <div style="padding: 16px; background: rgba(251, 191, 36, 0.1); border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.3);">
                         <p style="margin: 0; color: #fbbf24; font-weight: 600;">${appointment.barbearia}</p>
                         <p style="margin: 8px 0 0 0; color: #cbd5e1;">${formatDate(appointment.date)} às ${appointment.time}</p>
-                        <p style="margin: 4px 0 0 0; color: #cbd5e1;">${appointment.service} - R$ ${currentServicePrice.toFixed(2)}</p>
+                        <p style="margin: 4px 0 0 0; color: #cbd5e1;">${appointment.service} - R$ ${parseFloat(appointment.price).toFixed(2)}</p>
                     </div>
                 </div>
 
@@ -1715,7 +1721,7 @@
             `;
 
             // Carregar serviços disponíveis
-            loadRescheduleServices(appointment.service);
+            await loadRescheduleServices(appointment.service, appointment.notes);
 
             // Configurar eventos
             setupRescheduleEvents(appointment);
@@ -1724,75 +1730,75 @@
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
-
-        // Função para obter preço do serviço atual
-        function getCurrentServicePrice(serviceName) {
-            const prices = getServicePrices();
-            
-            // Mapear nomes de serviços para corresponder aos preços
-            const serviceMapping = {
-                'Corte masculino': 'Corte Masculino',
-                'Barba': 'Barba',
-                'Sobrancelha': 'Sobrancelha',
-                'Design de sobrancelhas': 'Design de Sobrancelhas',
-                'Barboterapia': 'Barboterapia',
-                'Massagem facial': 'Massagem Facial',
-                'Tratamentos capilares': 'Tratamentos Capilares'
-            };
-            
-            const mappedService = serviceMapping[serviceName] || serviceName;
-            return prices[mappedService] || 20.00; // Valor padrão se não encontrar
-        }
-
+        
         // Função para obter data mínima (hoje)
         function getMinDate() {
-            const today = new Date();
-            return today.toISOString().split('T')[0];
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1); // Permitir reagendar a partir de amanhã (ou hoje se a lógica permitir)
+            return new Date().toISOString().split('T')[0];
         }
 
         // Função para obter data máxima (30 dias)
         function getMaxDate() {
             const maxDate = new Date();
-            maxDate.setDate(maxDate.getDate() + 30);
+            maxDate.setDate(maxDate.getDate() + 60);
             return maxDate.toISOString().split('T')[0];
         }
 
-        // Função para carregar serviços disponíveis no reagendamento
-        function loadRescheduleServices(currentService) {
+        // Função para carregar serviços disponíveis no reagendamento (DA API)
+        async function loadRescheduleServices(currentService, notes) {
             const container = document.getElementById('servicesList');
-            
-            const services = [
-                'Corte Masculino', 'Barba', 'Sobrancelha', 'Design de Sobrancelhas',
-                'Barboterapia', 'Massagem Facial', 'Tratamentos Capilares'
-            ];
+            container.innerHTML = '<div style="text-align: center; width: 100%;"><div class="loading-spinner" style="width: 24px; height: 24px;"></div></div>';
 
-            container.innerHTML = services.map(service => 
-                `<span class="service-tag" onclick="toggleRescheduleService('${service}')" title="Clique para selecionar">${service}</span>`
-            ).join('');
+            try {
+                const response = await fetch(`${API_BASE}/api/barbearias/${currentRescheduleBarbeariaId}/servicos`);
+                const data = await response.json();
 
-            // Selecionar serviço atual por padrão se existir
-            if (currentService) {
-                // Mapear nomes de serviços para corresponder aos disponíveis
-                const serviceMapping = {
-                    'Corte masculino': 'Corte Masculino',
-                    'Barba': 'Barba',
-                    'Sobrancelha': 'Sobrancelha',
-                    'Design de sobrancelhas': 'Design de Sobrancelhas',
-                    'Barboterapia': 'Barboterapia',
-                    'Massagem facial': 'Massagem Facial',
-                    'Tratamentos capilares': 'Tratamentos Capilares'
-                };
-                
-                const mappedService = serviceMapping[currentService] || currentService;
-                if (services.includes(mappedService)) {
-                    // Simular clique no serviço para selecioná-lo
-                    setTimeout(() => {
-                        const serviceElement = document.querySelector(`[onclick="toggleRescheduleService('${mappedService}')"]`);
-                        if (serviceElement) {
-                            serviceElement.click();
+                if (data.success && data.servicos) {
+                    currentRescheduleServicesList = data.servicos;
+                    
+                    if (currentRescheduleServicesList.length === 0) {
+                        container.innerHTML = '<p style="color: #cbd5e1; width: 100%; text-align: center;">Nenhum serviço disponível.</p>';
+                        return;
+                    }
+
+                    // Resetar seleção
+                    rescheduleSelectedServices = [];
+                    let servicesToSelect = [];
+
+                    // 1. Tentar recuperar da lista de observações (prioridade para múltiplos serviços)
+                    if (notes && typeof notes === 'string' && notes.trim().length > 0) {
+                        const potentialServices = notes.split(',').map(s => s.trim());
+                        const validServices = potentialServices.filter(s => 
+                            currentRescheduleServicesList.some(rs => rs.name.toLowerCase() === s.toLowerCase())
+                        );
+                        if (validServices.length > 0) {
+                            servicesToSelect = validServices;
                         }
-                    }, 100);
+                    }
+
+                    // 2. Fallback para serviço principal
+                    if (servicesToSelect.length === 0 && currentService) {
+                        servicesToSelect = [currentService];
+                    }
+
+                    container.innerHTML = currentRescheduleServicesList.map(service => {
+                        const shouldSelect = servicesToSelect.some(s => s.toLowerCase() === service.name.toLowerCase());
+                        if (shouldSelect && !rescheduleSelectedServices.includes(service.name)) {
+                            rescheduleSelectedServices.push(service.name);
+                        }
+                        return `<span class="service-tag ${shouldSelect ? 'selected' : ''}" onclick="toggleRescheduleService('${service.name}')" title="R$ ${service.price.toFixed(2)} - ${service.duration} min">${service.name}</span>`;
+                    }).join('');
+
+                    updateRescheduleServicesSummary();
+                    updateRescheduleButton();
+
+                } else {
+                    container.innerHTML = '<p style="color: #ef4444; width: 100%; text-align: center;">Erro ao carregar serviços.</p>';
                 }
+            } catch (error) {
+                console.error("Erro ao carregar serviços:", error);
+                container.innerHTML = '<p style="color: #ef4444; width: 100%; text-align: center;">Erro de conexão.</p>';
             }
         }
 
@@ -1826,15 +1832,15 @@
             
             summaryContainer.style.display = 'block';
             
-            const prices = getServicePrices();
             let total = 0;
             
-            const servicesHtml = rescheduleSelectedServices.map(service => {
-                const price = prices[service] || 20;
-                total += price;
+            const servicesHtml = rescheduleSelectedServices.map(serviceName => {
+                const serviceObj = currentRescheduleServicesList.find(s => s.name === serviceName);
+                const price = serviceObj ? parseFloat(serviceObj.price) : 0;
+                total += price; 
                 return `
                     <div class="service-item">
-                        <span class="service-name">✂️ ${service}</span>
+                        <span class="service-name">✂️ ${serviceName}</span>
                         <span class="service-price">R$ ${price.toFixed(2)}</span>
                     </div>
                 `;
@@ -1842,19 +1848,6 @@
             
             servicesList.innerHTML = servicesHtml;
             totalPrice.innerHTML = `💰 <strong>Total: R$ ${total.toFixed(2)}</strong>`;
-        }
-
-        // Função para obter preços dos serviços
-        function getServicePrices() {
-            return {
-                'Corte Masculino': 25.00,
-                'Barba': 15.00,
-                'Sobrancelha': 10.00,
-                'Design de Sobrancelhas': 20.00,
-                'Barboterapia': 50.00,
-                'Massagem Facial': 25.00,
-                'Tratamentos Capilares': 30.00
-            };
         }
 
         // Função para atualizar botão de reagendamento
@@ -1874,9 +1867,9 @@
 
         // Função para calcular preço total do reagendamento
         function calculateRescheduleTotalPrice() {
-            const prices = getServicePrices();
-            return rescheduleSelectedServices.reduce((total, service) => {
-                return total + (prices[service] || 20);
+            return rescheduleSelectedServices.reduce((total, serviceName) => {
+                const serviceObj = currentRescheduleServicesList.find(s => s.name === serviceName);
+                return total + (serviceObj ? parseFloat(serviceObj.price) : 0);
             }, 0).toFixed(2);
         }
 
@@ -1891,8 +1884,8 @@
             });
         }
 
-        // Função para carregar horários no reagendamento
-        function loadRescheduleTimeSlots(date) {
+        // Função para carregar horários no reagendamento (DA API)
+        async function loadRescheduleTimeSlots(date) {
             const timeSlotsSection = document.getElementById('timeSlotsSection');
             const timeSlots = document.getElementById('timeSlots');
             
@@ -1902,40 +1895,36 @@
             }
             
             timeSlotsSection.style.display = 'block';
-            
-            // Simular carregamento
             timeSlots.innerHTML = '<div style="text-align: center; padding: 20px; color: #94a3b8;">Carregando horários...</div>';
             
-            setTimeout(() => {
-                const slots = generateRescheduleTimeSlots(date);
-                renderRescheduleTimeSlots(slots);
-            }, 500);
-        }
+            // Calcular duração total
+            let totalDuration = 0;
+            rescheduleSelectedServices.forEach(name => {
+                const svc = currentRescheduleServicesList.find(s => s.name === name);
+                if (svc) totalDuration += (svc.duration || 30);
+            });
+            if (totalDuration === 0) totalDuration = 30;
 
-        // Função para gerar horários disponíveis no reagendamento
-        function generateRescheduleTimeSlots(selectedDate) {
-            const slots = [];
-            const startHour = 8;
-            const endHour = 20;
-            const interval = 30;
+            try {
+                const response = await fetch(`${API_BASE}/api/barbearias/${currentRescheduleBarbeariaId}/availability?date=${date}&duration=${totalDuration}`);
+                const data = await response.json();
 
-            // Simular alguns horários ocupados
-            const occupiedSlots = ['09:00', '10:30', '14:00', '15:30', '17:00'];
-
-            for (let hour = startHour; hour < endHour; hour++) {
-                for (let minute = 0; minute < 60; minute += interval) {
-                    const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-                    const isOccupied = occupiedSlots.includes(timeString);
-                    const isPastTime = isTimeInPast(timeString) && selectedDate === getMinDate();
-
-                    slots.push({
-                        time: timeString,
-                        available: !isOccupied && !isPastTime
-                    });
+                if (data.success) {
+                    // API retorna lista de horários ["09:00", "09:30"...]
+                    const slots = data.slots.map(t => ({ time: t, available: true }));
+                    
+                    if (data.message === 'Fechado neste dia') {
+                        timeSlots.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">Barbearia fechada neste dia.</div>';
+                    } else {
+                        renderRescheduleTimeSlots(slots);
+                    }
+                } else {
+                    timeSlots.innerHTML = `<div style="text-align: center; padding: 20px; color: #ef4444;">${data.message || 'Erro ao carregar horários'}</div>`;
                 }
+            } catch (error) {
+                console.error("Erro ao buscar horários:", error);
+                timeSlots.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">Erro de conexão ao buscar horários.</div>';
             }
-
-            return slots;
         }
 
         // Função para renderizar horários no reagendamento
@@ -2380,31 +2369,59 @@
         }
 
         // Função para prosseguir com o reagendamento
-        function proceedWithReschedule(appointmentId) {
+        async function proceedWithReschedule(appointmentId) {
             const appointment = allAppointments.find(a => a.id === appointmentId);
             if (!appointment) return;
 
-            // Atualizar dados do agendamento
-            appointment.date = rescheduleSelectedDate;
-            appointment.time = rescheduleSelectedTime;
-            appointment.service = rescheduleSelectedServices.join(', ');
-            appointment.price = calculateRescheduleTotalPrice();
-            appointment.status = 'confirmed'; // Reagendamento sempre fica confirmado
+            const updatedData = {
+                date: rescheduleSelectedDate,
+                time: rescheduleSelectedTime,
+                notes: rescheduleSelectedServices.join(', '), // Salva serviços em 'notes'
+                price: calculateRescheduleTotalPrice(),
+                status: 'pending'
+            };
 
-            // Fechar modais
-            cancelRescheduleConfirmation();
-            closeRescheduleModal();
+            try {
+                const response = await fetch(`${API_BASE}/api/agendamentos/${appointmentId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedData)
+                });
 
-            // Resetar variáveis
-            rescheduleSelectedServices = [];
-            rescheduleSelectedDate = null;
-            rescheduleSelectedTime = null;
+                const data = await response.json();
 
-            // Atualizar lista
-            applyFilters();
+                if (data.success) {
+                    // Atualizar objeto local para refletir na UI instantaneamente
+                    appointment.date = updatedData.date;
+                    appointment.time = updatedData.time;
+                    appointment.service = updatedData.notes; // Atualiza visualmente o serviço
+                    appointment.notes = updatedData.notes;
+                    appointment.price = updatedData.price;
+                    appointment.status = updatedData.status;
 
-            // Mostrar mensagem de sucesso
-            showSuccessMessage('Agendamento reagendado com sucesso!');
+                    // Reordenar lista para manter consistência (mais recente primeiro)
+                    allAppointments.sort((a, b) => {
+                        const dateA = new Date(a.createdAt || 0);
+                        const dateB = new Date(b.createdAt || 0);
+                        return dateB - dateA;
+                    });
+
+                    // Fechar modais e limpar
+                    cancelRescheduleConfirmation();
+                    closeRescheduleModal();
+                    rescheduleSelectedServices = [];
+                    rescheduleSelectedDate = null;
+                    rescheduleSelectedTime = null;
+                    
+                    applyFilters();
+                    showSuccessMessage('Agendamento reagendado e salvo com sucesso!');
+                } else {
+                    alert('Erro ao salvar reagendamento: ' + (data.message || 'Erro desconhecido'));
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Erro de conexão ao salvar reagendamento.');
+            }
         }
 
         // Função para mostrar mensagem de sucesso
@@ -2447,6 +2464,7 @@
             rescheduleSelectedServices = [];
             rescheduleSelectedDate = null;
             rescheduleSelectedTime = null;
+            currentRescheduleBarbeariaId = null;
         }
 
         // Função para avaliar agendamento

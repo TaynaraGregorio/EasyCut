@@ -1279,7 +1279,7 @@
         
         // Função para validar arquivo de imagem
         function validateImageFile(file) {
-            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             const maxSize = 5 * 1024 * 1024; // 5MB
             
             if (!validTypes.includes(file.type)) {
@@ -1312,6 +1312,7 @@
                 
                 uploadedImages.push(imageData);
                 renderImagePreviews();
+                checkBlockChanges();
             };
             reader.readAsDataURL(file);
         }
@@ -1369,6 +1370,7 @@
                 uploadedImages.splice(index, 1);
                 console.log('Imagens depois:', uploadedImages.length);
                 renderImagePreviews();
+                checkBlockChanges();
             } else {
                 console.error('Índice inválido:', index);
             }
@@ -1396,6 +1398,7 @@
             // Seleção de arquivos
             imageInput.addEventListener('change', (e) => {
                 processSelectedFiles(e.target.files);
+                imageInput.value = ''; // Limpar para permitir selecionar o mesmo arquivo novamente
             });
             
             // Drag and drop
@@ -1678,13 +1681,6 @@
                 field.addEventListener('input', checkBlockChanges);
                 field.addEventListener('change', checkBlockChanges);
             });
-            
-            // Listener especial para imagens
-            const originalRenderImagePreviews = renderImagePreviews;
-            renderImagePreviews = function() {
-                originalRenderImagePreviews();
-                checkBlockChanges();
-            };
         }
         
         // Carregar dados quando a página carregar

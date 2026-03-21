@@ -852,6 +852,10 @@
                     
                     if (data.success && data.agendamentos) {
                         const count = data.agendamentos.length;
+                        const activeCount = data.agendamentos.filter(a => 
+                            a.status === 'pending' || a.status === 'confirmed' ||
+                            a.status === 'pendente' || a.status === 'confirmado'
+                        ).length;
                         
                         // Atualizar estatística no dashboard
                         const totalAppointmentsEl = document.getElementById('totalAppointments');
@@ -859,12 +863,14 @@
                         
                         // Atualizar badge no menu
                         const badge = document.getElementById('menuAppointmentsBadge');
-                        if (badge) badge.textContent = count;
+                        if (badge) badge.textContent = activeCount;
                         
                         // Calcular total gasto
                         const totalSpent = data.agendamentos.reduce((acc, curr) => {
-                            if (curr.status === 'cancelled') return acc;
-                            return acc + parseFloat(curr.price || 0);
+                            if (curr.status === 'completed') {
+                                return acc + parseFloat(curr.price || 0);
+                            }
+                            return acc;
                         }, 0);
                         const totalSpentEl = document.getElementById('totalSpent');
                         if (totalSpentEl) totalSpentEl.textContent = `R$ ${totalSpent.toFixed(2)}`;

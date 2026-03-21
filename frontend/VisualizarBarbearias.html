@@ -956,16 +956,12 @@
                 <div class="search-icon" id="searchIcon">🔍</div>
                 <div id="suggestions" class="suggestions"></div>
             </div>
-            <div class="info-text" id="searchHint">Digite o nome da barbearia para buscar no banco de dados</div>
+            <div class="info-text" id="searchHint">Digite o nome da barbearia desejada</div>
         </div>
 
         <button id="locationButton" class="btn btn-primary" style="display: none;">
             📍 Usar minha localização
         </button>
-
-        <div class="radius-info">
-            Raio de <strong>5km</strong>
-        </div>
 
         <!-- Filtros -->
         <div class="filters-section">
@@ -989,18 +985,9 @@
                     <label>Ordenar por</label>
                     <select id="priceSort">
                         <option value="">Sem ordenação</option>
-                        <option value="cheap">💰 Mais barato primeiro</option>
-                        <option value="expensive">💎 Mais caro primeiro</option>
                         <option value="rating">⭐ Melhor avaliação</option>
                         <option value="distance">📍 Mais próximo</option>
                     </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label>Serviços</label>
-                    <div id="servicesFilter" class="services-filter">
-                        <!-- Será preenchido dinamicamente -->
-                    </div>
                 </div>
                 
                 <div class="filter-group">
@@ -1080,7 +1067,6 @@
                 this.filtersContent = document.getElementById('filtersContent');
                 this.minRating = document.getElementById('minRating');
                 this.priceSort = document.getElementById('priceSort');
-                this.servicesFilter = document.getElementById('servicesFilter');
                 this.maxDistance = document.getElementById('maxDistance');
                 this.distanceValue = document.getElementById('distanceValue');
                 this.applyFilters = document.getElementById('applyFilters');
@@ -1212,9 +1198,6 @@
                     this.clearAllFilters();
                 });
 
-                // Carregar serviços disponíveis
-                this.loadAvailableServices();
-                
                 // Event listeners do menu
                 this.setupMenuEventListeners();
                 
@@ -2076,45 +2059,17 @@
                 }
             }
 
-            async loadAvailableServices() {
-                // Usar serviços mock diretamente (sem tentar conectar com API)
-                console.log('Carregando serviços mock...');
-                this.availableServices = [
-                    "Corte masculino", "Barba", "Sobrancelha", "Design de sobrancelhas", 
-                    "Barboterapia", "Massagem facial", "Tratamentos capilares", 
-                    "Progressivas", "Relaxamento", "Pigmentação", "Limpeza de pele", 
-                    "Toalha quente", "Massagem", "Tratamentos"
-                ];
-                this.renderServicesFilter();
-            }
-
-            renderServicesFilter() {
-                this.servicesFilter.innerHTML = this.availableServices.map(service => `
-                    <div class="service-checkbox" onclick="this.toggleService(this)">
-                        <input type="checkbox" id="service_${service.replace(/\s+/g, '_')}" value="${service}">
-                        <label for="service_${service.replace(/\s+/g, '_')}">${service}</label>
-                    </div>
-                `).join('');
-            }
-
-            toggleService(element) {
-                const checkbox = element.querySelector('input[type="checkbox"]');
-                checkbox.checked = !checkbox.checked;
-                
-                if (checkbox.checked) {
-                    element.classList.add('checked');
-                } else {
-                    element.classList.remove('checked');
-                }
-            }
-
             toggleFiltersPanel() {
                 const isVisible = this.filtersContent.style.display !== 'none';
                 this.filtersContent.style.display = isVisible ? 'none' : 'block';
                 this.toggleFilters.textContent = isVisible ? '🔽' : '🔼';
             }
 
-            applyCurrentFilters() {
+            async applyCurrentFilters() {
+                // Recarregar dados da API para garantir que o raio (maxDistance) seja aplicado na busca
+                // Isso é essencial para quando o usuário aumenta o raio de busca
+                await this.loadRealBarbearias();
+
                 // Só aplicar filtro por nome se estiver no modo NOME e tiver texto
                 const nameFilter = (this.searchModeValue === 'name' && this.searchInput.value.trim()) 
                     ? this.searchInput.value.trim().toLowerCase() 
@@ -2124,17 +2079,11 @@
                     name_search: nameFilter,
                     min_rating: this.minRating.value ? parseFloat(this.minRating.value) : null,
                     sort_by: this.priceSort.value,
-                    services: this.getSelectedServices(),
                     max_distance: parseFloat(this.maxDistance.value)
                 };
 
                 // Aplicar filtros aos dados atuais
                 this.applyFiltersToCurrentData();
-            }
-
-            getSelectedServices() {
-                const checkboxes = this.servicesFilter.querySelectorAll('input[type="checkbox"]:checked');
-                return Array.from(checkboxes).map(cb => cb.value);
             }
 
             clearAllFilters() {
@@ -2143,13 +2092,6 @@
                 this.priceSort.value = '';
                 this.maxDistance.value = '5';
                 this.distanceValue.textContent = '5 km';
-
-                // Limpar checkboxes de serviços
-                const checkboxes = this.servicesFilter.querySelectorAll('input[type="checkbox"]');
-                checkboxes.forEach(cb => {
-                    cb.checked = false;
-                    cb.closest('.service-checkbox').classList.remove('checked');
-                });
 
                 this.currentFilters = {};
                 this.applyFiltersToCurrentData();
@@ -2172,18 +2114,6 @@
                         barbearia.rating >= this.currentFilters.min_rating
                     );
                     console.log('[DEBUG] Após filtro de rating:', filteredBarbearias.length);
-                }
-
-                // Filtro por serviços
-                if (this.currentFilters.services && this.currentFilters.services.length > 0) {
-                    filteredBarbearias = filteredBarbearias.filter(barbearia => {
-                        return this.currentFilters.services.some(service => 
-                            barbearia.services.some(barbeariaService => 
-                                barbeariaService.toLowerCase().includes(service.toLowerCase())
-                            )
-                        );
-                    });
-                    console.log('[DEBUG] Após filtro de serviços:', filteredBarbearias.length);
                 }
 
                 // Filtro por distância - SÓ aplicar se estiver no modo LOCALIZAÇÃO e tiver coordenadas
@@ -2221,8 +2151,6 @@
 
                 if (this.currentFilters.sort_by) {
                     const sortTexts = {
-                        'cheap': '💰 Ordenado por: Mais barato primeiro',
-                        'expensive': '💎 Ordenado por: Mais caro primeiro',
                         'rating': '⭐ Ordenado por: Melhor avaliação',
                         'distance': '📍 Ordenado por: Mais próximo'
                     };
@@ -2251,10 +2179,6 @@
             sortBarbeariasByPrice(barbearias, sortType) {
                 return barbearias.sort((a, b) => {
                     switch (sortType) {
-                        case 'cheap':
-                            return a.price_level - b.price_level; // Mais barato primeiro
-                        case 'expensive':
-                            return b.price_level - a.price_level; // Mais caro primeiro
                         case 'rating':
                             return b.rating - a.rating; // Melhor avaliação primeiro
                         case 'distance':
@@ -2440,8 +2364,12 @@
                     // Formata a avaliação
                     const ratingText = barbearia.rating ? `⭐ ${barbearia.rating.toFixed(1)}` : '';
 
+                    // Formata o endereço com emoji
+                    const addressText = barbearia.address ? `📍 ${barbearia.address}` : '';
+
                     // Constrói a linha de metadados
-                    const metaParts = [ratingText, distanceText, this.getPriceLevelText(barbearia.price_level)].filter(Boolean);
+                    // Substituído preço por endereço
+                    const metaParts = [ratingText, distanceText, addressText].filter(Boolean);
                     const metaText = metaParts.join(' • ');
 
                     return `

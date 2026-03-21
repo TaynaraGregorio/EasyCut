@@ -277,6 +277,30 @@ def fetch_barbearia_opening_hours(cursor, barbearia_id):
         print(f"[ERRO] Ao buscar horários para barbearia {barbearia_id}: {e}")
         return {}
 
+def _geocode_address(data):
+    """Função auxiliar para geocodificar endereço"""
+    try:
+        logradouro = data.get('logradouro') or data.get('rua')
+        numero = data.get('numero', '')
+        bairro = data.get('bairro', '')
+        cidade = data.get('cidade', '')
+        estado = data.get('estado') or data.get('uf', '')
+        
+        if not logradouro or not cidade:
+            return None, None
+
+        address_parts = [logradouro, numero, bairro, cidade, estado, 'Brasil']
+        full_address = ", ".join([str(p) for p in address_parts if p])
+        
+        geolocator = Nominatim(user_agent="easycut_app/1.0")
+        location = geolocator.geocode(full_address, timeout=10)
+        
+        if location:
+            return location.latitude, location.longitude
+    except Exception as e:
+        print(f"[AVISO] Erro no geocoding: {e}")
+    return None, None
+
 @dataclass
 class Barbearia:
     """Modelo de dados para barbearia"""
@@ -319,8 +343,8 @@ class BarbeariasService:
         except Exception as e:
             print(f"Google Places não disponível: {e}")
         
-        # Dados mock removidos - usando apenas banco de dados
-        # self.mock_barbearias = self._load_mock_data()
+        # Dados mock para fallback se o banco estiver vazio
+        self.mock_barbearias = self._load_mock_data()
     
     def _load_mock_data(self) -> List[Barbearia]:
         """Carrega dados mock de barbearias"""
@@ -491,13 +515,36 @@ class BarbeariasService:
                 
                 # Se tem nome, inclui independente da distância (ou se estiver dentro do raio se location for fornecida)
                 # Se não tem nome, obrigatoriamente filtra pelo raio
-                if name_query or (distance is not None and distance <= radius):
+                
+                # Lógica de inclusão atualizada para permitir "Listar Tudo":
+                should_include = False
+                if name_query:
+                    should_include = True
+                elif lat is not None and lng is not None:
+                    # Se tem localização, filtra por raio (suporta até 100km ou mais)
+                    if distance is not None and distance <= radius:
+                        should_include = True
+                else:
+                    # Se não tem filtro de nome nem de localização, inclui tudo
+                    should_include = True
+
+                if should_include:
                     # Buscar serviços
                     cursor.execute('SELECT nome_servico FROM servicos WHERE barbearia_id = %s', (barbearia_db['id'],))
                     servicos_db = cursor.fetchall()
                     
                     # Buscar horários reais
                     opening_hours = fetch_barbearia_opening_hours(cursor, barbearia_db['id'])
+                    
+                    # Calcular média de avaliações (Real do banco)
+                    cursor.execute('''
+                        SELECT AVG(avaliacao_nota) as media, COUNT(id) as total 
+                        FROM agendamentos 
+                        WHERE barbearia_id = %s AND avaliacao_nota IS NOT NULL
+                    ''', (barbearia_db['id'],))
+                    rating_row = cursor.fetchone()
+                    avg_rating = float(rating_row['media']) if rating_row and rating_row['media'] is not None else 0.0
+                    total_reviews = rating_row['total'] if rating_row else 0
                     
                     # Formatar endereço
                     address_parts = []
@@ -524,7 +571,8 @@ class BarbeariasService:
                         "email": barbearia_db.get('email') or '',
                         "latitude": float(barbearia_db['latitude']) if barbearia_db.get('latitude') is not None else None,
                         "longitude": float(barbearia_db['longitude']) if barbearia_db.get('longitude') is not None else None,
-                        "rating": 5.0,  # Mock, pois não temos avaliações ainda
+                        "rating": avg_rating,
+                        "total_reviews": total_reviews,
                         "price_level": 2, # Mock
                         "opening_hours": opening_hours,
                         "services": [s['nome_servico'] for s in servicos_db] if servicos_db else [],
@@ -590,6 +638,16 @@ class BarbeariasService:
         print(f"[DEBUG] find_nearby_barbearias chamado: name='{name}', lat={lat}, lng={lng}, radius={radius}")
         # Prioriza a busca no banco de dados, que já tem fallback para mock.
         return self._find_db_barbearias(lat, lng, radius, filters, name)
+        
+        # 1. Tentar buscar no banco de dados
+        results = self._find_db_barbearias(lat, lng, radius, filters, name)
+        
+        # 2. Se não encontrou nada no banco e não é uma busca específica por nome, usar Mock como fallback
+        if not results and not name:
+            print("[DEBUG] Banco vazio ou sem resultados locais. Usando dados Mock para demonstração.")
+            return self._find_mock_barbearias(lat, lng, radius, filters, name)
+            
+        return results
     
     def _find_mock_barbearias(self, lat: Optional[float], lng: Optional[float], radius: float, filters: Optional[FilterOptions], name_query: Optional[str] = None) -> List[Dict[str, Any]]:
         """Busca barbearias usando dados mock - DESABILITADO: usando apenas banco de dados"""
@@ -614,6 +672,8 @@ class BarbeariasService:
             if name_query:
                 query = name_query.lower().strip()
                 if query and (query in barbearia.name.lower() or query in barbearia.address.lower()):
+                # Verifica se o termo está no nome ou no endereço
+                if query and (query in barbearia.name.lower() or query in barbearia.address.lower()): 
                     include = True
             elif distance is not None and distance <= radius:
                 include = True
@@ -826,16 +886,7 @@ def get_nearby_barbearias():
         print(f"  - lat: {lat}")
         print(f"  - lng: {lng}")
 
-        # Validação: precisa ter nome OU localização
-        if not name and (lat is None or lng is None):
-            print(f"[DEBUG] Validação falhou: sem nome e sem localização")
-            return jsonify({
-                'success': False,
-                'message': 'Forneça localização ou nome para busca',
-                'barbearias': []
-            }), 400
-        
-        print(f"[DEBUG] Validação passou. Buscando barbearias...")
+        print(f"[DEBUG] Buscando barbearias (Filtros: Name={name}, Lat={lat}, Lng={lng})...")
         
         # Tratamento robusto para o raio
         try:
@@ -843,6 +894,8 @@ def get_nearby_barbearias():
             radius = float(radius_val) if radius_val is not None and str(radius_val).strip() != "" else 5.0
         except (ValueError, TypeError):
             radius = 5.0
+            
+        print(f"[DEBUG] Raio de busca aplicado: {radius} km")
         
         # Criar filtros se fornecidos
         filters = None
@@ -938,6 +991,16 @@ def get_barbearia_details(barbearia_id):
                         
                         # Buscar horários reais
                         opening_hours = fetch_barbearia_opening_hours(cursor, barbearia_id)
+
+                        # Buscar média de avaliações (Real do banco)
+                        cursor.execute('''
+                            SELECT AVG(avaliacao_nota) as media, COUNT(id) as total 
+                            FROM agendamentos 
+                            WHERE barbearia_id = %s AND avaliacao_nota IS NOT NULL
+                        ''', (barbearia_id,))
+                        rating_row = cursor.fetchone()
+                        avg_rating = float(rating_row['media']) if rating_row and rating_row['media'] is not None else 0.0
+                        total_reviews = rating_row['total'] if rating_row else 0
                         
                         # Formatar resposta combinando dados do banco
                         # Converter tipos não serializáveis (Decimal, Datetime)
@@ -960,6 +1023,9 @@ def get_barbearia_details(barbearia_id):
                         ]
                         barbearia_db['address'] = ", ".join([str(p) for p in addr_parts if p])
                         
+                        # Adicionar campo 'description' para compatibilidade com o frontend
+                        barbearia_db['description'] = barbearia_db.get('descricao')
+                        
                         barbearia_db['phone'] = barbearia_db['whatsapp']
                         barbearia_db['services'] = [s['nome_servico'] for s in servicos_db] # Lista simples
                         
@@ -970,8 +1036,9 @@ def get_barbearia_details(barbearia_id):
                                 s['preco'] = float(s['preco'])
                             barbearia_db['servicos_detalhados'].append(s)
 
-                        # Mock de dados faltantes (que ainda não estão no form de cadastro)
-                        barbearia_db['rating'] = 5.0 
+                        # Dados calculados
+                        barbearia_db['rating'] = avg_rating
+                        barbearia_db['total_reviews'] = total_reviews
                         barbearia_db['price_level'] = 2
                         barbearia_db['opening_hours'] = opening_hours
                         
@@ -1486,17 +1553,23 @@ def get_cliente_favoritos(cliente_id):
             address_parts = [p for p in [barbearia_db.get('logradouro'), barbearia_db.get('numero'), barbearia_db.get('bairro'), barbearia_db.get('cidade'), barbearia_db.get('estado')] if p]
             address = ", ".join(address_parts) if address_parts else "Endereço não cadastrado"
 
-            # Mock de dados que não estão no banco para manter compatibilidade
-            total_reviews_mock = (barbearia_db['id'] * 37) % 250 + 20
-            rating_mock = round(4.0 + (barbearia_db['id'] % 10) / 10, 1)
+            # Calcular média de avaliações (Real do banco)
+            cursor.execute('''
+                SELECT AVG(avaliacao_nota) as media, COUNT(id) as total 
+                FROM agendamentos 
+                WHERE barbearia_id = %s AND avaliacao_nota IS NOT NULL
+            ''', (barbearia_db['id'],))
+            rating_row = cursor.fetchone()
+            avg_rating = float(rating_row['media']) if rating_row and rating_row['media'] is not None else 0.0
+            total_reviews = rating_row['total'] if rating_row else 0
             
             formatted = {
                 "id": str(barbearia_db['id']),
                 "name": barbearia_db['nome_barbearia'],
                 "address": address,
                 "distance": "N/A",
-                "rating": rating_mock,
-                "totalReviews": total_reviews_mock,
+                "rating": avg_rating,
+                "totalReviews": total_reviews,
                 "phone": barbearia_db.get('whatsapp') or barbearia_db.get('telefone_fixo') or '',
                 "hours": "08:00 às 18:00", # Mock
                 "services": [s['nome_servico'] for s in servicos_db] if servicos_db else [],
@@ -1762,6 +1835,7 @@ def _row_to_agendamento_dict(r, barbearia_nome=None, servico_nome=None):
         'rating': r.get('avaliacao_nota'),
         'cliente_id': r.get('cliente_id'),
         'servico_id': r.get('servico_id'),
+        'created_at': str(r.get('criado_em')) if r.get('criado_em') else None,
     }
 
 
@@ -1775,7 +1849,7 @@ def list_cliente_agendamentos(cliente_id):
         cursor = conn.cursor(dictionary=True)
         cursor.execute('''
             SELECT a.id, a.cliente_id, a.barbearia_id, a.servico_id, a.data_agendamento, a.horario_inicio,
-                   a.status, a.valor_total, a.observacoes, a.avaliacao_nota, a.avaliacao_comentario,
+                   a.status, a.valor_total, a.observacoes, a.avaliacao_nota, a.avaliacao_comentario, a.criado_em,
                    b.nome_barbearia AS barbearia_nome, s.nome_servico AS servico_nome
             FROM agendamentos a
             LEFT JOIN barbearias b ON b.id = a.barbearia_id
@@ -1817,6 +1891,7 @@ def list_barbearia_agendamentos(barbearia_id):
         cursor.close()
         conn.close()
         # Para a barbearia: retornar formato com clientName, clientPhone, date, time, services, totalPrice, status
+        pending_count = 0
         lista = []
         for r in rows:
             status = (r.get('status') or 'pendente').lower()
@@ -1828,6 +1903,10 @@ def list_barbearia_agendamentos(barbearia_id):
                 horario = horario.strftime('%H:%M') if horario else ''
             else:
                 horario = str(horario)[:5] if horario else ''
+            
+            if st == 'pending' or st == 'pendente':
+                pending_count += 1
+                
             lista.append({
                 'id': str(r.get('id')),
                 'clientName': r.get('cliente_nome') or '',
@@ -1840,39 +1919,71 @@ def list_barbearia_agendamentos(barbearia_id):
                 'notes': (r.get('observacoes') or '') or '',
                 'createdBy': 'cliente',
             })
-        return jsonify({'success': True, 'agendamentos': lista})
+        return jsonify({'success': True, 'agendamentos': lista, 'pending_count': pending_count})
     except Exception as e:
         print(f"Erro ao listar agendamentos da barbearia: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
 @app.route('/api/agendamentos/<int:agendamento_id>', methods=['PUT'])
-def update_agendamento_status(agendamento_id):
-    """Atualiza status do agendamento (confirmar, cancelar, concluir)."""
+def update_agendamento(agendamento_id):
+    """Atualiza agendamento (status, data, horario, serviços/observacoes, preço)."""
     try:
         data = request.get_json() or {}
-        status = (data.get('status') or '').strip().lower()
-        status_db_map = {
-            'pending': 'pendente', 'pendente': 'pendente',
-            'confirmed': 'confirmado', 'confirmado': 'confirmado',
-            'cancelled': 'cancelado', 'cancelado': 'cancelado',
-            'completed': 'concluído', 'concluido': 'concluído', 'concluído': 'concluído',
-        }
-        status_db = status_db_map.get(status)
-        if not status_db:
-            return jsonify({'success': False, 'message': 'Status inválido'}), 400
         conn = get_db_connection()
         if not conn:
             return jsonify({'success': False, 'message': 'Erro de conexão'}), 500
+            
         cursor = conn.cursor()
-        cursor.execute('UPDATE agendamentos SET status = %s WHERE id = %s', (status_db, agendamento_id))
+        fields = []
+        values = []
+
+        # Atualizar Status
+        if 'status' in data:
+            status = (data.get('status') or '').strip().lower()
+            status_db_map = {
+                'pending': 'pendente', 'pendente': 'pendente',
+                'confirmed': 'confirmado', 'confirmado': 'confirmado',
+                'cancelled': 'cancelado', 'cancelado': 'cancelado',
+                'completed': 'concluído', 'concluido': 'concluído', 'concluído': 'concluído',
+            }
+            status_db = status_db_map.get(status)
+            if status_db:
+                fields.append("status = %s")
+                values.append(status_db)
+
+        # Atualizar outros campos (Reagendamento)
+        if 'date' in data:
+            fields.append("data_agendamento = %s")
+            values.append(data['date'])
+        
+        if 'time' in data:
+            fields.append("horario_inicio = %s")
+            values.append(data['time'])
+            
+        if 'price' in data:
+            fields.append("valor_total = %s")
+            values.append(data['price'])
+            
+        if 'notes' in data: # Salva a lista de serviços atualizada nas observações
+            fields.append("observacoes = %s")
+            values.append(data['notes'])
+
+        if not fields:
+            cursor.close()
+            conn.close()
+            return jsonify({'success': False, 'message': 'Nenhum dado para atualizar'}), 400
+
+        values.append(agendamento_id)
+        sql = f"UPDATE agendamentos SET {', '.join(fields)} WHERE id = %s"
+        
+        cursor.execute(sql, tuple(values))
         conn.commit()
         affected = cursor.rowcount
         cursor.close()
         conn.close()
-        if affected == 0:
-            return jsonify({'success': False, 'message': 'Agendamento não encontrado'}), 404
-        return jsonify({'success': True, 'message': 'Status atualizado com sucesso!'})
+        
+        return jsonify({'success': True, 'message': 'Agendamento atualizado com sucesso!'})
     except Exception as e:
         print(f"Erro ao atualizar agendamento: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
@@ -1979,6 +2090,36 @@ def get_barbearia_availability(barbearia_id):
         return jsonify({'success': False, 'message': str(e)}), 500
 
 # ---------- Horários de Funcionamento ----------
+@app.route('/api/barbearias/<int:barbearia_id>/dashboard-stats', methods=['GET'])
+def get_barbearia_dashboard_stats(barbearia_id):
+    """Retorna estatísticas para o dashboard da barbearia (contadores)"""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'success': False, 'message': 'Erro de conexão'}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        # Contar agendamentos pendentes
+        cursor.execute('''
+            SELECT COUNT(*) as count 
+            FROM agendamentos 
+            WHERE barbearia_id = %s AND status = 'pendente'
+        ''', (barbearia_id,))
+        row = cursor.fetchone()
+        pending_count = row['count'] if row else 0
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'pending_count': pending_count
+        })
+    except Exception as e:
+        print(f"Erro ao buscar estatísticas do dashboard: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 @app.route('/api/barbearias/<int:barbearia_id>/horarios', methods=['GET'])
 def get_horarios(barbearia_id):
     """Busca os horários de funcionamento da barbearia"""

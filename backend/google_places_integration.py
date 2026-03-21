@@ -237,9 +237,13 @@ class GooglePlacesAPI:
         """
         url = f"{self.base_url}/place/nearbysearch/json"
         
+        # API do Google Places limita radius a 50000 metros (50km)
+        # Se o usuário pedir mais (ex: 100km), limitamos ao máximo permitido pela API para não gerar erro
+        safe_radius = min(radius, 50000)
+        
         params = {
             'location': f"{lat},{lng}",
-            'radius': radius,
+            'radius': safe_radius,
             'type': place_type,
             'key': self.api_key,
             'language': 'pt-BR'
@@ -426,31 +430,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 60)
     print("INTEGRAÇÃO COM GOOGLE PLACES CONCLUÍDA!")
     print("=" * 60)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

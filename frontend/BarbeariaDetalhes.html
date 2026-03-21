@@ -951,6 +951,50 @@
                 transform: translateY(0);
             }
         }
+
+        /* Modal de Visualização de Imagem */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-modal.active {
+            display: flex;
+        }
+
+        .image-modal-content {
+            max-width: 600px;
+            max-height: 80vh;
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            animation: zoomIn 0.3s;
+            object-fit: contain;
+        }
+
+        .image-modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 2001;
+            transition: 0.3s;
+        }
+
+        .image-modal-close:hover {
+            color: #bbb;
+        }
     </style>
 </head>
 <body>
@@ -970,6 +1014,12 @@
                 <div>Carregando detalhes da barbearia...</div>
             </div>
         </div>
+    </div>
+
+    <!-- Modal de Visualização de Imagem -->
+    <div id="imageModal" class="image-modal" onclick="barbeariaDetalhes.closeImageModal(event)">
+        <span class="image-modal-close" onclick="barbeariaDetalhes.forceCloseImageModal()">&times;</span>
+        <img class="image-modal-content" id="modalImage">
     </div>
 
     <script>
@@ -999,6 +1049,11 @@
                 setTimeout(() => {
                     this.setupDatePicker();
                 }, 100);
+
+                // Fechar modal de imagem com ESC
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') this.forceCloseImageModal();
+                });
             }
 
             getBarbeariaIdFromUrl() {
@@ -1165,12 +1220,12 @@
                         ${barbearia.whatsapp ? `<p><strong>💬 WhatsApp:</strong> <a href="https://wa.me/${barbearia.whatsapp}" target="_blank" style="color: #25D366;">${barbearia.whatsapp}</a></p>` : ''}
                     </div>
 
-                    ${barbearia.photos && barbearia.photos.length > 1 ? `
+                    ${barbearia.photos && barbearia.photos.length > 0 ? `
                     <div class="info-section">
                         <h3>📸 Galeria de Fotos</h3>
                         <div class="photos-grid">
-                            ${barbearia.photos.map(photo => 
-                                `<div class="photo-item" onclick="barbeariaDetalhes.openPhotoModal('${photo}')">
+                            ${barbearia.photos.map((photo, index) => 
+                                `<div class="photo-item" onclick="barbeariaDetalhes.openPhotoByIndex(${index})">
                                     <img src="${photo}" alt="Foto da barbearia">
                                 </div>`
                             ).join('')}
@@ -1838,6 +1893,15 @@
             }
             
             getServicePrices() {
+                // PRIORIDADE: Usar preços reais carregados da API (Banco de Dados)
+                if (this.barbeariaServicos && this.barbeariaServicos.length > 0) {
+                    const prices = {};
+                    this.barbeariaServicos.forEach(s => {
+                        prices[s.name] = parseFloat(s.price);
+                    });
+                    return prices;
+                }
+
                 // Preços variados baseados no nível da barbearia
                 const priceLevels = {
                     1: { // Econômico
@@ -1879,9 +1943,30 @@
                 }, 0);
             }
 
-            openPhotoModal(photoUrl) {
-                // Implementar modal de fotos se necessário
-                window.open(photoUrl, '_blank');
+            openPhotoByIndex(index) {
+                const photoUrl = this.barbeariaData.photos[index];
+                if (photoUrl) {
+                    const modal = document.getElementById('imageModal');
+                    const modalImg = document.getElementById('modalImage');
+                    modal.classList.add('active');
+                    modalImg.src = photoUrl;
+                    document.body.style.overflow = 'hidden'; // Impede scroll da página
+                }
+            }
+
+            closeImageModal(event) {
+                // Fecha apenas se clicar fora da imagem (no overlay)
+                if (event.target.id === 'imageModal') {
+                    this.forceCloseImageModal();
+                }
+            }
+
+            forceCloseImageModal() {
+                const modal = document.getElementById('imageModal');
+                if (modal) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = ''; // Restaura scroll
+                }
             }
 
             compartilharBarbearia() {

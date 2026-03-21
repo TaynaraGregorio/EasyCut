@@ -888,8 +888,12 @@
                     const data = await response.json();
                     
                     let appointments = [];
+                    let pendingCount = 0;
+
                     if (data.success && data.agendamentos) {
                         appointments = data.agendamentos;
+                        // Usa a contagem vinda do backend ou calcula localmente se necessário
+                        pendingCount = data.pending_count !== undefined ? data.pending_count : appointments.filter(a => a.status === 'pending' || a.status === 'pendente').length;
                     }
 
                     // 2. Carregar Avaliações
@@ -909,7 +913,7 @@
                     
                     // Atualizar badge do menu
                     const badge = document.getElementById('menuAppointmentsBadge');
-                    if (badge) badge.textContent = appointments.length;
+                    if (badge) badge.textContent = pendingCount;
 
                 } catch (error) {
                     console.error('Erro ao carregar dados do dashboard:', error);
