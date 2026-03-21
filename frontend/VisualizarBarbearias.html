@@ -1090,12 +1090,8 @@
             init() {
                 this.setupEventListeners();
                 this.updateSearchUI();
-                // Mostrar mensagem inicial apropriada
-                if (this.searchModeValue === 'name') {
-                    this.barbeariasList.innerHTML = '<div class="info-text" style="text-align:center; padding: 40px;">Digite o nome da barbearia para buscar no banco de dados.</div>';
-                } else {
-                    this.barbeariasList.innerHTML = '<div class="info-text" style="text-align:center; padding: 40px;">Para começar, use sua localização ou digite um endereço para encontrar barbearias próximas.</div>';
-                }
+                // Carregar todas as barbearias cadastradas no banco de dados ao iniciar
+                this.loadRealBarbearias();
             }
 
             updateSearchUI() {
@@ -1122,12 +1118,9 @@
                     this.currentLocation = null;
                     this.allBarbearias = [];
                     this.hideSuggestions(); // Ocultar sugestões ao trocar modo
-                    // Mostrar mensagem inicial apropriada
-                    if (this.searchModeValue === 'name') {
-                        this.barbeariasList.innerHTML = '<div class="info-text" style="text-align:center; padding: 40px;">Digite o nome da barbearia para buscar no banco de dados.</div>';
-                    } else {
-                        this.barbeariasList.innerHTML = '<div class="info-text" style="text-align:center; padding: 40px;">Para começar, use sua localização ou digite um endereço para encontrar barbearias próximas.</div>';
-                    }
+                    
+                    // Recarregar todas as barbearias ao trocar o modo de busca
+                    this.loadRealBarbearias();
                 });
 
                 // Campo de busca unificado
@@ -2137,6 +2130,9 @@
                 // Mostrar contador de resultados
                 this.showResultsCount(filteredBarbearias.length, this.allBarbearias.length);
                 
+                // Mostrar indicador de raio
+                this.showRadiusIndicator();
+                
                 // Mostrar indicador de ordenação se ativo
                 this.showSortIndicator();
             }
@@ -2169,6 +2165,31 @@
                         font-weight: 500;
                     `;
                     indicatorDiv.textContent = sortTexts[this.currentFilters.sort_by];
+                    
+                    // Inserir antes da lista de barbearias
+                    this.barbeariasList.parentNode.insertBefore(indicatorDiv, this.barbeariasList);
+                }
+            }
+
+            // Método para mostrar indicador do raio de busca
+            showRadiusIndicator() {
+                // Remover indicador anterior se existir
+                const existingIndicator = document.querySelector('.radius-indicator');
+                if (existingIndicator) {
+                    existingIndicator.remove();
+                }
+
+                // Só mostrar se estiver usando localização/coordenadas
+                if (this.currentLocation || this.selectedAddress || this.searchModeValue === 'location') {
+                    const indicatorDiv = document.createElement('div');
+                    indicatorDiv.className = 'radius-indicator';
+                    indicatorDiv.style.cssText = `
+                        text-align: center;
+                        margin: 0 0 12px 0;
+                        font-size: 0.85rem;
+                        color: #94a3b8;
+                    `;
+                    indicatorDiv.innerHTML = `🎯 Buscando em um raio de <strong>${this.maxDistance.value} km</strong>`;
                     
                     // Inserir antes da lista de barbearias
                     this.barbeariasList.parentNode.insertBefore(indicatorDiv, this.barbeariasList);
@@ -2395,6 +2416,9 @@
                 
                 // Mostrar contador de resultados
                 this.showResultsCount(barbearias.length, barbearias.length);
+                
+                // Mostrar indicador de raio também na carga inicial/display direto
+                this.showRadiusIndicator();
             }
 
             // Método para converter nível de preço em texto

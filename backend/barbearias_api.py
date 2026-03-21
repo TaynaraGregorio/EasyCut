@@ -546,6 +546,11 @@ class BarbeariasService:
                     avg_rating = float(rating_row['media']) if rating_row and rating_row['media'] is not None else 0.0
                     total_reviews = rating_row['total'] if rating_row else 0
                     
+                    # Contar total de agendamentos para relevância (Popularidade)
+                    cursor.execute('SELECT COUNT(id) as total FROM agendamentos WHERE barbearia_id = %s', (barbearia_db['id'],))
+                    appt_row = cursor.fetchone()
+                    total_appointments = appt_row['total'] if appt_row else 0
+                    
                     # Formatar endereço
                     address_parts = []
                     if barbearia_db.get('logradouro'):
@@ -573,6 +578,7 @@ class BarbeariasService:
                         "longitude": float(barbearia_db['longitude']) if barbearia_db.get('longitude') is not None else None,
                         "rating": avg_rating,
                         "total_reviews": total_reviews,
+                        "total_appointments": total_appointments,
                         "price_level": 2, # Mock
                         "opening_hours": opening_hours,
                         "services": [s['nome_servico'] for s in servicos_db] if servicos_db else [],
@@ -594,12 +600,18 @@ class BarbeariasService:
                 # Converter de volta para dict
                 barbearias_with_distance = [asdict(b) if not isinstance(b, dict) else b for b in filtered_objects]
             
-            # Ordenar por distância (agora são dicts)
-            # Se tiver distância, ordena por ela. Se não (busca só por nome sem gps), mantém ordem do banco ou alfabética
-            barbearias_with_distance.sort(key=lambda x: (
-                x.get('distance') if isinstance(x, dict) and x.get('distance') is not None else float('inf'),
-                x.get('name', '') if isinstance(x, dict) else ''  # Desempate alfabético
-            ))
+            # Lógica de Ordenação Inteligente
+            if lat is not None and lng is not None:
+                # Se tem localização definida (busca GPS ou endereço), a prioridade é PROXIMIDADE
+                barbearias_with_distance.sort(key=lambda x: (
+                    x.get('distance') if isinstance(x, dict) and x.get('distance') is not None else float('inf')
+                ))
+            else:
+                # Se é listagem inicial ou busca por nome, a prioridade é RELEVÂNCIA (Popularidade)
+                # Ordena quem tem mais agendamentos primeiro
+                barbearias_with_distance.sort(key=lambda x: (
+                    x.get('total_appointments', 0) if isinstance(x, dict) else 0
+                ), reverse=True)
             
             print(f"[DEBUG] Retornando {len(barbearias_with_distance)} barbearias do banco de dados")
             if barbearias_with_distance:
