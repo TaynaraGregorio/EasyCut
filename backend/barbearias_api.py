@@ -993,8 +993,8 @@ def get_barbearia_details(barbearia_id):
                     barbearia_db = cursor.fetchone()
                     
                     if barbearia_db:
-                        # Buscar serviços
-                        cursor.execute('SELECT * FROM servicos WHERE barbearia_id = %s', (barbearia_id,))
+                        # Buscar apenas serviços ativos para exibição na página de detalhes
+                        cursor.execute("SELECT * FROM servicos WHERE barbearia_id = %s AND status = 'ativo'", (barbearia_id,))
                         servicos_db = cursor.fetchall()
 
                         # Buscar fotos da galeria

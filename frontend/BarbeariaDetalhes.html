@@ -1095,7 +1095,10 @@
                         if (dataServicos.success && dataServicos.servicos && dataServicos.servicos.length > 0) {
                             this.barbeariaServicos = dataServicos.servicos;
                             if (!this.barbeariaData.services || this.barbeariaData.services.length === 0) {
-                                this.barbeariaData.services = this.barbeariaServicos.map(s => s.name);
+                                // Apenas serviços ativos devem ser mostrados para seleção do cliente
+                                this.barbeariaData.services = this.barbeariaServicos
+                                    .filter(s => s.status === 'active')
+                                    .map(s => s.name);
                             }
                         }
                     } catch (e) {

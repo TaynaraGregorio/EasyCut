@@ -103,6 +103,8 @@
             transition: all 0.3s ease;
             position: relative;
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
         }
 
         .favorite-card:hover {
@@ -116,6 +118,7 @@
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 16px;
+            order: 1;
         }
 
         .barbearia-info {
@@ -156,6 +159,7 @@
             margin-top: 16px;
             padding-top: 16px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
+            order: 2;
         }
 
         .detail-row {
@@ -271,24 +275,12 @@
             cursor: pointer;
             transition: all 0.3s ease;
             z-index: 10;
+            order: 0; /* Padrão para telas grandes, para reordenar em telas menores */
         }
 
         .favorite-indicator:hover {
             background: rgba(239, 68, 68, 0.3);
             transform: scale(1.05);
-        }
-
-        .click-hint {
-            position: absolute;
-            bottom: 12px;
-            right: 12px;
-            background: rgba(59, 130, 246, 0.2);
-            color: #3b82f6;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 500;
-            opacity: 0.8;
         }
 
         .btn {
@@ -388,6 +380,18 @@
                 align-items: stretch;
             }
 
+            /* Responsividade para botões no card: evita sobreposição */
+            .favorite-indicator {
+                position: static;
+                order: 10; /* Mover para o final do card */
+                margin-top: 16px;
+                text-align: center;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                width: 100%;
+                border-radius: 8px;
+            }
+
             .detail-row {
                 flex-direction: column;
                 gap: 4px;
@@ -398,12 +402,6 @@
                 justify-content: flex-start;
             }
 
-            .click-hint {
-                position: static;
-                margin-top: 12px;
-                text-align: center;
-                opacity: 1;
-            }
         }
 
         @media (max-width: 576px) {
@@ -495,11 +493,6 @@
             .favorite-indicator:hover {
                 transform: scale(1.02);
             }
-
-            .click-hint {
-                font-size: 0.65rem;
-                padding: 3px 6px;
-            }
         }
 
         @media (max-width: 360px) {
@@ -589,7 +582,6 @@
             container.innerHTML = favoritesData.map(favorite => `
                 <div class="favorite-card" onclick="openBarbeariaPage('${favorite.id}')">
                     <div class="favorite-indicator" onclick="removeFromFavorites(event, '${favorite.id}')">❤️ Favorita</div>
-                    <div class="click-hint">Clique para ver detalhes</div>
                     
                     <div class="favorite-header">
                         <div class="barbearia-info">
