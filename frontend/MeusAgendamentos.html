@@ -1256,7 +1256,12 @@
 
         // Função para formatar data
         function formatDate(dateString) {
-            const date = new Date(dateString);
+            if (!dateString) return '';
+            
+            // Criar a data garantindo que seja no fuso horário local (YYYY-MM-DD)
+            const parts = dateString.split('-');
+            const date = new Date(parts[0], parts[1] - 1, parts[2]);
+            
             const today = new Date();
             const tomorrow = new Date(today);
             tomorrow.setDate(today.getDate() + 1);

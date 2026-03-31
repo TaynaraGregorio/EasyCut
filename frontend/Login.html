@@ -256,29 +256,19 @@
         }
         
         .back-link {
-            text-align: center;
-            margin-top: 24px;
-        }
-        
-        .back-link a {
-            color: #94a3b8;
-            text-decoration: none;
-            font-size: 1rem;
-            font-weight: 500;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: 1px solid transparent;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
             transition: all 0.3s ease;
+            margin-bottom: 24px;
         }
         
-        .back-link a:hover {
+        .back-link:hover {
             color: #3b82f6;
-            background: rgba(59, 130, 246, 0.1);
-            border-color: rgba(59, 130, 246, 0.2);
-            transform: translateY(-1px);
         }
         
         .error-message {
@@ -446,6 +436,9 @@
 </head>
 <body>
     <div class="login-container">
+        <a href="index.html" class="back-link" onclick="return confirmVoltarLogin()">
+            ← Voltar
+        </a>
         <div class="logo-section">
             <img src="imagens/imgTelaInicial.jpg" alt="EasyCut Barbearia" class="logo-image">
             <h1 class="logo-title">EasyCut</h1>

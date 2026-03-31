@@ -1152,7 +1152,6 @@
                             <div class="barbearia-meta">${barbearia.distance ? `${barbearia.distance.toFixed(1)} km de distância` : ''}</div>
                             <div class="barbearia-rating">
                                 ⭐ ${barbearia.rating} 
-                                ${this.getPriceLevelText(barbearia.price_level)}
                             </div>
                         </div>
                     </div>
@@ -1169,12 +1168,6 @@
                             ${barbearia.services.map(service => 
                                 `<span class="service-tag" onclick="barbeariaDetalhes.toggleService('${service}')" title="Clique para selecionar">${service}</span>`
                             ).join('')}
-                        </div>
-                        <div class="price-info" style="margin-top: 16px; padding: 12px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">
-                            <p style="margin: 0; color: #10b981; font-size: 0.9rem;">
-                                💰 <strong>Preços:</strong> ${this.getPriceLevelText(barbearia.price_level)} - 
-                                Valores variam conforme o serviço selecionado
-                            </p>
                         </div>
                     </div>
 
@@ -1445,16 +1438,6 @@
                 }
             }
 
-            getPriceLevelText(priceLevel) {
-                const levels = {
-                    1: "($ - Econômico)",
-                    2: "($$ - Moderado)",
-                    3: "($$$ - Caro)",
-                    4: "($$$$ - Muito caro)"
-                };
-                return levels[priceLevel] || "";
-            }
-            
             getStatusIndicator(openingHours) {
                 const now = new Date();
                 const currentDay = now.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
@@ -1662,7 +1645,10 @@
 
             formatDate(dateString) {
                 if (!dateString) return '';
-                const date = new Date(dateString);
+                // Tratar a data como local para evitar problemas de fuso horário
+                const parts = dateString.split('-');
+                const date = new Date(parts[0], parts[1] - 1, parts[2]);
+                
                 return date.toLocaleDateString('pt-BR', {
                     day: '2-digit',
                     month: '2-digit',

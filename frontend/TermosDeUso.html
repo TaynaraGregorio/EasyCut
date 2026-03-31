@@ -314,44 +314,27 @@
         document.addEventListener('DOMContentLoaded', function() {
             const backButton = document.getElementById('backButton');
             
-            // Verificar parâmetros da URL primeiro
-            const urlParams = new URLSearchParams(window.location.search);
-            const fromPage = urlParams.get('from');
+            // Se o navegador tem histórico de navegação, deixamos o 'javascript:history.back()' 
+            // que já está no HTML fazer o trabalho dele. Isso evita criar loops no histórico.
+            // Só alteramos o href se o usuário acessou a página diretamente (ex: nova aba).
             
-            if (fromPage) {
-                // Se há parâmetro 'from', redirecionar para a página especificada
-                switch(fromPage) {
-                    case 'cliente':
-                        backButton.href = 'CadastroCliente.html';
-                        break;
-                    case 'barbearia':
-                        backButton.href = 'CadastroBarbearia.html';
-                        break;
-                    case 'inicial':
-                        backButton.href = 'Login.html';
-                        break;
-                    default:
-                        backButton.href = 'Login.html';
-                }
-                backButton.onclick = null; // Remove o onclick padrão
-            } else if (document.referrer) {
-                // Fallback: verificar referrer se não há parâmetros
-                const referrer = document.referrer;
+            if (window.history.length <= 1 || !document.referrer) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const fromPage = urlParams.get('from');
                 
-                if (referrer.includes('CadastroCliente.html')) {
-                    backButton.href = 'CadastroCliente.html';
-                } else if (referrer.includes('CadastroBarbearia.html')) {
-                    backButton.href = 'CadastroBarbearia.html';
-                } else if (referrer.includes('Login.html')) {
-                    backButton.href = 'Login.html';
+                if (fromPage) {
+                    switch(fromPage) {
+                        case 'cliente': backButton.href = 'CadastroCliente.html'; break;
+                        case 'barbearia': backButton.href = 'CadastroBarbearia.html'; break;
+                        default: backButton.href = 'index.html';
+                    }
+                } else if (document.referrer) {
+                    // Se veio de algum lugar mas o histórico é curto, mantém o link do referrer
+                    backButton.href = document.referrer;
                 } else {
-                    backButton.href = 'Login.html';
+                    // Fallback final para a página inicial
+                    backButton.href = 'index.html';
                 }
-                backButton.onclick = null;
-            } else {
-                // Se não há referrer nem parâmetros, redirecionar para login
-                backButton.href = 'Login.html';
-                backButton.onclick = null;
             }
         });
     </script>

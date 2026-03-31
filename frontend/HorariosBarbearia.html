@@ -145,6 +145,17 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
         }
+
+        .btn-danger-modal {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger-modal:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+        }
         
         .add-button:active {
             transform: translateY(0);
@@ -712,15 +723,31 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal-overlay" id="deleteModalOverlay">
+        <div class="modal" style="max-width: 400px; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 16px;">⚠️</div>
+            <h3 class="modal-title" style="margin-bottom: 16px; display: block; width: 100%; text-align: center;">Excluir Horário</h3>
+            <p style="color: #cbd5e1; margin-bottom: 24px;">Tem certeza que deseja excluir este horário? Esta ação não pode ser desfeita.</p>
+            
+            <div class="modal-actions" style="justify-content: center;">
+                <button class="btn btn-secondary" onclick="scheduleManager.closeDeleteModal()">Cancelar</button>
+                <button class="btn btn-danger-modal" onclick="scheduleManager.executeDelete()">Excluir</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         class ScheduleManager {
             constructor() {
                 this.scheduleGrid = document.getElementById('scheduleGrid');
                 this.modalOverlay = document.getElementById('modalOverlay');
+                this.deleteModalOverlay = document.getElementById('deleteModalOverlay');
                 this.scheduleForm = document.getElementById('scheduleForm');
                 this.modalTitle = document.getElementById('modalTitle');
                 this.submitBtn = document.getElementById('submitBtn');
                 this.editingId = null;
+                this.pendingDelete = null;
                 this.currentSchedule = null; // Cache local dos horários
                 this.apiUrl = 'http://localhost:5001/api';
                 
@@ -757,10 +784,17 @@
                     }
                 });
                 
+                this.deleteModalOverlay.addEventListener('click', (e) => {
+                    if (e.target === this.deleteModalOverlay) {
+                        this.closeDeleteModal();
+                    }
+                });
+                
                 // Fechar modal com ESC
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
                         this.closeModal();
+                        this.closeDeleteModal();
                     }
                 });
                 
@@ -944,17 +978,33 @@
                 }
             }
             
-            async deleteSlot(dayKey, slotId) {
-                if (confirm('Tem certeza que deseja excluir este horário?')) {
-                    const schedules = this.getSchedules();
-                    const daySchedule = schedules[dayKey];
-                    
-                    if (daySchedule) {
-                        daySchedule.slots = daySchedule.slots.filter(s => s.id !== slotId);
-                        await this.saveSchedules(schedules);
-                        this.renderSchedules(schedules);
-                    }
+            deleteSlot(dayKey, slotId) {
+                this.pendingDelete = { dayKey, slotId };
+                this.deleteModalOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            closeDeleteModal() {
+                this.deleteModalOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+                this.pendingDelete = null;
+            }
+
+            async executeDelete() {
+                if (!this.pendingDelete) return;
+                
+                const { dayKey, slotId } = this.pendingDelete;
+                const schedules = this.getSchedules();
+                const daySchedule = schedules[dayKey];
+                
+                if (daySchedule) {
+                    daySchedule.slots = daySchedule.slots.filter(s => s.id !== slotId);
+                    await this.saveSchedules(schedules);
+                    this.renderSchedules(schedules);
                 }
+                
+                this.closeDeleteModal();
+                this.showSuccessMessage('Horário excluído com sucesso!');
             }
             
             openModal() {
