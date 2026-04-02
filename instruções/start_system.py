@@ -23,7 +23,8 @@ def check_dependencies():
         ('phonenumbers', 'phonenumbers'),
         ('email_validator', 'email-validator'),
         ('mysql.connector', 'mysql-connector-python'),
-        ('geopy', 'geopy')
+        ('geopy', 'geopy'),
+        ('azure.communication.email', 'azure-communication-email')
     ]
     
     missing = []

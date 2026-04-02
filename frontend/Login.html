@@ -432,11 +432,51 @@
                 margin-bottom: 16px;
             }
         }
+
+        /* Estilos do Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: #1e293b;
+            padding: 32px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            color: #fff;
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+        }
+        .modal-content p {
+            color: #94a3b8;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <a href="index.html" class="back-link" onclick="return confirmVoltarLogin()">
+        <a href="index.html" class="back-link" onclick="confirmVoltarLogin(event)">
             ← Voltar
         </a>
         <div class="logo-section">
@@ -493,17 +533,33 @@
        
     </div>
 
+    <!-- Modal de Confirmação -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Confirmar Saída</h3>
+            <p>Você tem certeza que deseja voltar? Os dados preenchidos serão perdidos.</p>
+            <div class="modal-buttons">
+                <button type="button" class="login-btn" id="btnConfirmExit" style="margin: 0;">Sim, Voltar</button>
+                <button type="button" class="social-btn" id="btnCancelExit" style="margin: 0;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Função para confirmar se o usuário quer voltar para a página inicial
-        function confirmVoltarLogin() {
+        function confirmVoltarLogin(event) {
+            if (event) event.preventDefault();
+            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
             if (email || password) {
-                return confirm('Você tem certeza que deseja voltar para a página inicial? Os dados preenchidos serão perdidos.');
+                document.getElementById('confirmModal').style.display = 'flex';
+            } else {
+                window.location.href = 'index.html'; // Redireciona para index.html se não houver dados
             }
-            return true;
         }
+
 
         // Toggle password visibility
         function togglePassword() {
@@ -667,6 +723,12 @@
                     this.placeholder = 'Digite seu email';
                 }
             });
+        });
+
+        // Eventos do Modal
+        document.getElementById('btnConfirmExit').addEventListener('click', () => window.location.href = 'index.html');
+        document.getElementById('btnCancelExit').addEventListener('click', () => {
+            document.getElementById('confirmModal').style.display = 'none';
         });
     </script>
     

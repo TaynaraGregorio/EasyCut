@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>EasyCut - Confirmar E-mail</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="imagens/favicon001.png" type="image/png">
+    <style>
+        body {
+            margin: 0; font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #fff; min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .container {
+            background: rgba(30, 41, 59, 0.8); padding: 40px; border-radius: 20px;
+            text-align: center; max-width: 400px; border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px); box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        .loader {
+            border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%;
+            width: 40px; height: 40px; animation: spin 2s linear infinite; margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        h2 { margin-top: 0; color: #3b82f6; }
+        p { color: #94a3b8; line-height: 1.6; }
+        .btn {
+            display: inline-block; margin-top: 30px; padding: 12px 30px;
+            background: #3b82f6; color: white; text-decoration: none;
+            border-radius: 10px; font-weight: bold; transition: 0.3s;
+        }
+        .btn:hover { background: #2563eb; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <div class="container" id="content">
+        <div class="loader" id="spinner"></div>
+        <h2 id="title">Validando Confirmação</h2>
+        <p id="msg">Aguarde um momento enquanto confirmamos seu e-mail...</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const email = urlParams.get('email');
+            
+            const title = document.getElementById('title');
+            const msg = document.getElementById('msg');
+            const spinner = document.getElementById('spinner');
+
+            if (!token || !email) {
+                spinner.style.display = 'none';
+                title.textContent = "Link Inválido";
+                msg.textContent = "Os parâmetros de confirmação estão ausentes.";
+                return;
+            }
+
+            try {
+                // Chama o backend para confirmar
+                const response = await fetch(`http://localhost:5001/api/confirm-email?token=${token}&email=${email}`);
+                const data = await response.json();
+                
+                spinner.style.display = 'none';
+                if (data.success) {
+                    title.textContent = "E-mail Confirmado!";
+                    title.style.color = "#10b981";
+                    msg.textContent = data.message;
+                    document.getElementById('content').innerHTML += '<a href="Login.html" class="btn">Fazer Login</a>';
+                } else {
+                    title.textContent = "Falha na Confirmação";
+                    title.style.color = "#ef4444";
+                    msg.textContent = data.message;
+                }
+            } catch (err) {
+                spinner.style.display = 'none';
+                title.textContent = "Erro de Conexão";
+                msg.textContent = "Não foi possível conectar ao servidor de autenticação.";
+            }
+        });
+    </script>
+</body>
+</html>

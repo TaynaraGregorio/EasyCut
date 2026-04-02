@@ -373,11 +373,51 @@
                 margin: 12px 0 8px 0;
             }
         }
+
+        /* Estilos do Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: #1e293b;
+            padding: 32px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            color: #fff;
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+        }
+        .modal-content p {
+            color: #94a3b8;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="javascript:history.back()" class="back-link" onclick="return confirmVoltar()">
+        <a href="#" class="back-link" onclick="confirmVoltar(event)">
             ← Voltar
         </a>
         
@@ -442,9 +482,23 @@
         </form>
     </div>
 
+    <!-- Modal de Confirmação -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Confirmar Saída</h3>
+            <p>Você tem certeza que deseja voltar? Os dados preenchidos serão perdidos.</p>
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-primary" id="btnConfirmExit" style="margin: 0;">Sim, Voltar</button>
+                <button type="button" class="btn btn-secondary" id="btnCancelExit" style="margin: 0;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Função para confirmar se o usuário quer voltar
-        function confirmVoltar() {
+        function confirmVoltar(event) {
+            if (event) event.preventDefault();
+            
             const form = document.getElementById('cadastroForm');
             const formData = new FormData(form);
             let hasData = false;
@@ -458,10 +512,17 @@
             }
             
             if (hasData) {
-                return confirm('Você tem certeza que deseja voltar? Os dados preenchidos serão perdidos.');
+                document.getElementById('confirmModal').style.display = 'flex';
+            } else {
+                history.back();
             }
-            return true;
         }
+
+        // Eventos do Modal
+        document.getElementById('btnConfirmExit').addEventListener('click', () => history.back());
+        document.getElementById('btnCancelExit').addEventListener('click', () => {
+            document.getElementById('confirmModal').style.display = 'none';
+        });
 
         // Validação de CNPJ/CPF usando CPFCNPJValidatorFrontend
         function formatCNPJCPF(value) {
@@ -733,13 +794,9 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showSuccessMessage(form, 'Cadastro realizado com sucesso! Você será redirecionado para o login.');
+                    showSuccessMessage(form, data.message);
                     // Limpar formulário
                     e.target.reset();
-                    // Redirecionar para login
-                    setTimeout(() => {
-                        window.location.href = 'Login.html';
-                    }, 2000);
                 } else {
                     // Mapear erros do backend para os campos
                     let mapped = false;

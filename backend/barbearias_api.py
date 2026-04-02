@@ -1295,7 +1295,7 @@ def register_client():
             
         cursor = conn.cursor()
         
-        # Sintaxe MySQL usa %s em vez de ?
+        # Inserir cliente
         sql = "INSERT INTO clientes (nome_completo, email, telefone, senha_hash, termos_aceitos) VALUES (%s, %s, %s, %s, %s)"
         val = (
             data.get('nomeCompleto'),
@@ -1306,6 +1306,7 @@ def register_client():
         )
         
         cursor.execute(sql, val)
+        
         conn.commit()
         cursor.close()
         conn.close()
@@ -1424,6 +1425,7 @@ def register_barbearia():
         )
         
         cursor.execute(sql, val)
+
         conn.commit()
         cursor.close()
         conn.close()
@@ -1431,7 +1433,7 @@ def register_barbearia():
         
         return jsonify({
             'success': True,
-            'message': 'Cadastro de barbearia realizado com sucesso!'
+            'message': 'Cadastro realizado com sucesso!'
         })
         
     except mysql.connector.Error as err:
