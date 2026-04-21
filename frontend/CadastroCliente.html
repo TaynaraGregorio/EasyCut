@@ -748,6 +748,10 @@
                     // Limpar formulário
                     e.target.reset();
                     document.getElementById('passwordStrength').textContent = '';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'Login.html';
+                    }, 2000);
                 } else {
                     // Mapear erros do backend para os campos
                     let mapped = false;
@@ -771,11 +775,15 @@
             .catch((error) => {
                 console.error('Erro:', error);
                 showFormError(form, 'Não foi possível conectar ao servidor. Verifique se o backend está rodando.');
+                // Garante que o botão volte ao normal em caso de falha de rede
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
             })
             .finally(() => {
                  // Restaurar botão
                  submitBtn.disabled = false;
                  submitBtn.textContent = originalText;
+                 // O finally já está presente, mas o catch acima garante redundância visual
             });
         });
 

@@ -797,6 +797,10 @@
                     showSuccessMessage(form, data.message);
                     // Limpar formulário
                     e.target.reset();
+                    
+                    setTimeout(() => {
+                        window.location.href = 'Login.html';
+                    }, 2000);
                 } else {
                     // Mapear erros do backend para os campos
                     let mapped = false;
