@@ -27,12 +27,14 @@ app = Flask(__name__)
 CORS(app)  # Permitir CORS para frontend
 
 # Configuração do Banco de Dados MySQL
+# No Azure, configure estas variáveis em Settings > Configuration > Application Settings
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',      # Usuário padrão do XAMPP
-    'password': '',      # Senha padrão do XAMPP (geralmente vazia)
-    'database': 'easycut_db', # Nome do banco que você criou no MySQL
-    'charset': 'utf8mb4' # Garante suporte a acentos e emojis
+    'host': os.getenv('DB_HOST', 'localhost'),
+    'user': os.getenv('DB_USER', 'root'),
+    'password': os.getenv('DB_PASSWORD', ''),
+    'database': os.getenv('DB_NAME', 'easycut_db'),
+    'port': int(os.getenv('DB_PORT', 3306)),
+    'charset': 'utf8mb4'
 }
 
 def get_db_connection():
@@ -2416,25 +2418,6 @@ if __name__ == '__main__':
     print("=" * 60)
     print("EASYCUT - API DE BARBEARIAS")
     print("=" * 60)
-    print("Servidor rodando em: http://localhost:5001")
-    print("Endpoints disponíveis:")
-    print("  POST /api/barbearias/nearby - Buscar barbearias próximas")
-    print("  POST /api/clientes - Cadastro de clientes")
-    print("  POST /api/barbearias - Cadastro de barbearias")
-    print("  POST /api/login    - Login de usuários")
-    print("  GET  /api/clientes - Listar clientes (Verificação)")
-    print("  GET /api/clientes/<id>/favoritos - Listar favoritos do cliente")
-    print("  GET  /api/barbearias/<id> - Detalhes da barbearia")
-    print("  GET  /api/barbearias/<id>/servicos - Listar serviços da barbearia")
-    print("  POST /api/barbearias/<id>/servicos - Cadastrar serviço")
-    print("  PUT  /api/barbearias/<id>/servicos/<sid> - Atualizar serviço")
-    print("  DELETE /api/barbearias/<id>/servicos/<sid> - Excluir serviço")
-    print("  POST /api/agendamentos - Criar agendamento (cliente)")
-    print("  GET  /api/clientes/<id>/agendamentos - Agendamentos do cliente")
-    print("  GET  /api/barbearias/<id>/agendamentos - Agendamentos da barbearia")
-    print("  PUT  /api/agendamentos/<id> - Atualizar status do agendamento")
-    print("  GET  /api/barbearias/services - Serviços disponíveis")
-    print("  GET  /api/health - Status da API")
-    print("=" * 60)
-    
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    # O Azure injeta a variável de ambiente PORT automaticamente
+    port = int(os.environ.get("PORT", 5001))
+    app.run(host='0.0.0.0', port=port)

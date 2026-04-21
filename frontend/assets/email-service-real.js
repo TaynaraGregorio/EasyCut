@@ -21,7 +21,9 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         alert(result.message);
     }
 });
-        this.apiUrl = 'http://localhost:5001'; // URL da API Backend
+        // Em produção, a API URL deve ser a URL do seu App Service no Azure
+        // Você pode injetar isso via ambiente ou assumir a mesma origem se estiverem no mesmo domínio
+        this.apiUrl = window.location.origin.includes('localhost') ? 'http://localhost:5001' : window.location.origin;
         this.isEmailJSLoaded = false;
         
         // Inicializar dados de usuários no localStorage se não existirem
