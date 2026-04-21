@@ -5,13 +5,13 @@ EasyCut - Backend API para Barbearias
 API para buscar e gerenciar barbearias próximas
 """
 
-from flask import Flask, request, jsonify
+import os
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 import json
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, asdict, replace
 from datetime import datetime, time, timedelta, date
-import os
 import mysql.connector
 from mysql.connector import Error
 from geopy.geocoders import Nominatim
@@ -23,7 +23,15 @@ try:
 except ImportError:
     from google_places_integration import PlacesService
 
-app = Flask(__name__)
+# 1. Configuração de pastas
+# Definimos o caminho absoluto para evitar erros no Linux do Azure
+base_dir = os.path.abspath(os.path.dirname(__file__))
+static_folder = os.path.join(base_dir, 'static')
+template_folder = os.path.join(base_dir, 'templates')
+
+app = Flask(__name__,
+            static_folder=static_folder,
+            template_folder=template_folder)
 CORS(app)  # Permitir CORS para frontend
 
 # Configuração do Banco de Dados MySQL
@@ -36,6 +44,25 @@ DB_CONFIG = {
     'port': int(os.getenv('DB_PORT', 3306)),
     'charset': 'utf8mb4'
 }
+
+# --- ROTAS DO FRONTEND ---
+
+@app.route('/')
+def index():
+    """Serve a página principal."""
+    # Se o seu arquivo principal for index.html, use ele aqui.
+    # Caso seja TelaInicial.html, altere o nome abaixo.
+    return render_template('index.html')
+
+@app.route('/<path:path>')
+def serve_static_pages(path):
+    """Serve outras páginas HTML ou arquivos estáticos se não forem API."""
+    # Se o caminho termina em .html, renderiza como template
+    if path.endswith('.html'):
+        return render_template(path)
+    
+    # Caso contrário, tenta servir da pasta static (CSS, JS, Imagens)
+    return send_from_directory(app.static_folder, path)
 
 def get_db_connection():
     """Cria conexão com o MySQL"""

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>EasyCut - Termos de Uso</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="imagens/favicon001.png" type="image/png">
+    <link rel="icon" href="/static/imagens/favicon001.png" type="image/png">
     <style>
         body {
             margin: 0;
@@ -325,15 +325,15 @@
                 if (fromPage) {
                     switch(fromPage) {
                         case 'cliente': backButton.href = 'CadastroCliente.html'; break;
-                        case 'barbearia': backButton.href = 'CadastroBarbearia.html'; break;
-                        default: backButton.href = 'index.html';
+                        case 'barbearia': backButton.href = '/CadastroBarbearia.html'; break;
+                        default: backButton.href = '/';
                     }
                 } else if (document.referrer) {
                     // Se veio de algum lugar mas o histórico é curto, mantém o link do referrer
                     backButton.href = document.referrer;
                 } else {
-                    // Fallback final para a página inicial
-                    backButton.href = 'index.html';
+                    // Fallback final para a página inicial 
+                    backButton.href = '/';
                 }
             }
         });
