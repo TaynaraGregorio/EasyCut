@@ -1,0 +1,28 @@
+# EasyCut - Dependências Python
+# Validação de Email e Telefone
+
+# Biblioteca principal para validação de emails
+email-validator>=2.0.0
+
+# Biblioteca do Google para validação de telefones
+phonenumbers>=8.13.0
+
+# Framework web para API
+flask>=2.0.0
+
+# CORS para integração frontend-backend
+flask-cors>=3.0.0
+
+# Requisições HTTP para APIs externas
+requests>=2.25.0
+
+# Dependências opcionais para desenvolvimento e testes
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Para formatação de código (opcional)
+black>=22.0.0
+flake8>=5.0.0
+
+# Conector MySQL
+mysql-connector-python>=8.0.0
