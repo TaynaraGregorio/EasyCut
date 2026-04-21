@@ -8,6 +8,9 @@ Testa se todos os imports estão funcionando corretamente
 import sys
 import os
 
+# Adicionar o diretório backend ao path
+sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
+
 def test_imports():
     """Testa se todos os imports estão funcionando"""
     print("=" * 60)
@@ -92,35 +95,29 @@ def test_file_structure():
     print("\n4. Verificando estrutura de arquivos...")
     
     # Verificar se as pastas existem
+    if os.path.exists('frontend'):
+        print("   OK Pasta frontend existe")
+    else:
+        print("   ❌ Pasta frontend não encontrada")
+        return False
+    
     if os.path.exists('backend'):
         print("   OK Pasta backend existe")
     else:
         print("   ❌ Pasta backend não encontrada")
         return False
     
-    if os.path.exists('backend/templates'):
-        print("   OK Pasta backend/templates existe")
-    else:
-        print("   ❌ Pasta backend/templates não encontrada")
-        return False
-
-    if os.path.exists('backend/static'):
-        print("   OK Pasta backend/static existe")
-    else:
-        print("   ❌ Pasta backend/static não encontrada")
-        return False
-    
-    # Verificar arquivos HTML em backend/templates
+    # Verificar arquivos HTML no frontend
     html_files = ['CadastroCliente.html', 'CadastroBarbearia.html', 'Login.html', 'TelaInicial.html']
     for html_file in html_files:
-        if os.path.exists(f'backend/templates/{html_file}'):
+        if os.path.exists(f'frontend/{html_file}'):
             print(f"   OK {html_file} encontrado")
         else:
             print(f"   ❌ {html_file} não encontrado")
             return False
     
     # Verificar arquivos Python no backend
-    py_files = ['email_validator.py', 'phone_validator.py', 'cpf_cnpj_validator.py', 'form_validator.py', 'barbearias_api.py'] # Changed api_validator.py to barbearias_api.py
+    py_files = ['email_validator.py', 'phone_validator.py', 'cpf_cnpj_validator.py', 'form_validator.py', 'api_validator.py']
     for py_file in py_files:
         if os.path.exists(f'backend/{py_file}'):
             print(f"   OK {py_file} encontrado")
@@ -128,10 +125,10 @@ def test_file_structure():
             print(f"   ❌ {py_file} não encontrado")
             return False
     
-    # Verificar arquivos JavaScript em backend/static/assets
+    # Verificar arquivos JavaScript no frontend/assets
     js_files = ['cpf_cnpj_validator_frontend.js', 'phone_validator_frontend.js', 'backend_integration.js']
     for js_file in js_files:
-        if os.path.exists(f'backend/static/assets/{js_file}'):
+        if os.path.exists(f'frontend/assets/{js_file}'):
             print(f"   OK {js_file} encontrado")
         else:
             print(f"   ❌ {js_file} não encontrado")
@@ -156,13 +153,11 @@ if __name__ == "__main__":
     print("\nSUCESSO! Nova estrutura está funcionando perfeitamente!")
     print("\nEstrutura final:")
     print("EasyCut/")
+    print("|-- frontend/")
+    print("|   |-- *.html")
+    print("|   |-- assets/")
+    print("|       |-- *.js")
     print("|-- backend/")
-    print("|   |-- templates/")
-    print("|   |   |-- *.html")
-    print("|   |-- static/")
-    print("|   |   |-- imagens/")
-    print("|   |   |-- assets/")
-    print("|   |   |-- *.js (if any directly in static)")
-    print("|   |-- *.py (including barbearias_api.py)")
+    print("|   |-- *.py")
     print("|   |-- requirements.txt")
     print("|-- README.md")

@@ -5,13 +5,13 @@ EasyCut - Backend API para Barbearias
 API para buscar e gerenciar barbearias próximas
 """
 
-import os
-from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import json
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, asdict, replace
 from datetime import datetime, time, timedelta, date
+import os
 import mysql.connector
 from mysql.connector import Error
 from geopy.geocoders import Nominatim
@@ -23,46 +23,17 @@ try:
 except ImportError:
     from google_places_integration import PlacesService
 
-# 1. Configuração de pastas
-# Definimos o caminho absoluto para evitar erros no Linux do Azure
-base_dir = os.path.abspath(os.path.dirname(__file__))
-static_folder = os.path.join(base_dir, 'static')
-template_folder = os.path.join(base_dir, 'templates')
-
-app = Flask(__name__,
-            static_folder=static_folder,
-            template_folder=template_folder)
+app = Flask(__name__)
 CORS(app)  # Permitir CORS para frontend
 
 # Configuração do Banco de Dados MySQL
-# No Azure, configure estas variáveis em Settings > Configuration > Application Settings
 DB_CONFIG = {
-    'host': os.getenv('DB_HOST', 'localhost'),
-    'user': os.getenv('DB_USER', 'root'),
-    'password': os.getenv('DB_PASSWORD', ''),
-    'database': os.getenv('DB_NAME', 'easycut_db'),
-    'port': int(os.getenv('DB_PORT', 3306)),
-    'charset': 'utf8mb4'
+    'host': 'localhost',
+    'user': 'root',      # Usuário padrão do XAMPP
+    'password': '',      # Senha padrão do XAMPP (geralmente vazia)
+    'database': 'easycut_db', # Nome do banco que você criou no MySQL
+    'charset': 'utf8mb4' # Garante suporte a acentos e emojis
 }
-
-# --- ROTAS DO FRONTEND ---
-
-@app.route('/')
-def index():
-    """Serve a página principal."""
-    # Se o seu arquivo principal for index.html, use ele aqui.
-    # Caso seja TelaInicial.html, altere o nome abaixo.
-    return render_template('index.html')
-
-@app.route('/<path:path>')
-def serve_static_pages(path):
-    """Serve outras páginas HTML ou arquivos estáticos se não forem API."""
-    # Se o caminho termina em .html, renderiza como template
-    if path.endswith('.html'):
-        return render_template(path)
-    
-    # Caso contrário, tenta servir da pasta static (CSS, JS, Imagens)
-    return send_from_directory(app.static_folder, path)
 
 def get_db_connection():
     """Cria conexão com o MySQL"""
@@ -2445,6 +2416,25 @@ if __name__ == '__main__':
     print("=" * 60)
     print("EASYCUT - API DE BARBEARIAS")
     print("=" * 60)
-    # O Azure injeta a variável de ambiente PORT automaticamente
-    port = int(os.environ.get("PORT", 5001))
-    app.run(host='0.0.0.0', port=port)
+    print("Servidor rodando em: http://localhost:5001")
+    print("Endpoints disponíveis:")
+    print("  POST /api/barbearias/nearby - Buscar barbearias próximas")
+    print("  POST /api/clientes - Cadastro de clientes")
+    print("  POST /api/barbearias - Cadastro de barbearias")
+    print("  POST /api/login    - Login de usuários")
+    print("  GET  /api/clientes - Listar clientes (Verificação)")
+    print("  GET /api/clientes/<id>/favoritos - Listar favoritos do cliente")
+    print("  GET  /api/barbearias/<id> - Detalhes da barbearia")
+    print("  GET  /api/barbearias/<id>/servicos - Listar serviços da barbearia")
+    print("  POST /api/barbearias/<id>/servicos - Cadastrar serviço")
+    print("  PUT  /api/barbearias/<id>/servicos/<sid> - Atualizar serviço")
+    print("  DELETE /api/barbearias/<id>/servicos/<sid> - Excluir serviço")
+    print("  POST /api/agendamentos - Criar agendamento (cliente)")
+    print("  GET  /api/clientes/<id>/agendamentos - Agendamentos do cliente")
+    print("  GET  /api/barbearias/<id>/agendamentos - Agendamentos da barbearia")
+    print("  PUT  /api/agendamentos/<id> - Atualizar status do agendamento")
+    print("  GET  /api/barbearias/services - Serviços disponíveis")
+    print("  GET  /api/health - Status da API")
+    print("=" * 60)
+    
+    app.run(debug=True, host='0.0.0.0', port=5001)

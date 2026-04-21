@@ -264,7 +264,7 @@ if __name__ == '__main__':
     print("=" * 60)
     print("EasyCut - API de Validação")
     print("=" * 60)
-    print("Servidor de desenvolvimento iniciado.")
+    print("Servidor rodando em: http://localhost:5000")
     print("Endpoints disponíveis:")
     print("  GET  /                    - Página de teste")
     print("  POST /api/validate-client - Validar cliente")
@@ -273,5 +273,5 @@ if __name__ == '__main__':
     print("  POST /api/validate-phone  - Validar apenas telefone")
     print("  POST /api/validate-cpf-cnpj - Validar apenas CPF/CNPJ")
     print("=" * 60)
-    # Em produção, o Gunicorn ignora este bloco e usa o objeto 'app' diretamente
-    app.run(debug=False)
+    
+    app.run(debug=True, host='0.0.0.0', port=5000)
