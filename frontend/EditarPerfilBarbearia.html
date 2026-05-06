@@ -912,7 +912,6 @@
         // Função para confirmar se o usuário quer voltar
         function confirmVoltar() {
             // Verificar se há campos com alterações não salvas
-            // const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}'); // Removido: usa originalData
             let hasUnsavedChanges = false;
             
             // Verificar campos principais
@@ -943,12 +942,11 @@
                 hasUnsavedChanges = true;
             }
             
-            // Verificar se há imagens não salvas
-            if (uploadedImages.length > 0) {
-                const savedImages = currentUser.imagens || [];
-                if (uploadedImages.length !== savedImages.length) {
-                    hasUnsavedChanges = true;
-                }
+            // Verificar se há imagens não salvas ou deletadas (lógica similar a checkBlockChanges)
+            const hasNewImages = uploadedImages.some(img => !img.isStored);
+            const hasDeletedImages = deletedImageIds.length > 0;
+            if (hasNewImages || hasDeletedImages) {
+                hasUnsavedChanges = true;
             }
             
             if (hasUnsavedChanges) {

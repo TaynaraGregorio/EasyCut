@@ -6,11 +6,11 @@ Como usar o validador de email com os formulários de cadastro
 """
 
 try:
-    from .email_validator import EmailValidator
+    from .email_check_logic import EmailValidator
     from .phone_validator import PhoneValidator
     from .cpf_cnpj_validator import CPFCNPJValidator
 except ImportError:
-    from email_validator import EmailValidator
+    from email_check_logic import EmailValidator
     from phone_validator import PhoneValidator
     from cpf_cnpj_validator import CPFCNPJValidator
 import json

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-EasyCut - Validador de Email
+EasyCut - Validador de Email (Lógica Interna)
 Validação de emails usando a biblioteca email-validator
 """
 
@@ -87,7 +87,7 @@ class EmailValidator:
             }
             
         except ext_email_validator.EmailNotValidError as e:
-            result['error_message'] = str(e)
+            result['error_message'] = "E-mail inválido"
             result['validation_details']['error_code'] = e.code
             
         except Exception as e:
@@ -161,92 +161,3 @@ def validate_email_with_details(email: str) -> Dict[str, Any]:
     """
     validator = EmailValidator()
     return validator.validate_email_advanced(email)
-
-
-# Exemplo de uso e testes
-if __name__ == "__main__":
-    # Criar instância do validador
-    validator = EmailValidator()
-    
-    # Lista de emails para teste
-    test_emails = [
-        "usuario@exemplo.com",
-        "teste@domain.co.uk",
-        "email+tag@example.org",
-        "invalid-email",
-        "@domain.com",
-        "user@",
-        "user@domain",
-        "user@domain.",
-        "user@.domain.com",
-        "user@domain..com",
-        "user name@domain.com",  # Espaço no local
-        "user@domain name.com",  # Espaço no domínio
-        "",  # Email vazio
-        None  # Email nulo
-    ]
-    
-    print("=" * 60)
-    print("TESTE DE VALIDAÇÃO DE EMAILS - EasyCut")
-    print("=" * 60)
-    
-    for email in test_emails:
-        print(f"\nTestando: '{email}'")
-        print("-" * 40)
-        
-        # Validação básica
-        is_valid_format, format_msg = validator.validate_email_format(email)
-        print(f"Formato básico: {'✓' if is_valid_format else '✗'} - {format_msg}")
-        
-        # Validação avançada
-        if email:  # Só testa se não for vazio/nulo
-            result = validator.validate_email_for_form(email)
-            print(f"Validação completa: {'✓' if result['is_valid'] else '✗'} - {result['message']}")
-            
-            if result['normalized_email']:
-                print(f"Email normalizado: {result['normalized_email']}")
-    
-    print("\n" + "=" * 60)
-    print("TESTE DE MÚLTIPLOS EMAILS")
-    print("=" * 60)
-    
-    # Teste com múltiplos emails
-    multiple_results = validator.validate_multiple_emails([
-        "cliente@barbearia.com",
-        "contato@easycut.com.br",
-        "invalid-email",
-        "admin@teste.org"
-    ])
-    
-    for email, result in multiple_results.items():
-        status = "✓ VÁLIDO" if result['is_valid'] else "✗ INVÁLIDO"
-        print(f"{email}: {status} - {result['message']}")
-    
-    print("\n" + "=" * 60)
-    print("EXEMPLO DE USO EM FORMULÁRIO")
-    print("=" * 60)
-    
-    # Simulação de validação em formulário
-    def simulate_form_validation(email_input):
-        result = validator.validate_email_for_form(email_input)
-        
-        if result['is_valid']:
-            print(f"✓ Email '{email_input}' é válido!")
-            if result['normalized_email'] != email_input:
-                print(f"  Email normalizado: {result['normalized_email']}")
-        else:
-            print(f"✗ Email '{email_input}' é inválido: {result['message']}")
-        
-        return result['is_valid']
-    
-    # Teste com emails do formulário
-    form_emails = [
-        "cliente@exemplo.com",
-        "barbearia@teste.com.br",
-        "email-invalido",
-        "contato@easycut.com"
-    ]
-    
-    for email in form_emails:
-        simulate_form_validation(email)
-        print()

@@ -194,9 +194,9 @@ def validate_email_only():
         email = data.get('email', '')
         
         try:
-            from .email_validator import EmailValidator
+            from .email_check_logic import EmailValidator
         except ImportError:
-            from email_validator import EmailValidator
+            from email_check_logic import EmailValidator
         email_validator = EmailValidator()
         result = email_validator.validate_email_for_form(email)
         

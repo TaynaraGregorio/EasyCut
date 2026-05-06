@@ -14,6 +14,7 @@ from datetime import datetime, time, timedelta, date
 import os
 import mysql.connector
 from mysql.connector import Error
+from email_validator import validate_email, EmailNotValidError
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 
@@ -1385,6 +1386,16 @@ def register_barbearia():
         if missing_fields:
             print(f"[ALERTA] Campos faltando: {missing_fields}")
             return jsonify({'success': False, 'message': f'Preencha todos os campos obrigatórios: {", ".join(missing_fields)}'}), 400
+
+        # --- Email Validation ---
+        try:
+            # Validate and normalize the email
+            v = validate_email(email, check_deliverability=False) # check_deliverability can be slow and is not strictly necessary for format validation
+            email = v["email"] # Use the normalized email
+        except EmailNotValidError as e:
+            print(f"[ALERTA] Email inválido fornecido para barbearia: {email} - {str(e)}")
+            return jsonify({'success': False, 'message': 'E-mail inválido'}), 400
+        # --- End Email Validation ---
 
         # Salvar no banco de dados
         conn = get_db_connection()

@@ -278,7 +278,7 @@ if (emailInput) {
             const errorMsg = document.createElement('div');
             errorMsg.className = 'email-validation-message';
             errorMsg.style.cssText = 'color: #ef4444; font-size: 0.85rem; margin-top: 4px;';
-            errorMsg.textContent = result.message;
+            errorMsg.textContent = 'E-mail inválido';
             e.target.parentNode.appendChild(errorMsg);
         }
     } else {

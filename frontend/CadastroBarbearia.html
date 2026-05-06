@@ -807,7 +807,7 @@
                     const msg = (data.message || '').toLowerCase();
                     
                     if (msg.includes('email')) {
-                        showFieldError(document.getElementById('email'), data.message);
+                        showFieldError(document.getElementById('email'), 'E-mail inválido');
                         mapped = true;
                     }
                     

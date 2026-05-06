@@ -12,6 +12,11 @@ import time
 import webbrowser
 from pathlib import Path
 
+# Configuração de caminhos absolutos para evitar erros de diretório
+BASE_DIR = Path(__file__).resolve().parent.parent
+BACKEND_DIR = BASE_DIR / "backend"
+FRONTEND_DIR = BASE_DIR / "frontend"
+
 def check_dependencies():
     """Verifica se as dependências estão instaladas"""
     print("🔍 Verificando dependências...")
@@ -52,9 +57,8 @@ def start_backend_api():
     print("🚀 Iniciando API de Barbearias...")
     
     try:
-        # Mudar para o diretório backend
-        backend_dir = Path(__file__).parent.parent / "backend"
-        os.chdir(backend_dir)
+        # Garantir diretório correto
+        os.chdir(BACKEND_DIR)
         
         # Iniciar o servidor
         process = subprocess.Popen([
@@ -82,9 +86,8 @@ def start_validation_api():
     print("🚀 Iniciando API de Validação...")
     
     try:
-        # Mudar para o diretório backend
-        backend_dir = Path(__file__).parent.parent / "backend"
-        os.chdir(backend_dir)
+        # Garantir diretório correto
+        os.chdir(BACKEND_DIR)
         
         # Iniciar o servidor
         process = subprocess.Popen([
@@ -112,15 +115,13 @@ def start_frontend_server():
     print("🚀 Iniciando Servidor Frontend...")
     
     try:
-        # Mudar para o diretório frontend
-        frontend_dir = Path(__file__).parent.parent / "frontend"
-        os.chdir(frontend_dir)
+        # Garantir diretório correto
+        os.chdir(FRONTEND_DIR)
         
         # Iniciar servidor Python simples na porta 8000
-        # Redirecionamos stdout/stderr para DEVNULL para não poluir o terminal
         process = subprocess.Popen([
             sys.executable, "-m", "http.server", "8000"
-        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
         time.sleep(2)
         
@@ -128,7 +129,8 @@ def start_frontend_server():
             print("✅ Frontend rodando em http://localhost:8000")
             return process
         else:
-            print("❌ Erro ao iniciar servidor Frontend")
+            stdout, stderr = process.communicate()
+            print(f"❌ Erro ao iniciar servidor Frontend: {stderr.decode()}")
             return None
             
     except Exception as e:
