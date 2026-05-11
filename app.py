@@ -5,7 +5,7 @@ EasyCut - Backend Unificado
 API para gerenciamento de barbearias e validação de formulários.
 """
 
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import json
 import sys
@@ -55,80 +55,6 @@ DB_CONFIG = {
     'port': int(os.environ.get('MYSQLPORT', os.environ.get('DB_PORT', 3306))),
     'charset': 'utf8mb4'
 }
-
-HTML_TEMPLATE_VALIDATION = '''
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>EasyCut - Teste de Validação</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .form-group { margin: 15px 0; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input { padding: 8px; width: 300px; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #0056b3; }
-        .error { color: red; margin-top: 5px; }
-        .success { color: green; margin-top: 5px; }
-        .result { margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9; }
-    </style>
-</head>
-<body>
-    <h1>EasyCut - Teste de Validação Backend</h1>
-    <h2>Cadastro de Cliente</h2>
-    <form id="clientForm">
-        <div class="form-group">
-            <label for="nomeCompleto">Nome Completo:</label>
-            <input type="text" id="nomeCompleto" name="nomeCompleto" required>
-        </div>
-        <div class="form-group">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        <div class="form-group">
-            <label for="telefone">Telefone:</label>
-            <input type="tel" id="telefone" name="telefone" required>
-        </div>
-        <div class="form-group">
-            <label for="senha">Senha:</label>
-            <input type="password" id="senha" name="senha" required>
-        </div>
-        <div class="form-group">
-            <label for="confirmarSenha">Confirmar Senha:</label>
-            <input type="password" id="confirmarSenha" name="confirmarSenha" required>
-        </div>
-        <button type="submit">Validar com Backend</button>
-    </form>
-    <div id="result" class="result" style="display: none;"></div>
-    <script>
-        document.getElementById('clientForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData);
-            try {
-                const response = await fetch('/api/validate-client', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(data)
-                });
-                const result = await response.json();
-                const resultDiv = document.getElementById('result');
-                resultDiv.style.display = 'block';
-                if (result.success) {
-                    resultDiv.innerHTML = `<h3 class="success">✓ ${result.message}</h3><pre>${JSON.stringify(result.data, null, 2)}</pre>`;
-                } else {
-                    let errorsHtml = '<h3 class="error">✗ Erros:</h3><ul>' + result.errors.map(e => `<li class="error">${e}</li>`).join('') + '</ul>';
-                    resultDiv.innerHTML = errorsHtml;
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-            }
-        });
-    </script>
-</body>
-</html>
-'''
 
 # --- UTILITÁRIOS DE BANCO DE DADOS ---
 def get_db_connection():
@@ -376,8 +302,9 @@ email_validator_service = EmailValidator()
 
 # --- ROTAS DE VALIDAÇÃO (Antiga api_validator.py) ---
 @app.route('/')
-def index_validation():
-    return render_template_string(HTML_TEMPLATE_VALIDATION)
+def index():
+    """Renderiza a página principal do site"""
+    return render_template('index.html')
 
 @app.route('/api/validate-client', methods=['POST'])
 def validate_client():
