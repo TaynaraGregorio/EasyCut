@@ -21,7 +21,11 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         alert(result.message);
     }
 });
-        this.apiUrl = 'http://localhost:5001'; // URL da API Backend
+        // Detecta automaticamente se deve usar localhost ou a URL do Railway
+        this.apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:5000'
+            : 'https://YOUR_RAILWAY_APP_URL.up.railway.app'; // <-- SUBSTITUA PELA URL REAL DO SEU APP NO RAILWAY
+
         this.isEmailJSLoaded = false;
         
         // Inicializar dados de usuários no localStorage se não existirem
