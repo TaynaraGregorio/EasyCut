@@ -337,6 +337,47 @@ def validate_cpf_cnpj_only():
     result = cpf_cnpj_validator.validate_document_for_form(doc)
     return jsonify(result)
 
+# --- ROTAS PARA PÁGINAS HTML ---
+@app.route('/confirmar-email')
+def confirmar_email_page():
+    """Renderiza a página de confirmação de email."""
+    return render_template('ConfirmarEmail.html')
+
+@app.route('/redefinir-senha')
+def redefinir_senha_page():
+    """Renderiza a página de redefinição de senha."""
+    return render_template('RedefinirSenha.html')
+
+@app.route('/cadastro-cliente')
+def cadastro_cliente_page():
+    """Renderiza a página de cadastro de cliente."""
+    return render_template('CadastroCliente.html')
+
+@app.route('/cadastro-barbearia')
+def cadastro_barbearia_page():
+    """Renderiza a página de cadastro de barbearia."""
+    return render_template('CadastroBarbearia.html')
+
+@app.route('/login')
+def login_page():
+    """Renderiza a página de login."""
+    return render_template('Login.html')
+
+@app.route('/tela-inicial')
+def tela_inicial_page():
+    """Renderiza a página inicial (dashboard, etc.)."""
+    return render_template('TelaInicial.html')
+
+@app.route('/visualizar-barbearias')
+def visualizar_barbearias_page():
+    """Renderiza a página de visualização de barbearias."""
+    return render_template('VisualizarBarbearias.html')
+
+@app.route('/barbearia-detalhes/<int:barbearia_id>')
+def barbearia_detalhes_page(barbearia_id):
+    """Renderiza a página de detalhes de uma barbearia específica."""
+    return render_template('BarbeariaDetalhes.html', barbearia_id=barbearia_id)
+
 # --- ROTAS DE BARBEARIA (Antiga barbearias_api.py) ---
 @app.route('/api/barbearias/nearby', methods=['POST'])
 def get_nearby_barbearias():

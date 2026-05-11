@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>EasyCut - Confirmar Email</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="imagens/favicon001.png" type="image/png">
+    <link rel="icon" href="static/imagens/favicon001.png" type="image/png">
     <style>
         body {
             margin: 0;
@@ -235,15 +235,15 @@
         </div>
         
         <div id="actionButtons" style="display: none;">
-            <a href="Login.html" class="btn btn-success" id="loginBtn">
+            <a href="{{ url_for('login_page') }}" class="btn btn-success" id="loginBtn">
                 <span>🚀</span> Fazer Login
             </a>
-            <a href="Login.html" class="btn btn-secondary">
+            <a href="{{ url_for('login_page') }}" class="btn btn-secondary">
                 <span>🏠</span> Página Inicial
             </a>
         </div>
         
-        <a href="Login.html" class="back-link">
+        <a href="{{ url_for('login_page') }}" class="back-link">
             ← Voltar para início
         </a>
     </div>

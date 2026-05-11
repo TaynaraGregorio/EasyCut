@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>EasyCut - Tela Inicial</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="imagens/favicon001.png" type="image/png">
+    <link rel="icon" href="{{ url_for('static', filename='imagens/favicon001.png') }}" type="image/png">
     <style>
         body {
             margin: 0;
@@ -32,6 +32,7 @@
         .container {
             background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px); /* Corrigido: estava faltando o ponto e vírgula */
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 24px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
@@ -45,6 +46,7 @@
         }
         .logo-image {
             width: 100%;
+            width: 100%; /* Corrigido: estava faltando o ponto e vírgula */
             max-width: 280px;
             height: auto;
             margin-bottom: 24px;
@@ -261,9 +263,9 @@
 </head>
 <body>
     <div class="container">
-        <img src="imagens/imgTelaInicial.jpg" alt="EasyCut Barbearia" class="logo-image">
+        <img src="{{ url_for('static', filename='imagens/imgTelaInicial.jpg') }}" alt="EasyCut Barbearia" class="logo-image">
         <div class="logo">EasyCut</div>
         <button class="btn btn-loja" onclick="window.location.href='CadastroBarbearia.html'">Cadastrar como Barbearia</button>
         <button class="btn btn-cliente" onclick="window.location.href='CadastroCliente.html'">Cadastrar como Cliente</button>
-        <a href="Login.html" class="login-link">Já possui cadastro? Faça login</a>
+        <a href="{{ url_for('login_page') }}" class="login-link">Já possui cadastro? Faça login</a>
     

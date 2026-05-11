@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>EasyCut - Redefinir Senha</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="imagens/favicon001.png" type="image/png">
+    <link rel="icon" href="{{ url_for('static', filename='imagens/favicon001.png') }}" type="image/png">
     <style>
         body {
             margin: 0;
@@ -241,7 +241,7 @@
 </head>
 <body>
     <div class="container">
-        <a href="Login.html" class="back-link">
+        <a href="{{ url_for('login_page') }}" class="back-link">
             ← Voltar para login
         </a>
         
@@ -271,7 +271,7 @@
             </button>
         </form>
         
-        <a href="Login.html" class="btn btn-secondary">
+        <a href="{{ url_for('login_page') }}" class="btn btn-secondary">
             Cancelar
         </a>
     </div>
