@@ -43,7 +43,10 @@ except (ImportError, ModuleNotFoundError):
     from cpf_cnpj_validator import CPFCNPJValidator
     from email_check_logic import EmailValidator
 
-app = Flask(__name__)
+# Configura explicitamente as pastas de templates e static
+app = Flask(__name__, 
+            template_folder='templates',
+            static_folder='static')
 CORS(app)
 
 # --- CONFIGURAÇÕES ---
