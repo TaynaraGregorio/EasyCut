@@ -3223,13 +3223,13 @@
                     const detectedUserType = currentUser.tipo || userType || 'cliente';
                     
                     if (detectedUserType === 'barbearia') {
-                        window.location.href = 'BarbeariaDashboard.html';
+                        window.location.href = "{{ url_for('barbearia_dashboard_page') }}";
                     } else {
-                        window.location.href = 'ClienteDashboard.html';
+                        window.location.href = "{{ url_for('cliente_dashboard_page') }}";
                     }
                 } catch (error) {
                     console.error('Erro no fallback:', error);
-                    window.location.href = 'Login.html';
+                    window.location.href = "{{ url_for('login_page') }}";
                 }
             }
         }

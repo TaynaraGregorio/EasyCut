@@ -556,7 +556,7 @@
             if (email || password) {
                 document.getElementById('confirmModal').style.display = 'flex';
             } else {
-                window.location.href = 'index.html'; // Redireciona para index.html se não houver dados
+                window.location.href = "{{ url_for('index') }}"; // Redireciona para index.html se não houver dados
             }
         }
 
@@ -661,9 +661,9 @@
                     showSuccess('Login realizado com sucesso! Redirecionando...');
                     setTimeout(() => {
                         if (data.user.tipo === 'barbearia') {
-                            window.location.href = 'BarbeariaDashboard.html';
+                            window.location.href = "{{ url_for('barbearia_dashboard_page') }}";
                         } else {
-                            window.location.href = 'ClienteDashboard.html';
+                            window.location.href = "{{ url_for('cliente_dashboard_page') }}";
                         }
                     }, 1500);
                 } else {
@@ -726,7 +726,7 @@
         });
 
         // Eventos do Modal
-        document.getElementById('btnConfirmExit').addEventListener('click', () => window.location.href = 'index.html');
+        document.getElementById('btnConfirmExit').addEventListener('click', () => window.location.href = "{{ url_for('index') }}");
         document.getElementById('btnCancelExit').addEventListener('click', () => {
             document.getElementById('confirmModal').style.display = 'none';
         });

@@ -483,12 +483,12 @@
                 <label class="checkbox-label">
                     <input type="checkbox" id="aceitarTermos" name="aceitarTermos" required>
                     <span class="checkmark"></span>
-                    Li e aceito os <a href="TermosDeUso.html?from=cliente" target="_blank" class="terms-link">Termos de Uso</a> <span class="required">*</span>
+                    Li e aceito os <a href="{{ url_for('termos_de_uso_page', from='cliente') }}" target="_blank" class="terms-link">Termos de Uso</a> <span class="required">*</span>
                 </label>
             </div>
 
             <button type="submit" class="btn btn-primary">Cadastrar Cliente</button>
-            <button type="button" class="btn btn-secondary" onclick="window.location.href='Login.html'">Cancelar</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ url_for('login_page') }}'">Cancelar</button>
         </form>
     </div>
 
@@ -750,7 +750,7 @@
                     document.getElementById('passwordStrength').textContent = '';
                     
                     setTimeout(() => {
-                        window.location.href = 'Login.html';
+                        window.location.href = "{{ url_for('login_page') }}";
                     }, 2000);
                 } else {
                     // Mapear erros do backend para os campos

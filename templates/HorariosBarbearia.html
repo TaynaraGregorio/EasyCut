@@ -639,12 +639,12 @@
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <div class="logo" onclick="window.location.href='BarbeariaDashboard.html'">EasyCut</div>
+            <div class="logo" onclick="window.location.href='{{ url_for('barbearia_dashboard_page') }}'">EasyCut</div>
             <div style="display: flex; gap: 10px;">
                 <button id="viewAsClientBtn" class="back-button" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3);">
                     👁️ Ver como Cliente
                 </button>
-                <a href="BarbeariaDashboard.html" class="back-button">
+                <a href="#" class="back-button" onclick="window.history.back(); return false;">
                     ← Voltar ao Dashboard
                 </a>
             </div>
@@ -750,6 +750,10 @@
     </div>
 
     <script>
+        function easycutBarbeariaDetalhesUrl(id) {
+            return {{ url_for('barbearia_detalhes_page', barbearia_id=0)|tojson }}.replace(/\/0(?=\?|$)/, '/' + id);
+        }
+
         class ScheduleManager {
             constructor() {
                 this.scheduleGrid = document.getElementById('scheduleGrid');
@@ -781,7 +785,7 @@
                 const user = JSON.parse(localStorage.getItem('currentUser'));
                 if (user && user.id) {
                     const btn = document.getElementById('viewAsClientBtn');
-                    btn.onclick = () => window.open(`BarbeariaDetalhes.html?id=${user.id}`, '_blank');
+                    btn.onclick = () => window.open(easycutBarbeariaDetalhesUrl(user.id), '_blank');
                 }
 
                 this.loadSchedules();
@@ -835,7 +839,7 @@
                 const user = JSON.parse(localStorage.getItem('currentUser'));
                 if (!user || user.tipo !== 'barbearia') {
                     alert('Sessão inválida. Por favor, faça login novamente.');
-                    window.location.href = 'Login.html';
+                    window.location.href = "{{ url_for('login_page') }}";
                     return;
                 }
 

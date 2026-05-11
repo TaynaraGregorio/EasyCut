@@ -243,7 +243,7 @@
             </a>
         </div>
         
-        <a href="{{ url_for('login_page') }}" class="back-link">
+        <a href="{{ url_for('index') }}" class="back-link">
             ← Voltar para início
         </a>
     </div>
@@ -302,10 +302,10 @@
                 
                 // Mostrar botão para reenviar confirmação
                 actionButtons.innerHTML = `
-                    <a href="Login.html" class="btn btn-primary">
+                    <a href="{{ url_for('login_page') }}" class="btn btn-primary">
                         <span>🔄</span> Tentar Novamente
                     </a>
-                    <a href="Login.html" class="btn btn-secondary">
+                    <a href="{{ url_for('index') }}" class="btn btn-secondary">
                         <span>🏠</span> Página Inicial
                     </a>
                 `;

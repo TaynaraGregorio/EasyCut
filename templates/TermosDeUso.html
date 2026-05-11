@@ -199,7 +199,7 @@
 </head>
 <body>
     <div class="container">
-        <a href="javascript:history.back()" class="back-link" id="backButton">
+        <a href="#" class="back-link" id="backButton" onclick="easycutTermosVoltar(event); return false;">
             ← Voltar
         </a>
         
@@ -310,33 +310,28 @@
     </div>
 
     <script>
-        // Detectar de qual página o usuário veio e redirecionar adequadamente
-        document.addEventListener('DOMContentLoaded', function() {
-            const backButton = document.getElementById('backButton');
-            
-            // Se o navegador tem histórico de navegação, deixamos o 'javascript:history.back()' 
-            // que já está no HTML fazer o trabalho dele. Isso evita criar loops no histórico.
-            // Só alteramos o href se o usuário acessou a página diretamente (ex: nova aba).
-            
-            if (window.history.length <= 1 || !document.referrer) {
-                const urlParams = new URLSearchParams(window.location.search);
-                const fromPage = urlParams.get('from');
-                
-                if (fromPage) {
-                    switch(fromPage) {
-                        case 'cliente': backButton.href = 'CadastroCliente.html'; break;
-                        case 'barbearia': backButton.href = 'CadastroBarbearia.html'; break;
-                        default: backButton.href = 'index.html';
-                    }
-                } else if (document.referrer) {
-                    // Se veio de algum lugar mas o histórico é curto, mantém o link do referrer
-                    backButton.href = document.referrer;
-                } else {
-                    // Fallback final para a página inicial
-                    backButton.href = 'index.html';
-                }
+        function easycutTermosVoltar(event) {
+            if (event) event.preventDefault();
+            if (window.history.length > 1) {
+                window.history.back();
+                return;
             }
-        });
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromPage = urlParams.get('from');
+            if (fromPage === 'cliente') {
+                window.location.href = "{{ url_for('cadastro_cliente_page') }}";
+                return;
+            }
+            if (fromPage === 'barbearia') {
+                window.location.href = "{{ url_for('cadastro_barbearia_page') }}";
+                return;
+            }
+            if (document.referrer) {
+                window.location.href = document.referrer;
+                return;
+            }
+            window.location.href = "{{ url_for('index') }}";
+        }
     </script>
 </body>
 </html>

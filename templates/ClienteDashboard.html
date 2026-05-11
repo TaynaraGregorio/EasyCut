@@ -1035,13 +1035,13 @@
                 
                 switch (action) {
                     case 'editProfile':
-                        window.location.href = 'EditarPerfilCliente.html';
+                        window.location.href = "{{ url_for('editar_perfil_cliente_page') }}";
                         break;
                     case 'myAppointments':
-                        window.location.href = 'MeusAgendamentos.html';
+                        window.location.href = "{{ url_for('meus_agendamentos_page') }}";
                         break;
                     case 'favorites':
-                        window.location.href = 'Favoritos.html';
+                        window.location.href = "{{ url_for('favoritos_page') }}";
                         break;
                     case 'logout':
                         this.handleLogout();
@@ -1073,7 +1073,7 @@
                 localStorage.removeItem('currentUser');
                 localStorage.removeItem('userType');
                 localStorage.removeItem('userName');
-                window.location.href = 'Login.html';
+                window.location.href = "{{ url_for('login_page') }}";
             }
         }
         
@@ -1081,16 +1081,16 @@
         function handleAction(action) {
             switch (action) {
                 case 'findBarbershops':
-                    window.location.href = 'VisualizarBarbearias.html';
+                    window.location.href = "{{ url_for('visualizar_barbearias_page') }}";
                     break;
                 case 'myAppointments':
-                    window.location.href = 'MeusAgendamentos.html';
+                    window.location.href = "{{ url_for('meus_agendamentos_page') }}";
                     break;
                 case 'favorites':
-                    window.location.href = 'Favoritos.html';
+                    window.location.href = "{{ url_for('favoritos_page') }}";
                     break;
                 case 'editProfile':
-                    window.location.href = 'EditarPerfilCliente.html';
+                    window.location.href = "{{ url_for('editar_perfil_cliente_page') }}";
                     break;
                 default:
                     console.log('Ação não implementada:', action);

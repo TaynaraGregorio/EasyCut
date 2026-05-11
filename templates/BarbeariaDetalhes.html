@@ -1024,6 +1024,8 @@
     </div>
 
     <script>
+        const EASYCUT_BARBearia_ID_FROM_ROUTE = {{ (barbearia_id if barbearia_id is defined else none)|tojson }};
+
         class BarbeariaDetalhes {
             constructor() {
                 this.barbeariaContent = document.getElementById('barbeariaContent');
@@ -1058,8 +1060,14 @@
             }
 
             getBarbeariaIdFromUrl() {
+                if (EASYCUT_BARBearia_ID_FROM_ROUTE !== null && EASYCUT_BARBearia_ID_FROM_ROUTE !== undefined) {
+                    return String(EASYCUT_BARBearia_ID_FROM_ROUTE);
+                }
                 const urlParams = new URLSearchParams(window.location.search);
-                return urlParams.get('id');
+                const q = urlParams.get('id');
+                if (q) return q;
+                const m = window.location.pathname.match(/barbearia-detalhes\/(\d+)/i);
+                return m ? m[1] : null;
             }
 
             setupDatePicker() {
@@ -1248,7 +1256,7 @@
             }
 
             displayMockBarbearia() {
-                // Dados das barbearias fictícias baseadas na página VisualizarBarbearias.html
+                // Dados das barbearias fictícias baseadas na listagem de barbearias
                 const mockBarbearias = {
                     1: {
                         id: 1,
@@ -1828,7 +1836,7 @@
                 const userType = localStorage.getItem('userType') || '';
                 if (!currentUser.id || userType !== 'cliente') {
                     alert('Faça login como cliente para realizar agendamentos.');
-                    window.location.href = 'Login.html?redirect=' + encodeURIComponent(window.location.href);
+                    window.location.href = "{{ url_for('login_page') }}?redirect=" + encodeURIComponent(window.location.href);
                     return;
                 }
 

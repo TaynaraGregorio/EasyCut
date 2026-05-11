@@ -1110,22 +1110,22 @@
                 
                 switch (action) {
                     case 'editProfile':
-                        window.location.href = 'EditarPerfilBarbearia.html';
+                        window.location.href = "{{ url_for('editar_perfil_barbearia_page') }}";
                         break;
                     case 'manageServices':
-                        window.location.href = 'ServicosBarbearia.html';
+                        window.location.href = "{{ url_for('servicos_barbearia_page') }}";
                         break;
                     case 'appointments':
-                        window.location.href = 'AgendamentosBarbearia.html';
+                        window.location.href = "{{ url_for('agendamentos_barbearia_page') }}";
                         break;
                     case 'schedule':
-                        window.location.href = 'HorariosBarbearia.html';
+                        window.location.href = "{{ url_for('horarios_barbearia_page') }}";
                         break;
                     case 'reviews':
-                        window.location.href = 'AvaliacoesBarbearia.html';
+                        window.location.href = "{{ url_for('avaliacoes_barbearia_page') }}";
                         break;
                     case 'nearbyBarbers':
-                        window.location.href = 'VisualizarBarbearias.html';
+                        window.location.href = "{{ url_for('visualizar_barbearias_page') }}";
                         break;
                     case 'logout':
                         this.handleLogout();
@@ -1157,7 +1157,7 @@
                 localStorage.removeItem('currentUser');
                 localStorage.removeItem('userType');
                 localStorage.removeItem('userName');
-                window.location.href = 'Login.html';
+                window.location.href = "{{ url_for('login_page') }}";
             }
         }
         
@@ -1165,22 +1165,22 @@
         function handleAction(action) {
             switch (action) {
                 case 'appointments':
-                    window.location.href = 'AgendamentosBarbearia.html';
+                    window.location.href = "{{ url_for('agendamentos_barbearia_page') }}";
                     break;
                 case 'editProfile':
-                    window.location.href = 'EditarPerfilBarbearia.html';
+                    window.location.href = "{{ url_for('editar_perfil_barbearia_page') }}";
                     break;
                 case 'manageServices':
-                    window.location.href = 'ServicosBarbearia.html';
+                    window.location.href = "{{ url_for('servicos_barbearia_page') }}";
                     break;
                 case 'schedule':
-                    window.location.href = 'HorariosBarbearia.html';
+                    window.location.href = "{{ url_for('horarios_barbearia_page') }}";
                     break;
                 case 'reviews':
-                    window.location.href = 'AvaliacoesBarbearia.html';
+                    window.location.href = "{{ url_for('avaliacoes_barbearia_page') }}";
                     break;
                 case 'nearbyBarbers':
-                    window.location.href = 'VisualizarBarbearias.html';
+                    window.location.href = "{{ url_for('visualizar_barbearias_page') }}";
                     break;
                 default:
                     console.log('Ação não implementada:', action);

@@ -353,7 +353,7 @@
                     showSuccess('Senha redefinida com sucesso! (Simulação)');
                     // Redirecionar para login após 2 segundos
                     setTimeout(() => {
-                        window.location.href = 'Login.html';
+                        window.location.href = "{{ url_for('login_page') }}";
                     }, 2000);
                     
                     setLoading(false);

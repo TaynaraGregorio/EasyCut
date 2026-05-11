@@ -561,6 +561,10 @@
     </div>
 
     <script>
+        function easycutBarbeariaDetalhesUrl(id) {
+            return {{ url_for('barbearia_detalhes_page', barbearia_id=0)|tojson }}.replace(/\/0(?=\?|$)/, '/' + id);
+        }
+
         // Função para renderizar favoritas
         function renderFavorites(favoritesData) {
             const container = document.getElementById('favoritesGrid');
@@ -637,7 +641,7 @@
         // Função para abrir página da barbearia
         function openBarbeariaPage(barbeariaId) {
             if (!barbeariaId) return;
-            window.location.href = `BarbeariaDetalhes.html?id=${barbeariaId}`;
+            window.location.href = easycutBarbeariaDetalhesUrl(barbeariaId);
         }
 
         // Função para remover dos favoritos
@@ -647,7 +651,7 @@
             const currentUser = JSON.parse(localStorage.getItem('currentUser'));
             if (!currentUser || currentUser.tipo !== 'cliente') {
                 alert('Você precisa estar logado como cliente para remover favoritos.');
-                window.location.href = 'Login.html';
+                window.location.href = "{{ url_for('login_page') }}";
                 return;
             }
             const clienteId = currentUser.id;
@@ -713,7 +717,7 @@
             } else {
                 // Se não há histórico, redirecionar para dashboard do cliente
                 console.log('Sem histórico, redirecionando para dashboard do cliente');
-                window.location.href = 'ClienteDashboard.html';
+                window.location.href = "{{ url_for('cliente_dashboard_page') }}";
             }
         }
 
@@ -735,7 +739,7 @@
                 document.querySelector('#emptyState .empty-state-text').textContent = 'Para gerenciar suas barbearias favoritas, você precisa estar logado.';
                 const findButton = document.querySelector('#emptyState .btn-primary');
                 findButton.textContent = 'Ir para Login';
-                findButton.href = 'Login.html';
+                findButton.href = "{{ url_for('login_page') }}";
                 return;
             }
             const clienteId = currentUser.id;

@@ -365,8 +365,8 @@ def login_page():
 
 @app.route('/tela-inicial')
 def tela_inicial_page():
-    """Renderiza a página inicial (dashboard, etc.)."""
-    return render_template('TelaInicial.html')
+    """Página inicial da aplicação (mesmo conteúdo da landing)."""
+    return render_template('index.html')
 
 @app.route('/visualizar-barbearias')
 def visualizar_barbearias_page():
@@ -377,6 +377,50 @@ def visualizar_barbearias_page():
 def barbearia_detalhes_page(barbearia_id):
     """Renderiza a página de detalhes de uma barbearia específica."""
     return render_template('BarbeariaDetalhes.html', barbearia_id=barbearia_id)
+
+@app.route('/meus-agendamentos')
+def meus_agendamentos_page():
+    return render_template('MeusAgendamentos.html')
+
+@app.route('/favoritos')
+def favoritos_page():
+    return render_template('Favoritos.html')
+
+@app.route('/editar-perfil-barbearia')
+def editar_perfil_barbearia_page():
+    return render_template('EditarPerfilBarbearia.html')
+
+@app.route('/editar-perfil-cliente')
+def editar_perfil_cliente_page():
+    return render_template('EditarPerfilCliente.html')
+
+@app.route('/barbearia-dashboard')
+def barbearia_dashboard_page():
+    return render_template('BarbeariaDashboard.html')
+
+@app.route('/cliente-dashboard')
+def cliente_dashboard_page():
+    return render_template('ClienteDashboard.html')
+
+@app.route('/agendamentos-barbearia')
+def agendamentos_barbearia_page():
+    return render_template('AgendamentosBarbearia.html')
+
+@app.route('/horarios-barbearia')
+def horarios_barbearia_page():
+    return render_template('HorariosBarbearia.html')
+
+@app.route('/servicos-barbearia')
+def servicos_barbearia_page():
+    return render_template('ServicosBarbearia.html')
+
+@app.route('/avaliacoes-barbearia')
+def avaliacoes_barbearia_page():
+    return render_template('AvaliacoesBarbearia.html')
+
+@app.route('/termos-de-uso')
+def termos_de_uso_page():
+    return render_template('TermosDeUso.html')
 
 # --- ROTAS DE BARBEARIA (Antiga barbearias_api.py) ---
 @app.route('/api/barbearias/nearby', methods=['POST'])

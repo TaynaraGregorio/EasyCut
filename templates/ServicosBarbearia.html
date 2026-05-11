@@ -897,7 +897,7 @@
             barbeariaId = getBarbeariaId();
             if (!barbeariaId) {
                 alert('Sessão inválida. Faça login como barbearia.');
-                window.location.href = 'Login.html';
+                window.location.href = "{{ url_for('login_page') }}";
                 return;
             }
             document.getElementById('loadingState').style.display = 'block';
@@ -1288,7 +1288,7 @@
         // Função para voltar
         function handleBackButton() {
             console.log('handleBackButton chamada - voltando para dashboard');
-            window.location.href = 'BarbeariaDashboard.html';
+            window.history.back();
         }
 
         // Fechar modal ao clicar no overlay
