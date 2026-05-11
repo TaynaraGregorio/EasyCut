@@ -656,6 +656,18 @@
         <h1 class="page-title">Horários de Funcionamento</h1>
         <p class="page-subtitle">Configure os horários de funcionamento da sua barbearia</p>
 
+        <!-- Configuração de Capacidade -->
+        <div class="schedule-section" style="margin-bottom: 20px; padding: 20px;">
+            <div class="section-title" style="margin-bottom: 15px;">
+                <span>👥</span> Capacidade de Atendimento
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <label for="quantidadeBarbeiros">Quantidade de barbeiros atendendo ao mesmo tempo:</label>
+                <input type="number" id="quantidadeBarbeiros" class="form-input" style="width: 80px;" min="1" value="1">
+                <button class="add-button" onclick="scheduleManager.saveCapacity()" style="padding: 10px 20px;">Salvar</button>
+            </div>
+        </div>
+
         <!-- Schedule Section -->
         <div class="schedule-section">
             <div class="section-title">
@@ -775,6 +787,20 @@
                 this.loadSchedules();
                 this.setupEventListeners();
             }
+
+            async saveCapacity() {
+                const qtd = document.getElementById('quantidadeBarbeiros').value;
+                const user = JSON.parse(localStorage.getItem('currentUser'));
+                const response = await fetch(`${this.apiUrl}/barbearias/${user.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ quantidade_barbeiros: parseInt(qtd) })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    this.showSuccessMessage('Capacidade atualizada com sucesso!');
+                }
+            }
             
             setupEventListeners() {
                 // Fechar modal ao clicar no overlay
@@ -820,6 +846,13 @@
                     if (data.success) {
                         this.currentSchedule = data.schedule;
                         this.renderSchedules(this.currentSchedule);
+                        
+                        // Carregar capacidade atual no input
+                        const resDetails = await fetch(`${this.apiUrl}/barbearias/${user.id}`);
+                        const details = await resDetails.json();
+                        if (details.success && details.barbearia.quantidade_barbeiros) {
+                            document.getElementById('quantidadeBarbeiros').value = details.barbearia.quantidade_barbeiros;
+                        }
                     } else {
                         // Se falhar ou estiver vazio, usa padrão
                         this.currentSchedule = this.getDefaultSchedules();

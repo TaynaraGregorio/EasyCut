@@ -504,16 +504,17 @@
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(5px);
             z-index: 2000;
-            display: none;
+            display: flex;
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            visibility: hidden;
+            transition: all 0.3s ease;
         }
 
         .logout-modal-overlay.active {
-            display: flex;
             opacity: 1;
+            visibility: visible;
         }
 
         .logout-modal {

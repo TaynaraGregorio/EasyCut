@@ -131,6 +131,12 @@ def init_db():
                     print(f"[MIGRAÇÃO] Adicionando coluna '{col}' na tabela barbearias...")
                     cursor.execute(f"ALTER TABLE barbearias ADD COLUMN {col} {dtype}")
 
+            # Garantir coluna quantidade_barbeiros
+            cursor.execute("SHOW COLUMNS FROM barbearias LIKE 'quantidade_barbeiros'")
+            if not cursor.fetchone():
+                print("[MIGRAÇÃO] Adicionando coluna 'quantidade_barbeiros'...")
+                cursor.execute("ALTER TABLE barbearias ADD COLUMN quantidade_barbeiros INT DEFAULT 1")
+
             # Cria tabela de servicos se não existir (coluna descricao sem acento para compatibilidade)
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS servicos (
@@ -1025,6 +1031,7 @@ def get_barbearia_details(barbearia_id):
                         
                         # Adicionar campos compatíveis com o frontend existente
                         barbearia_db['name'] = barbearia_db['nome_barbearia']
+                        barbearia_db['quantidade_barbeiros'] = barbearia_db.get('quantidade_barbeiros', 1)
                         
                         # Construir endereço completo
                         addr_parts = [
@@ -1170,7 +1177,7 @@ def update_barbearia(barbearia_id):
             'nome_barbearia', 'nome_responsavel', 'whatsapp', 'telefone_fixo', 
             'instagram', 'facebook', 'website', 'descricao', 'cep', 
             'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'estado', 'ponto_referencia',
-            'foto_perfil', 'latitude', 'longitude'
+            'foto_perfil', 'latitude', 'longitude', 'quantidade_barbeiros'
         ]
         
         for field in allowed_fields:
@@ -2036,6 +2043,11 @@ def get_barbearia_availability(barbearia_id):
         if not conn: return jsonify({'success': False, 'message': 'Erro de conexão'}), 500
         cursor = conn.cursor(dictionary=True)
         
+        # Buscar capacidade da barbearia
+        cursor.execute('SELECT quantidade_barbeiros FROM barbearias WHERE id = %s', (barbearia_id,))
+        barbearia_info = cursor.fetchone()
+        capacidade_max = barbearia_info['quantidade_barbeiros'] if barbearia_info else 1
+
         # 2. Verificar se a barbearia abre nesse dia
         cursor.execute('SELECT status FROM horarios_status WHERE barbearia_id = %s AND dia_semana = %s', (barbearia_id, day_name))
         status_row = cursor.fetchone()
@@ -2094,15 +2106,13 @@ def get_barbearia_availability(barbearia_id):
                 slot_start = current
                 slot_end = current + timedelta(minutes=duration_min)
                 
-                # Verificar colisão com agendamentos existentes
-                is_blocked = False
+                # Contar quantos agendamentos se sobrepõem a este intervalo [slot_start, slot_end]
+                sobreposicoes = 0
                 for b_start, b_end in booked_intervals:
-                    # Se houver sobreposição: (StartA < EndB) e (EndA > StartB)
                     if slot_start < b_end and slot_end > b_start:
-                        is_blocked = True
-                        break
+                        sobreposicoes += 1
                 
-                if not is_blocked:
+                if sobreposicoes < capacidade_max:
                     available_slots.append(slot_start.strftime('%H:%M'))
                 
                 # Avançar para o próximo horário (grade de 30 em 30 min)
