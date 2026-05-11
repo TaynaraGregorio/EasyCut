@@ -8,6 +8,7 @@ API para gerenciamento de barbearias e validação de formulários.
 from flask import Flask, request, jsonify, render_template_string
 from flask_cors import CORS
 import json
+import sys
 import os
 import math
 from typing import Dict, List, Any, Optional
@@ -19,14 +20,19 @@ from email_validator import validate_email, EmailNotValidError
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 
+# Garante que o diretório atual esteja no path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 # Importações de módulos locais
 try:
-    from .google_places_integration import PlacesService
-    from .form_validator import FormValidator
-    from .phone_validator import PhoneValidator
-    from .cpf_cnpj_validator import CPFCNPJValidator
-    from .email_check_logic import EmailValidator
-except ImportError:
+    # Tenta importar via pacote caso o app seja chamado da raiz
+    from backend.google_places_integration import PlacesService
+    from backend.form_validator import FormValidator
+    from backend.phone_validator import PhoneValidator
+    from backend.cpf_cnpj_validator import CPFCNPJValidator
+    from backend.email_check_logic import EmailValidator
+except (ImportError, ModuleNotFoundError):
+    # Importação direta (quando executado de dentro da pasta backend)
     from google_places_integration import PlacesService
     from form_validator import FormValidator
     from phone_validator import PhoneValidator
