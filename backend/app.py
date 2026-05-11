@@ -37,6 +37,8 @@ app = Flask(__name__)
 CORS(app)
 
 # --- CONFIGURAÇÕES ---
+# Render utiliza variáveis de ambiente. MYSQLHOST é o padrão do Railway, 
+# você pode renomear para DB_HOST no painel do Render se preferir.
 DB_CONFIG = {
     'host': os.environ.get('MYSQLHOST', os.environ.get('DB_HOST', 'localhost')),
     'user': os.environ.get('MYSQLUSER', os.environ.get('DB_USER', 'root')),
