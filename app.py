@@ -20,6 +20,8 @@ from email_validator import validate_email, EmailNotValidError
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 
+from easycut_api_impl import register_extended_api, serialize_barbearia_for_template
+
 # --- AJUSTE DE PATH PARA DEPLOY (Render/Railway) ---
 # Adiciona o diretório 'backend' ao sys.path para que as importações funcionem corretamente
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -56,12 +58,20 @@ else:
 
 # --- CONFIGURAÇÕES ---
 DB_CONFIG = {
-    'host': os.environ.get('MYSQLHOST', os.environ.get('DB_HOST', 'localhost')),
-    'user': os.environ.get('MYSQLUSER', os.environ.get('DB_USER', 'root')),
-    'password': os.environ.get('MYSQLPASSWORD', os.environ.get('DB_PASSWORD', '')),
-    'database': os.environ.get('MYSQLDATABASE', os.environ.get('DB_NAME', 'easycut_db')),
-    'port': int(os.environ.get('MYSQLPORT', os.environ.get('DB_PORT', 3306))),
-    'charset': 'utf8mb4'
+    'host': os.environ.get('MYSQLHOST')
+    or os.environ.get('MYSQL_HOST')
+    or os.environ.get('DB_HOST', 'localhost'),
+    'user': os.environ.get('MYSQLUSER')
+    or os.environ.get('MYSQL_USER')
+    or os.environ.get('DB_USER', 'root'),
+    'password': os.environ.get('MYSQLPASSWORD')
+    or os.environ.get('MYSQL_PASSWORD')
+    or os.environ.get('DB_PASSWORD', ''),
+    'database': os.environ.get('MYSQLDATABASE')
+    or os.environ.get('MYSQL_DATABASE')
+    or os.environ.get('DB_NAME', 'easycut_db'),
+    'port': int(os.environ.get('MYSQLPORT') or os.environ.get('MYSQL_PORT') or os.environ.get('DB_PORT', 3306)),
+    'charset': 'utf8mb4',
 }
 
 # --- UTILITÁRIOS DE BANCO DE DADOS ---
@@ -76,6 +86,8 @@ def get_db_connection():
             ssl_ca = os.environ.get('MYSQL_SSL_CA')
             if ssl_ca:
                 config['ssl_ca'] = ssl_ca
+            elif os.environ.get('MYSQL_SSL_DISABLED', '').lower() in ('1', 'true', 'yes'):
+                config['ssl_disabled'] = True
             else:
                 config['ssl_disabled'] = False
         return mysql.connector.connect(**config)
@@ -225,6 +237,18 @@ def init_db():
                 )
             ''')
 
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS cliente_favoritos (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    cliente_id INT NOT NULL,
+                    barbearia_id INT NOT NULL,
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE KEY uq_cliente_barbearia (cliente_id, barbearia_id),
+                    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
+                    FOREIGN KEY (barbearia_id) REFERENCES barbearias(id) ON DELETE CASCADE
+                )
+            ''')
+
             try:
                 cursor.execute('ALTER TABLE clientes MODIFY COLUMN foto_perfil LONGTEXT NULL')
             except Exception:
@@ -235,7 +259,7 @@ def init_db():
     except Exception as e:
         print(f"[ERRO] Ao inicializar banco: {e}")
         print(f"[ERRO] Falha crítica ao inicializar banco: {e}")
-        print("Certifique-se de que o Apache e o MySQL estão ativos no XAMPP.")
+        print("Verifique MYSQLHOST/MYSQL_USER/MYSQL_PASSWORD/MYSQL_DATABASE (ou DB_*) e conectividade com o MySQL.")
 
 def fetch_barbearia_opening_hours(cursor, barbearia_id):
     try:
@@ -577,7 +601,8 @@ def change_password_cliente(cliente_id):
 _BARBEARIA_PUT_FIELDS = frozenset({
     'nome_barbearia', 'nome_responsavel', 'foto_perfil', 'whatsapp', 'telefone_fixo',
     'instagram', 'facebook', 'website', 'descricao', 'cep', 'logradouro', 'numero',
-    'complemento', 'bairro', 'cidade', 'estado', 'ponto_referencia', 'latitude', 'longitude'
+    'complemento', 'bairro', 'cidade', 'estado', 'ponto_referencia', 'latitude', 'longitude',
+    'quantidade_barbeiros',
 })
 _LOCATION_KEYS = frozenset({'logradouro', 'numero', 'bairro', 'cidade', 'estado', 'cep', 'complemento', 'ponto_referencia'})
 
@@ -653,9 +678,10 @@ def get_barbearia_details(barbearia_id):
     cursor.execute('SELECT * FROM barbearias WHERE id = %s', (barbearia_id,))
     barbearia = cursor.fetchone()
     if barbearia:
-        barbearia['opening_hours'] = fetch_barbearia_opening_hours(cursor, barbearia_id)
         cursor.execute("SELECT * FROM servicos WHERE barbearia_id = %s AND status = 'ativo'", (barbearia_id,))
-        barbearia['servicos_detalhados'] = cursor.fetchall()
+        servicos_detalhados = cursor.fetchall()
+        barbearia = serialize_barbearia_for_template(cursor, barbearia, barbearia_id, fetch_barbearia_opening_hours)
+        barbearia['servicos_detalhados'] = servicos_detalhados
     cursor.close(); conn.close()
     return jsonify({'success': True, 'barbearia': barbearia}) if barbearia else (jsonify({'success': False, 'message': 'Não encontrado.'}), 404)
 
@@ -732,7 +758,7 @@ def register_barbearia():
     except Exception as e: return jsonify({'success': False, 'message': str(e)}), 400
     finally: cursor.close(); conn.close()
 
-# [Outras rotas de Agendamentos, Favoritos, Serviços e Fotos seguem o mesmo padrão de unificação]
+register_extended_api(app)
 
 @app.route('/api/health', methods=['GET'])
 def health_check():

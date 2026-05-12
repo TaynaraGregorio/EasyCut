@@ -5,14 +5,13 @@ import json
 import sys
 import os
 
-# Adiciona o diretório atual ao path para permitir importação correta do app
-sys.path.append(os.path.dirname(__file__))
-# Adiciona o diretório 'backend' (pai da pasta 'tests') ao sys.path
-# para que o 'from barbearias_api import app' funcione corretamente.
+# Raiz do repositório (onde está app.py)
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, ROOT_DIR)
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# Importa a aplicação Flask do seu projeto
-from barbearias_api import app
+# Importa a aplicação Flask unificada (app.py na raiz do repositório)
+from app import app
 
 @pytest.fixture
 def client():
@@ -21,7 +20,7 @@ def client():
     with app.test_client() as client:
         yield client
 
-@patch('barbearias_api.get_db_connection')
+@patch('app.get_db_connection')
 def test_agendamento_valido(mock_get_db, client):
     """
     RF06 - Teste de Agendamento Válido (Caminho Feliz)
@@ -106,7 +105,7 @@ def test_agendamento_dados_invalidos_campos_vazios(client):
     assert expected_msg in data['message'], f"❌ Mensagem de erro esperada: '{expected_msg}'"
     print("   ✅ Mensagem de validação correta")
 
-@patch('barbearias_api.get_db_connection')
+@patch('app.get_db_connection')
 def test_agendamento_horario_ocupado(mock_get_db, client):
     """
     RF06 - Teste de Horário Já Ocupado
