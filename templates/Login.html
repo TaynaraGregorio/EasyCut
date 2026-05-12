@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>EasyCut - Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="imagens/favicon001.png" type="image/png">
+    <link rel="icon" href="{{ url_for('static', filename='imagens/favicon001.png') }}" type="image/png">
     <style>
         * {
             margin: 0;
@@ -57,16 +57,23 @@
         
         .logo-image {
             width: 100%;
-            max-width: 200px;
+            max-width: 280px;
             height: auto;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
                         0 0 0 1px rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .logo-image:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4),
+                        0 0 0 1px rgba(255, 255, 255, 0.2);
         }
         
         .logo-title {
-            font-size: 2rem;
+            font-size: 2.4rem;
             font-weight: 700;
             background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
             -webkit-background-clip: text;
@@ -74,6 +81,7 @@
             background-clip: text;
             letter-spacing: 1px;
             margin-bottom: 8px;
+            text-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
         }
         
         .login-subtitle {
@@ -309,7 +317,7 @@
             }
             
             .logo-image {
-                max-width: 180px;
+                max-width: 250px;
             }
             
             .logo-title {
@@ -325,8 +333,8 @@
             }
             
             .logo-image {
-                max-width: 160px;
-                margin-bottom: 16px;
+                max-width: 220px;
+                margin-bottom: 22px;
             }
             
             .logo-title {
@@ -351,8 +359,8 @@
             }
             
             .logo-image {
-                max-width: 140px;
-                margin-bottom: 14px;
+                max-width: 200px;
+                margin-bottom: 20px;
             }
             
             .logo-title {
@@ -382,8 +390,8 @@
             }
             
             .logo-image {
-                max-width: 120px;
-                margin-bottom: 12px;
+                max-width: 180px;
+                margin-bottom: 18px;
             }
             
             .logo-title {
@@ -410,8 +418,8 @@
             }
             
             .logo-image {
-                max-width: 100px;
-                margin-bottom: 8px;
+                max-width: 150px;
+                margin-bottom: 12px;
             }
             
             .logo-title {
@@ -480,7 +488,7 @@
             ← Voltar
         </a>
         <div class="logo-section">
-            <img src="imagens/imgTelaInicial.jpg" alt="EasyCut Barbearia" class="logo-image">
+            <img src="{{ url_for('static', filename='imagens/imgTelaInicial.jpg') }}" alt="EasyCut Barbearia" class="logo-image">
             <h1 class="logo-title">EasyCut</h1>
             <p class="login-subtitle">Entre na sua conta</p>
         </div>

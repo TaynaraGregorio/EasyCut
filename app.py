@@ -215,6 +215,21 @@ def init_db():
                 )
             ''')
 
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS barbearia_fotos (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    barbearia_id INT NOT NULL,
+                    foto LONGTEXT NOT NULL,
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (barbearia_id) REFERENCES barbearias(id) ON DELETE CASCADE
+                )
+            ''')
+
+            try:
+                cursor.execute('ALTER TABLE clientes MODIFY COLUMN foto_perfil LONGTEXT NULL')
+            except Exception:
+                pass
+
             print("[OK] Tabelas do banco de dados verificadas/criadas.")
             conn.commit()
     except Exception as e:
@@ -464,10 +479,176 @@ def login():
         return jsonify({'success': True, 'user': user})
     return jsonify({'success': False, 'message': 'Credenciais inválidas'}), 401
 
+# --- Cliente: perfil (GET/PUT) e senha — o front usa localStorage (sem JWT); id na URL identifica o recurso ---
+@app.route('/api/clientes/<int:cliente_id>', methods=['GET'])
+def get_cliente(cliente_id):
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False, 'message': 'Erro de conexão com o banco.'}), 500
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT id, nome_completo, email, telefone, foto_perfil FROM clientes WHERE id = %s', (cliente_id,))
+    row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if not row:
+        return jsonify({'success': False, 'message': 'Cliente não encontrado.'}), 404
+    return jsonify({'success': True, 'cliente': row})
+
+@app.route('/api/clientes/<int:cliente_id>', methods=['PUT'])
+def update_cliente(cliente_id):
+    data = request.get_json() or {}
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False, 'message': 'Erro de conexão com o banco.'}), 500
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT id, email, senha_hash FROM clientes WHERE id = %s', (cliente_id,))
+    row = cursor.fetchone()
+    if not row:
+        cursor.close()
+        conn.close()
+        return jsonify({'success': False, 'message': 'Cliente não encontrado.'}), 404
+    new_email = data.get('email')
+    if new_email and new_email != row['email']:
+        cursor.execute('SELECT id FROM clientes WHERE email = %s AND id != %s', (new_email, cliente_id))
+        if cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return jsonify({'success': False, 'message': 'Este e-mail já está em uso.'}), 400
+    updates = []
+    params = []
+    if 'nome_completo' in data:
+        updates.append('nome_completo = %s')
+        params.append(data['nome_completo'])
+    if new_email is not None:
+        updates.append('email = %s')
+        params.append(new_email)
+    if 'telefone' in data:
+        updates.append('telefone = %s')
+        params.append(data['telefone'])
+    if 'foto_perfil' in data and data['foto_perfil']:
+        updates.append('foto_perfil = %s')
+        params.append(data['foto_perfil'])
+    if not updates:
+        cursor.close()
+        conn.close()
+        return jsonify({'success': True, 'message': 'Nada para atualizar.'})
+    params.append(cliente_id)
+    try:
+        cursor.execute(f"UPDATE clientes SET {', '.join(updates)} WHERE id = %s", tuple(params))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({'success': True, 'message': 'Perfil atualizado.'})
+    except Exception as e:
+        conn.rollback()
+        cursor.close()
+        conn.close()
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+@app.route('/api/clientes/<int:cliente_id>/change-password', methods=['PUT'])
+def change_password_cliente(cliente_id):
+    data = request.get_json() or {}
+    atual = data.get('senha_atual')
+    nova = data.get('nova_senha')
+    if not atual or not nova:
+        return jsonify({'success': False, 'message': 'Senha atual e nova senha são obrigatórias.'}), 400
+    if len(nova) < 8:
+        return jsonify({'success': False, 'message': 'A nova senha deve ter pelo menos 8 caracteres.'}), 400
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False, 'message': 'Erro de conexão com o banco.'}), 500
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT id, senha_hash FROM clientes WHERE id = %s', (cliente_id,))
+    row = cursor.fetchone()
+    if not row:
+        cursor.close()
+        conn.close()
+        return jsonify({'success': False, 'message': 'Cliente não encontrado.'}), 404
+    if row['senha_hash'] != atual:
+        cursor.close()
+        conn.close()
+        return jsonify({'success': False, 'message': 'Senha atual incorreta.'}), 401
+    cursor.execute('UPDATE clientes SET senha_hash = %s WHERE id = %s', (nova, cliente_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return jsonify({'success': True, 'message': 'Senha alterada.'})
+
+_BARBEARIA_PUT_FIELDS = frozenset({
+    'nome_barbearia', 'nome_responsavel', 'foto_perfil', 'whatsapp', 'telefone_fixo',
+    'instagram', 'facebook', 'website', 'descricao', 'cep', 'logradouro', 'numero',
+    'complemento', 'bairro', 'cidade', 'estado', 'ponto_referencia', 'latitude', 'longitude'
+})
+_LOCATION_KEYS = frozenset({'logradouro', 'numero', 'bairro', 'cidade', 'estado', 'cep', 'complemento', 'ponto_referencia'})
+
+@app.route('/api/barbearias/<int:barbearia_id>/fotos/<int:foto_id>', methods=['DELETE'])
+def delete_barbearia_foto(barbearia_id, foto_id):
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False, 'message': 'Erro DB'}), 500
+    cursor = conn.cursor()
+    cursor.execute(
+        'DELETE FROM barbearia_fotos WHERE id = %s AND barbearia_id = %s',
+        (foto_id, barbearia_id)
+    )
+    conn.commit()
+    deleted = cursor.rowcount
+    cursor.close()
+    conn.close()
+    if not deleted:
+        return jsonify({'success': False, 'message': 'Foto não encontrada.'}), 404
+    return jsonify({'success': True})
+
+@app.route('/api/barbearias/<int:barbearia_id>/fotos', methods=['GET'])
+def list_barbearia_fotos(barbearia_id):
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False, 'message': 'Erro DB'}), 500
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        'SELECT id, foto FROM barbearia_fotos WHERE barbearia_id = %s ORDER BY id',
+        (barbearia_id,)
+    )
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return jsonify({'success': True, 'fotos': rows})
+
+@app.route('/api/barbearias/<int:barbearia_id>/fotos', methods=['POST'])
+def add_barbearia_foto(barbearia_id):
+    data = request.get_json() or {}
+    foto_b64 = data.get('foto')
+    if not foto_b64:
+        return jsonify({'success': False, 'message': 'Campo foto é obrigatório.'}), 400
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False, 'message': 'Erro DB'}), 500
+    cursor = conn.cursor()
+    cursor.execute('SELECT id FROM barbearias WHERE id = %s', (barbearia_id,))
+    if not cursor.fetchone():
+        cursor.close()
+        conn.close()
+        return jsonify({'success': False, 'message': 'Barbearia não encontrada.'}), 404
+    try:
+        cursor.execute(
+            'INSERT INTO barbearia_fotos (barbearia_id, foto) VALUES (%s, %s)',
+            (barbearia_id, foto_b64)
+        )
+        conn.commit()
+        new_id = cursor.lastrowid
+        cursor.close()
+        conn.close()
+        return jsonify({'success': True, 'id': new_id})
+    except Exception as e:
+        conn.rollback()
+        cursor.close()
+        conn.close()
+        return jsonify({'success': False, 'message': str(e)}), 400
+
 @app.route('/api/barbearias/<int:barbearia_id>', methods=['GET'])
 def get_barbearia_details(barbearia_id):
     conn = get_db_connection()
-    if not conn: return jsonify({'success': False}), 500
+    if not conn: return jsonify({'success': False, 'message': 'Erro DB'}), 500
     cursor = conn.cursor(dictionary=True)
     cursor.execute('SELECT * FROM barbearias WHERE id = %s', (barbearia_id,))
     barbearia = cursor.fetchone()
@@ -476,7 +657,52 @@ def get_barbearia_details(barbearia_id):
         cursor.execute("SELECT * FROM servicos WHERE barbearia_id = %s AND status = 'ativo'", (barbearia_id,))
         barbearia['servicos_detalhados'] = cursor.fetchall()
     cursor.close(); conn.close()
-    return jsonify({'success': True, 'barbearia': barbearia}) if barbearia else (jsonify({'success': False}), 404)
+    return jsonify({'success': True, 'barbearia': barbearia}) if barbearia else (jsonify({'success': False, 'message': 'Não encontrado.'}), 404)
+
+@app.route('/api/barbearias/<int:barbearia_id>', methods=['PUT'])
+def update_barbearia(barbearia_id):
+    data = request.get_json() or {}
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False, 'message': 'Erro de conexão com o banco.'}), 500
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT * FROM barbearias WHERE id = %s', (barbearia_id,))
+    row = cursor.fetchone()
+    if not row:
+        cursor.close()
+        conn.close()
+        return jsonify({'success': False, 'message': 'Barbearia não encontrada.'}), 404
+    merged = dict(row)
+    for k, v in data.items():
+        if k in _BARBEARIA_PUT_FIELDS:
+            merged[k] = v
+    if _LOCATION_KEYS & set(data.keys()):
+        lat, lng = _geocode_address(merged)
+        if lat is not None and lng is not None:
+            data['latitude'] = lat
+            data['longitude'] = lng
+    updates = []
+    params = []
+    for k, v in data.items():
+        if k in _BARBEARIA_PUT_FIELDS and v is not None:
+            updates.append(f'{k} = %s')
+            params.append(v)
+    if not updates:
+        cursor.close()
+        conn.close()
+        return jsonify({'success': True, 'message': 'Nada para atualizar.'})
+    params.append(barbearia_id)
+    try:
+        cursor.execute(f"UPDATE barbearias SET {', '.join(updates)} WHERE id = %s", tuple(params))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({'success': True, 'message': 'Dados atualizados.'})
+    except Exception as e:
+        conn.rollback()
+        cursor.close()
+        conn.close()
+        return jsonify({'success': False, 'message': str(e)}), 400
 
 # --- REGISTRO E ATUALIZAÇÃO ---
 @app.route('/api/clientes', methods=['POST'])
@@ -511,6 +737,14 @@ def register_barbearia():
 @app.route('/api/health', methods=['GET'])
 def health_check():
     return jsonify({'success': True, 'message': 'API Unificada Online', 'timestamp': datetime.now().isoformat()})
+
+
+@app.errorhandler(404)
+def handle_not_found(e):
+    """Evita resposta HTML em caminhos /api/... quando o front espera JSON."""
+    if request.path.startswith('/api/'):
+        return jsonify({'success': False, 'message': 'Recurso ou método não encontrado.'}), 404
+    return e.get_response()
 
 # Inicializa o banco ao carregar o módulo (necessário para Gunicorn/Render)
 init_db()
