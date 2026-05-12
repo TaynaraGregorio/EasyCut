@@ -734,7 +734,7 @@
             submitBtn.textContent = 'Enviando...';
             
             // --- NOVA INTEGRAÇÃO COM BACKEND ---
-            fetch('http://localhost:5001/api/clientes', {
+            fetch('/api/clientes', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

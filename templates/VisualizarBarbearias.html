@@ -2107,7 +2107,7 @@
                 console.log('[DEBUG] JSON stringificado:', JSON.stringify(requestBody));
 
                 try {
-                    const response = await fetch('http://localhost:5001/api/barbearias/nearby', {
+                    const response = await fetch('/api/barbearias/nearby', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'

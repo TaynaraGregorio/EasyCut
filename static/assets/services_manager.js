@@ -3,7 +3,7 @@
  * Lógica para adicionar e listar serviços da barbearia
  */
 
-const API_URL = 'http://localhost:5001';
+const API_URL = '';
 
 // Função para carregar serviços ao iniciar a página
 async function carregarServicos() {

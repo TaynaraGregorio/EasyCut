@@ -47,7 +47,12 @@ except (ImportError, ModuleNotFoundError):
 app = Flask(__name__, 
             template_folder='templates',
             static_folder='static')
-CORS(app)
+_cors_origins = os.environ.get('CORS_ORIGINS', '').strip()
+if _cors_origins:
+    CORS(app, origins=[o.strip() for o in _cors_origins.split(',') if o.strip()])
+else:
+    # Sem CORS_ORIGINS: permite qualquer origem (útil em dev); em produção defina CORS_ORIGINS com o domínio do frontend
+    CORS(app)
 
 # --- CONFIGURAÇÕES ---
 DB_CONFIG = {
@@ -64,8 +69,15 @@ def get_db_connection():
     try:
         config = DB_CONFIG.copy()
         # auth_plugin costuma ser necessário apenas para XAMPP local
-        if config['host'] == 'localhost':
+        if config['host'] in ('localhost', '127.0.0.1'):
             config['auth_plugin'] = 'mysql_native_password'
+        else:
+            # FreeSQLDatabase / MySQL remoto: TLS costuma ser obrigatório
+            ssl_ca = os.environ.get('MYSQL_SSL_CA')
+            if ssl_ca:
+                config['ssl_ca'] = ssl_ca
+            else:
+                config['ssl_disabled'] = False
         return mysql.connector.connect(**config)
     except Error as e:
         print(f"[ERRO] Falha na conexão MySQL: {e}")
@@ -470,7 +482,10 @@ def get_barbearia_details(barbearia_id):
 @app.route('/api/clientes', methods=['POST'])
 def register_client():
     data = request.get_json()
-    conn = get_db_connection(); cursor = conn.cursor()
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False, 'message': 'Erro de conexão com o banco de dados.'}), 500
+    cursor = conn.cursor()
     try:
         cursor.execute("INSERT INTO clientes (nome_completo, email, telefone, senha_hash) VALUES (%s, %s, %s, %s)",
                        (data.get('nomeCompleto'), data.get('email'), data.get('telefone'), data.get('senha')))

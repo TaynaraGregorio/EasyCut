@@ -3,7 +3,7 @@
  * Atualiza a lista de barbearias enquanto o usuário digita
  */
 
-const API_BASE_URL = 'http://localhost:5001';
+const API_BASE_URL = '';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Tenta encontrar o campo de busca e o container de resultados

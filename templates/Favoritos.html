@@ -657,7 +657,7 @@
             const clienteId = currentUser.id;
 
             try {
-                const response = await fetch(`http://localhost:5001/api/clientes/${clienteId}/favoritos/${barbeariaId}`, {
+                const response = await fetch(`/api/clientes/${clienteId}/favoritos/${barbeariaId}`, {
                     method: 'DELETE'
                 });
 
@@ -745,7 +745,7 @@
             const clienteId = currentUser.id;
 
             try {
-                const response = await fetch(`http://localhost:5001/api/clientes/${clienteId}/favoritos`);
+                const response = await fetch(`/api/clientes/${clienteId}/favoritos`);
                 if (!response.ok) {
                     throw new Error('Falha ao carregar favoritos da API.');
                 }

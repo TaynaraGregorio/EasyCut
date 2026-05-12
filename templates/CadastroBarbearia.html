@@ -784,7 +784,7 @@
             submitBtn.textContent = 'Enviando...';
             
             // --- NOVA INTEGRAÇÃO COM BACKEND (Igual ao CadastroCliente) ---
-            fetch('http://localhost:5001/api/barbearias', {
+            fetch('/api/barbearias', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
