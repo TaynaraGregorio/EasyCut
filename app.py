@@ -556,6 +556,8 @@ def login():
     cursor.close(); conn.close()
     if user and user['senha_hash'] == password:
         user['tipo'] = u_type
+        if user.get('foto_perfil'):
+            user['foto'] = user['foto_perfil']
         return jsonify({'success': True, 'user': user})
     return jsonify({'success': False, 'message': 'Credenciais inválidas'}), 401
 

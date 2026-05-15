@@ -1475,8 +1475,6 @@
                         
                         if (newProfileImageBase64) {
                             payload.foto_perfil = newProfileImageBase64;
-                            // Resetar variável após salvar
-                            newProfileImageBase64 = null;
                         }
                         
                         // Validação específica
@@ -1569,6 +1567,13 @@
                 }
                 
                 showBlockStatus(blockId, '✅ Salvo com sucesso!', 'success');
+
+                if (payload.foto_perfil) {
+                    currentUser.foto = payload.foto_perfil;
+                    currentUser.foto_perfil = payload.foto_perfil;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    newProfileImageBase64 = null;
+                }
                 
                 // Atualizar originalData com os novos valores salvos
                 if (blockId === 'basic-info') {

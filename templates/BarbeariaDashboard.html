@@ -854,28 +854,52 @@
                 document.body.style.overflow = '';
             }
             
-            loadUserData() {
+            applyUserAvatar(photoUrl, userName) {
+                const initial = (userName || 'B').charAt(0).toUpperCase();
+                const targets = [this.userAvatar, this.menuUserAvatar];
+                if (photoUrl) {
+                    const safeUrl = photoUrl.startsWith('data:') || photoUrl.startsWith('http')
+                        ? photoUrl
+                        : photoUrl;
+                    targets.forEach(el => {
+                        el.textContent = '';
+                        el.style.backgroundImage = `url(${JSON.stringify(safeUrl)})`;
+                        el.style.backgroundSize = 'cover';
+                        el.style.backgroundPosition = 'center';
+                    });
+                } else {
+                    targets.forEach(el => {
+                        el.style.backgroundImage = '';
+                        el.textContent = initial;
+                    });
+                }
+            }
+
+            async loadUserData() {
                 const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-                // Tenta obter o nome de várias fontes: propriedade 'nome' (API), 'nomeBarbearia' (Demo/Legacy) ou localStorage
                 const userName = currentUser.nome || currentUser.nomeBarbearia || localStorage.getItem('userName') || 'Barbearia';
-                
+
                 this.userName.textContent = userName;
                 this.menuUserName.textContent = userName;
-                
-                if (currentUser.foto) {
-                    this.userAvatar.textContent = '';
-                    this.userAvatar.style.backgroundImage = `url('${currentUser.foto}')`;
-                    this.userAvatar.style.backgroundSize = 'cover';
-                    this.userAvatar.style.backgroundPosition = 'center';
-                    
-                    this.menuUserAvatar.textContent = '';
-                    this.menuUserAvatar.style.backgroundImage = `url('${currentUser.foto}')`;
-                    this.menuUserAvatar.style.backgroundSize = 'cover';
-                    this.menuUserAvatar.style.backgroundPosition = 'center';
-                } else {
-                    this.userAvatar.textContent = userName.charAt(0).toUpperCase();
-                    this.menuUserAvatar.textContent = userName.charAt(0).toUpperCase();
+
+                let photoUrl = currentUser.foto || currentUser.foto_perfil;
+
+                if (currentUser.id) {
+                    try {
+                        const response = await fetch(`${this.API_BASE_URL}/barbearias/${currentUser.id}`);
+                        const data = await response.json();
+                        if (data.success && data.barbearia && data.barbearia.foto_perfil) {
+                            photoUrl = data.barbearia.foto_perfil;
+                            currentUser.foto = photoUrl;
+                            currentUser.foto_perfil = photoUrl;
+                            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        }
+                    } catch (err) {
+                        console.warn('Não foi possível atualizar foto do perfil:', err);
+                    }
                 }
+
+                this.applyUserAvatar(photoUrl, userName);
             }
             
             async loadStats() {
