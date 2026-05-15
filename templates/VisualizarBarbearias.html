@@ -2168,7 +2168,11 @@
                     }
                 } catch (error) {
                     console.error('Erro ao carregar barbearias reais:', error);
-                    this.showError('Falha ao conectar com o servidor. Verifique se a API está rodando e tente novamente.');
+                    const detail = error && error.message ? error.message : String(error);
+                    this.showError(
+                        `Não foi possível carregar as barbearias (${detail}). ` +
+                        'Se o problema persistir, confira no Render se a API responde em /api/health e se o MySQL está configurado.'
+                    );
                 }
             }
 
@@ -2553,6 +2557,10 @@
             }
             
             getStatusIndicator(openingHours) {
+                if (!openingHours || typeof openingHours !== 'object') {
+                    return '';
+                }
+
                 const now = new Date();
                 const currentDay = now.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
                 const currentTime = now.toTimeString().slice(0, 5); // HH:MM

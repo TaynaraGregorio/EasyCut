@@ -264,12 +264,22 @@ def init_db():
 def fetch_barbearia_opening_hours(cursor, barbearia_id):
     try:
         cursor.execute('SELECT dia_semana, status FROM horarios_status WHERE barbearia_id = %s', (barbearia_id,))
-        status_map = {row[0]: row[1] for row in cursor.fetchall()}
+        status_map = {}
+        for row in cursor.fetchall():
+            if isinstance(row, dict):
+                status_map[row['dia_semana']] = row['status']
+            else:
+                status_map[row[0]] = row[1]
         cursor.execute('''
-            SELECT dia_semana, MIN(inicio), MAX(fim) 
+            SELECT dia_semana, MIN(inicio) AS inicio, MAX(fim) AS fim
             FROM horarios_slots WHERE barbearia_id = %s GROUP BY dia_semana
         ''', (barbearia_id,))
-        slots_map = {row[0]: (row[1], row[2]) for row in cursor.fetchall()}
+        slots_map = {}
+        for row in cursor.fetchall():
+            if isinstance(row, dict):
+                slots_map[row['dia_semana']] = (row['inicio'], row['fim'])
+            else:
+                slots_map[row[0]] = (row[1], row[2])
         hours = {}
         for day in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']:
             status = status_map.get(day, 'closed')
@@ -321,7 +331,8 @@ class BarbeariasService:
 
     def find_nearby_barbearias(self, lat=None, lng=None, radius=5.0, filters=None, name=None):
         conn = get_db_connection()
-        if not conn: return []
+        if not conn:
+            return None
         try:
             cursor = conn.cursor(dictionary=True)
             sql = "SELECT * FROM barbearias"
@@ -330,22 +341,53 @@ class BarbeariasService:
                 sql += " WHERE LOWER(nome_barbearia) LIKE LOWER(%s) OR LOWER(cidade) LIKE LOWER(%s)"
                 term = f"%{name}%"
                 params = [term, term]
-            
+
             cursor.execute(sql, tuple(params))
             rows = cursor.fetchall()
             results = []
+            has_coords = lat is not None and lng is not None
+
             for r in rows:
-                dist = self._calculate_distance(lat, lng, float(r['latitude']), float(r['longitude'])) if lat and r['latitude'] else None
-                if (not name and dist and dist <= radius) or name or (not lat and not name):
-                    # Simplificação da formatação para o exemplo
-                    results.append({
-                        "id": str(r['id']), "name": r['nome_barbearia'], 
-                        "distance": dist, "rating": 5.0, # Rating fixo para exemplo
-                        "place_id": f"db_{r['id']}", "photos": [r['foto_perfil']] if r['foto_perfil'] else []
-                    })
-            cursor.close(); conn.close()
+                bid = r['id']
+                lat_b = lng_b = None
+                try:
+                    if r.get('latitude') is not None:
+                        lat_b = float(r['latitude'])
+                    if r.get('longitude') is not None:
+                        lng_b = float(r['longitude'])
+                except (TypeError, ValueError):
+                    pass
+
+                dist = None
+                if has_coords and lat_b is not None and lng_b is not None:
+                    dist = self._calculate_distance(float(lat), float(lng), lat_b, lng_b)
+
+                if name:
+                    include = True
+                elif has_coords:
+                    include = dist is not None and dist <= float(radius)
+                else:
+                    include = True
+
+                if not include:
+                    continue
+
+                item = serialize_barbearia_for_template(cursor, r, bid, fetch_barbearia_opening_hours)
+                item['id'] = str(bid)
+                item['distance'] = dist
+                item['place_id'] = f"db_{bid}"
+                results.append(item)
+
+            cursor.close()
+            conn.close()
             return results
-        except Exception: return []
+        except Exception as e:
+            print(f"[ERRO] find_nearby_barbearias: {e}")
+            try:
+                conn.close()
+            except Exception:
+                pass
+            return None
 
 # Inicialização de instâncias globais
 barbearias_service = BarbeariasService()
@@ -476,10 +518,24 @@ def termos_de_uso_page():
 # --- ROTAS DE BARBEARIA (Antiga barbearias_api.py) ---
 @app.route('/api/barbearias/nearby', methods=['POST'])
 def get_nearby_barbearias():
-    data = request.get_json()
-    lat = data.get('latitude'); lng = data.get('longitude')
-    name = data.get('name'); radius = float(data.get('radius', 5.0))
+    data = request.get_json(silent=True) or {}
+    lat = data.get('latitude')
+    lng = data.get('longitude')
+    name = (data.get('name') or '').strip() or None
+    try:
+        radius = float(data.get('radius', 5.0))
+    except (TypeError, ValueError):
+        radius = 5.0
+
     results = barbearias_service.find_nearby_barbearias(lat, lng, radius, name=name)
+    if results is None:
+        return jsonify({
+            'success': False,
+            'message': 'Erro de conexão com o banco de dados. Verifique as variáveis MYSQL_* no Render.',
+            'barbearias': [],
+            'total': 0,
+        }), 503
+
     return jsonify({'success': True, 'barbearias': results, 'total': len(results)})
 
 @app.route('/api/login', methods=['POST'])
