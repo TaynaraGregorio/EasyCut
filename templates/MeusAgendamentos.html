@@ -1187,6 +1187,7 @@
         const API_BASE = '';
         let allAppointments = [];
         let filteredAppointments = [];
+        let currentRatingValue = 0;
 
         // Variáveis para reagendamento
         let rescheduleSelectedServices = [];
@@ -1491,7 +1492,7 @@
 
         // Função para cancelar agendamento
         function cancelAppointment(appointmentId) {
-            const appointment = allAppointments.find(a => a.id === appointmentId);
+            const appointment = allAppointments.find(a => a.id == appointmentId);
             if (!appointment) return;
 
             // Mostrar modal de confirmação de cancelamento
@@ -1630,7 +1631,7 @@
 
         // Função para prosseguir com o cancelamento (atualiza no banco)
         async function proceedWithCancel(appointmentId) {
-            const appointment = allAppointments.find(a => a.id === appointmentId);
+            const appointment = allAppointments.find(a => a.id == appointmentId);
             if (!appointment) return;
 
             cancelCancelConfirmation();
@@ -1657,7 +1658,7 @@
 
         // Função para reagendar
         function rescheduleAppointment(appointmentId) {
-            const appointment = allAppointments.find(a => a.id === appointmentId);
+            const appointment = allAppointments.find(a => a.id == appointmentId);
             if (!appointment) {
                 console.error('Agendamento não encontrado:', appointmentId);
                 return;
@@ -2177,7 +2178,7 @@
 
         // Função para confirmar reagendamento
         function confirmReschedule(appointmentId) {
-            const appointment = allAppointments.find(a => a.id === appointmentId);
+            const appointment = allAppointments.find(a => a.id == appointmentId);
             if (!appointment) return;
 
             // Validar campos obrigatórios
@@ -2375,7 +2376,7 @@
 
         // Função para prosseguir com o reagendamento
         async function proceedWithReschedule(appointmentId) {
-            const appointment = allAppointments.find(a => a.id === appointmentId);
+            const appointment = allAppointments.find(a => a.id == appointmentId);
             if (!appointment) return;
 
             const updatedData = {
@@ -2474,7 +2475,7 @@
 
         // Função para avaliar agendamento
         function rateAppointment(appointmentId) {
-            const appointment = allAppointments.find(a => a.id === appointmentId);
+            const appointment = allAppointments.find(a => a.id == appointmentId);
             if (!appointment) return;
 
             // Mostrar modal de avaliação
@@ -2661,6 +2662,8 @@
             
             document.body.appendChild(ratingModal);
             
+            currentRatingValue = appointment.rating || 0;
+
             // Configurar eventos das estrelas
             setupStarRating(appointment.rating || 0);
             
@@ -2892,6 +2895,8 @@
                 star.addEventListener('click', () => {
                     currentRating = index + 1;
                     highlightStars(currentRating);
+                    currentRatingValue = index + 1;
+                    highlightStars(currentRatingValue);
                     ratingText.textContent = ratingTexts[currentRating];
                     submitBtn.disabled = false;
                     submitBtn.style.background = 'linear-gradient(135deg, #fbbf24, #f59e0b)';
@@ -2904,6 +2909,7 @@
                 stars.forEach((star, index) => {
                     if (index < rating) {
                         star.style.color = '#fbbf24';
+                        star.style.color = '#fbbf24'; // Isso será interpretado como rgb(251, 191, 36)
                     } else {
                         star.style.color = '#64748b';
                     }
@@ -2930,22 +2936,14 @@
 
         // Função para enviar avaliação
         async function submitRating(appointmentId) {
-            const appointment = allAppointments.find(a => a.id === appointmentId);
+            const appointment = allAppointments.find(a => a.id == appointmentId);
             if (!appointment) return;
 
             // Obter dados da avaliação
-            const stars = document.querySelectorAll('.star');
-            let rating = 0;
-            stars.forEach((star, index) => {
-                if (star.style.color === 'rgb(251, 191, 36)') {
-                    rating = index + 1;
-                }
-            });
-            
             const comment = document.getElementById('ratingComment').value.trim();
 
             // Validar avaliação
-            if (rating === 0) {
+            if (currentRatingValue === 0) {
                 showValidationMessage('Por favor, selecione uma avaliação com estrelas.');
                 return;
             }
@@ -2960,14 +2958,14 @@
                 const response = await fetch(`${API_BASE}/api/agendamentos/${appointmentId}/avaliacao`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ rating: rating, comment: comment })
+                    body: JSON.stringify({ rating: currentRatingValue, comment: comment })
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
                     // Atualizar objeto local para refletir na UI imediatamente
-                    appointment.rating = rating;
+                    appointment.rating = currentRatingValue;
                     appointment.ratingComment = comment;
                     appointment.ratedAt = new Date().toISOString();
 
@@ -3004,7 +3002,7 @@
 
         // Função para ver detalhes
         function viewAppointmentDetails(appointmentId, mode = 'details') {
-            const appointment = allAppointments.find(a => a.id === appointmentId);
+            const appointment = allAppointments.find(a => a.id == appointmentId);
             if (!appointment) return;
 
             const modal = document.getElementById('appointmentModal');
