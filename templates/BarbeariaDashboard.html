@@ -988,9 +988,10 @@
 
                 // Processar agendamentos
                 appointments.forEach(appt => {
-                    let dateTimeStr = appt.date;
-                    if (appt.time) dateTimeStr += `T${appt.time}`;
-                    const dateTime = new Date(dateTimeStr);
+                    const dateParts = appt.date.split('-');
+                    const timeParts = (appt.time || '00:00').split(':');
+                    // Cria a data localmente para evitar o deslocamento de fuso horário (UTC)
+                    const dateTime = new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1]);
 
                     let title = 'Novo agendamento';
                     let icon = '📅';
@@ -1057,25 +1058,36 @@
                 if (!date || isNaN(date.getTime())) return '';
                 
                 const now = new Date();
-                const diff = now - date;
-                const isFuture = diff < 0;
-                const absDiff = Math.abs(diff);
                 
-                const days = Math.floor(absDiff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((absDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((absDiff % (1000 * 60 * 60)) / (1000 * 60));
+                // Comparação de dias civis (ignorando a hora para determinar se é hoje, ontem ou amanhã)
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const targetDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                const diffTime = targetDay - today;
+                const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
-                if (days === 0) {
-                    if (hours === 0) {
-                        if (minutes < 1) return 'Agora mesmo';
-                        return isFuture ? `Em ${minutes} min` : `${minutes} min atrás`;
+                // Se for hoje, usamos tempo relativo para atividades recentes, ou apenas "Hoje"
+                if (diffDays === 0) {
+                    const diffMs = now - date;
+                    const absDiffMs = Math.abs(diffMs);
+                    const minutes = Math.floor(absDiffMs / (1000 * 60));
+                    
+                    if (minutes < 1) return 'Agora mesmo';
+                    if (minutes < 60) return diffMs > 0 ? `${minutes} min atrás` : `Em ${minutes} min`;
+                    
+                    const hours = Math.floor(minutes / 60);
+                    if (hours < 24) {
+                        return diffMs > 0 ? `${hours} h atrás` : `Em ${hours} h`;
                     }
-                    return isFuture ? `Em ${hours} h` : `${hours} h atrás`;
+                    return 'Hoje';
                 }
                 
-                if (days === 1) return isFuture ? 'Amanhã' : 'Ontem';
-                if (days < 7) return isFuture ? `Em ${days} dias` : `${days} dias atrás`;
-                
+                if (diffDays === -1) return 'Ontem';
+
+                // Para datas futuras (como amanhã), mostramos o dia da semana ou a data
+                if (diffDays > 0 && diffDays < 7) {
+                    return date.toLocaleDateString('pt-BR', { weekday: 'long' });
+                }
+
                 return date.toLocaleDateString('pt-BR');
             }
             

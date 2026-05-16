@@ -971,42 +971,43 @@
 
         // Função para renderizar estatísticas
         function renderStats() {
-            const today = new Date().toISOString().split('T')[0];
-            const todayAppointments = allAppointments.filter(apt => apt.date === today);
+            const dateFilter = document.getElementById('dateFilter').value;
+            const isFiltered = !!dateFilter;
             
-            // Atualizar contador dinâmico baseado nos agendamentos ativos de hoje
-            // Conta: concluídos, pendentes e confirmados (exclui apenas cancelados)
-            todayAppointmentsCount = todayAppointments.filter(apt => 
-                apt.status === 'completed' || 
-                apt.status === 'pending' || 
-                apt.status === 'confirmed'
-            ).length;
+            // Define a base de dados: o dia filtrado ou a lista completa
+            const statsBasis = isFiltered 
+                ? allAppointments.filter(apt => apt.date === dateFilter)
+                : allAppointments;
+            
+            const labelSuffix = isFiltered ? " no Dia" : " Geral";
             
             const stats = {
-                today: todayAppointmentsCount,
-                confirmed: todayAppointments.filter(apt => apt.status === 'confirmed').length,
-                pending: todayAppointments.filter(apt => apt.status === 'pending').length,
-                revenue: todayAppointments
+                total: statsBasis.filter(apt => 
+                    ['completed', 'pending', 'confirmed'].includes(apt.status)
+                ).length,
+                confirmed: statsBasis.filter(apt => apt.status === 'confirmed').length,
+                pending: statsBasis.filter(apt => apt.status === 'pending').length,
+                revenue: statsBasis
                     .filter(apt => apt.status === 'completed')
-                    .reduce((sum, apt) => sum + apt.totalPrice, 0)
+                    .reduce((sum, apt) => sum + (parseFloat(apt.totalPrice) || 0), 0)
             };
 
             document.getElementById('statsGrid').innerHTML = `
                 <div class="stat-card">
-                    <div class="stat-number">${stats.today}</div>
-                    <div class="stat-label">Agendamentos Hoje</div>
+                    <div class="stat-number">${stats.total}</div>
+                    <div class="stat-label">Agendamentos${labelSuffix}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number">${stats.confirmed}</div>
-                    <div class="stat-label">Confirmados</div>
+                    <div class="stat-label">Confirmados${labelSuffix}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number">${stats.pending}</div>
-                    <div class="stat-label">Pendentes</div>
+                    <div class="stat-label">Pendentes${labelSuffix}</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number">R$ ${stats.revenue}</div>
-                    <div class="stat-label">Receita Hoje</div>
+                    <div class="stat-number">R$ ${stats.revenue.toFixed(2)}</div>
+                    <div class="stat-label">Receita${labelSuffix}</div>
                 </div>
             `;
         }
@@ -1154,6 +1155,7 @@
             });
 
             renderAppointments();
+            renderStats();
         }
 
         // Função para limpar filtros
@@ -1164,6 +1166,7 @@
             
             filteredAppointments = [...allAppointments];
             renderAppointments();
+            renderStats();
         }
 
         async function updateAgendamentoStatus(appointmentId, newStatus) {
