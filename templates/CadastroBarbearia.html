@@ -722,6 +722,7 @@
             clearFieldErrors();
             
             let hasError = false;
+            const email = document.getElementById('email');
             const senha = document.getElementById('senha');
             const confirmarSenha = document.getElementById('confirmarSenha');
             const whatsapp = document.getElementById('whatsapp');
@@ -730,23 +731,29 @@
             
             // Validação do CNPJ/CPF
             if (!validateCNPJCPFInput(cnpjCpf)) {
-                showFieldError(cnpjCpf, 'Por favor, digite um CNPJ/CPF válido.');
+                showFieldError(cnpjCpf, 'Digite um CPF ou CNPJ válido.');
                 hasError = true;
             }
             
             // Validação dos telefones
             if (!validatePhoneInput(whatsapp)) {
-                showFieldError(whatsapp, 'Por favor, digite um WhatsApp válido.');
+                showFieldError(whatsapp, 'Digite um WhatsApp válido.');
                 hasError = true;
             }
             
+            // Validação do email
+            if (!validateEmail(email.value)) {
+                showFieldError(email, 'Digite um e-mail válido.');
+                hasError = true;
+            }
+
             if (senha.value !== confirmarSenha.value) {
-                showFieldError(confirmarSenha, 'As senhas não coincidem!');
+                showFieldError(confirmarSenha, 'As senhas não são iguais.');
                 hasError = true;
             }
             
             if (senha.value.length < 8) {
-                showFieldError(senha, 'A senha deve ter pelo menos 8 caracteres.');
+                showFieldError(senha, 'A senha deve ter no mínimo 8 caracteres.');
                 hasError = true;
             }
             
@@ -755,7 +762,7 @@
                 const container = aceitarTermos.closest('.form-group');
                 const msg = document.createElement('div');
                 msg.className = 'field-error-msg';
-                msg.textContent = 'Você deve aceitar os Termos de Uso para continuar.';
+                msg.textContent = 'Você precisa aceitar os termos para continuar.';
                 msg.style.color = '#ef4444';
                 msg.style.fontSize = '0.85rem';
                 msg.style.marginTop = '4px';
@@ -807,22 +814,22 @@
                     const msg = (data.message || '').toLowerCase();
                     
                     if (msg.includes('email')) {
-                        showFieldError(document.getElementById('email'), 'E-mail inválido');
+                        showFieldError(document.getElementById('email'), 'Este e-mail já está cadastrado.');
                         mapped = true;
                     }
                     
                     if (msg.includes('cnpj') || msg.includes('cpf') || msg.includes('documento')) {
-                        showFieldError(document.getElementById('cnpjCpf'), data.message || 'Documento inválido ou já cadastrado.');
+                        showFieldError(document.getElementById('cnpjCpf'), 'Este CPF/CNPJ já está cadastrado.');
                         mapped = true;
                     }
                     
                     if (msg.includes('whatsapp') || msg.includes('telefone')) {
-                        showFieldError(document.getElementById('whatsapp'), data.message || 'WhatsApp inválido ou já cadastrado.');
+                        showFieldError(document.getElementById('whatsapp'), 'Este WhatsApp já está cadastrado.');
                         mapped = true;
                     }
                     
                     if (!mapped) {
-                        showFormError(form, data.message || 'Erro desconhecido ao cadastrar.');
+                        showFormError(form, 'Não foi possível realizar o cadastro.');
                     }
                 }
             })

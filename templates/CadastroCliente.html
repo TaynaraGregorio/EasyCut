@@ -681,37 +681,37 @@
             
             // Validação do nome completo
             if (!validateFullName(nomeCompleto.value)) {
-                showFieldError(nomeCompleto, 'Por favor, digite seu nome completo (nome e sobrenome).');
+                showFieldError(nomeCompleto, 'Digite seu nome completo (nome e sobrenome).');
                 hasError = true;
             }
             
             // Validação do email
             if (!validateEmail(email.value)) {
-                showFieldError(email, 'Por favor, digite um e-mail válido.');
+                showFieldError(email, 'Digite um e-mail válido.');
                 hasError = true;
             }
             
             // Validação do telefone
             if (!validatePhone(telefone.value)) {
-                showFieldError(telefone, 'Por favor, digite um telefone válido.');
+                showFieldError(telefone, 'Digite um telefone válido.');
                 hasError = true;
             }
             
             // Validação das senhas
             if (senha.value !== confirmarSenha.value) {
-                showFieldError(confirmarSenha, 'As senhas não coincidem!');
+                showFieldError(confirmarSenha, 'As senhas não são iguais.');
                 hasError = true;
             }
             
             if (senha.value.length < 8) {
-                showFieldError(senha, 'A senha deve ter pelo menos 8 caracteres.');
+                showFieldError(senha, 'A senha deve ter no mínimo 8 caracteres.');
                 hasError = true;
             }
             
             // Validação dos termos de uso
             if (!aceitarTermos.checked) {
                 // A mensagem de erro para o checkbox é um pouco diferente
-                showFieldError(aceitarTermos, 'Você deve aceitar os Termos de Uso para continuar.');
+                showFieldError(aceitarTermos, 'Você precisa aceitar os termos para continuar.');
                 hasError = true;
             }
             
@@ -758,17 +758,17 @@
                     const msg = (data.message || '').toLowerCase();
                     
                     if (msg.includes('email')) {
-                        showFieldError(document.getElementById('email'), data.message || 'Este e-mail já está em uso.');
+                        showFieldError(document.getElementById('email'), 'Este e-mail já está cadastrado.');
                         mapped = true;
                     }
                     
                     if (msg.includes('telefone') || msg.includes('celular')) {
-                        showFieldError(document.getElementById('telefone'), data.message || 'Telefone inválido ou já cadastrado.');
+                        showFieldError(document.getElementById('telefone'), 'Este telefone já está cadastrado.');
                         mapped = true;
                     }
                     
                     if (!mapped) {
-                        showFormError(form, data.message || 'Ocorreu um erro desconhecido.');
+                        showFormError(form, 'Não foi possível realizar o cadastro.');
                     }
                 }
             })
@@ -791,21 +791,21 @@
         document.getElementById('nomeCompleto').addEventListener('blur', function(e) {
             clearFieldError(e.target);
             if (e.target.value && !validateFullName(e.target.value)) {
-                showFieldError(e.target, 'Por favor, digite seu nome completo (nome e sobrenome).');
+                showFieldError(e.target, 'Digite seu nome completo (nome e sobrenome).');
             }
         });
 
         document.getElementById('email').addEventListener('blur', function(e) {
             clearFieldError(e.target);
             if (e.target.value && !validateEmail(e.target.value)) {
-                showFieldError(e.target, 'Por favor, digite um e-mail válido.');
+                showFieldError(e.target, 'Digite um e-mail válido.');
             }
         });
 
         document.getElementById('telefone').addEventListener('blur', function(e) {
             clearFieldError(e.target);
             if (e.target.value && !validatePhone(e.target.value)) {
-                showFieldError(e.target, 'Por favor, digite um telefone válido.');
+                showFieldError(e.target, 'Digite um telefone válido.');
             }
         });
     </script>
