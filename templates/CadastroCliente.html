@@ -611,11 +611,9 @@
 
         // Função para mostrar erro abaixo do campo
         function showFieldError(input, message) {
-            let parent = input.parentElement;
-            if (input.type === 'checkbox') {
-                parent = input.closest('.form-group');
-            }
-            
+            const isCheckbox = input.type === 'checkbox';
+            let parent = isCheckbox ? input.closest('.form-group') : input.parentElement;
+
             clearFieldError(input); // Limpa erro anterior antes de adicionar um novo
             
             input.classList.add('input-error');
@@ -624,12 +622,14 @@
             msgDiv.className = 'field-error-msg';
             msgDiv.textContent = message;
             
-            // Insere a mensagem de erro após o input, mas antes de outros elementos como 'info-text'
+            if (isCheckbox) {
+                parent.appendChild(msgDiv);
+                return;
+            }
+
             const infoText = parent.querySelector('.info-text');
             if (infoText) {
                 parent.insertBefore(msgDiv, infoText);
-            } else if (input.nextSibling) {
-                parent.insertBefore(msgDiv, input.nextSibling);
             } else {
                 parent.appendChild(msgDiv);
             }
