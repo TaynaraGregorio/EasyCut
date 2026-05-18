@@ -805,16 +805,53 @@ def register_client():
 
 @app.route('/api/barbearias', methods=['POST'])
 def register_barbearia():
-    data = request.get_json()
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({'success': False, 'message': 'Dados inválidos ou ausentes.'}), 400
+
+    required = ('nomeBarbearia', 'cnpjCpf', 'responsavel', 'whatsapp', 'email', 'senha')
+    missing = [f for f in required if not (data.get(f) or '').strip()]
+    if missing:
+        return jsonify({'success': False, 'message': 'Preencha todos os campos obrigatórios.'}), 400
+
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False, 'message': 'Erro de conexão com o banco de dados.'}), 503
+
     lat, lng = _geocode_address(data)
-    conn = get_db_connection(); cursor = conn.cursor()
+    cursor = conn.cursor()
     try:
-        cursor.execute("""INSERT INTO barbearias (nome_barbearia, email, whatsapp, senha_hash, cnpj_cpf, nome_responsavel, latitude, longitude) 
-                          VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
-                       (data.get('nomeBarbearia'), data.get('email'), data.get('whatsapp'), data.get('senha'), data.get('cnpjCpf'), data.get('responsavel'), lat, lng))
-        conn.commit(); return jsonify({'success': True})
-    except Exception as e: return jsonify({'success': False, 'message': str(e)}), 400
-    finally: cursor.close(); conn.close()
+        cursor.execute(
+            """INSERT INTO barbearias (
+                   nome_barbearia, email, whatsapp, senha_hash, cnpj_cpf,
+                   nome_responsavel, latitude, longitude, termos_aceitos
+               ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 1)""",
+            (
+                data.get('nomeBarbearia').strip(),
+                data.get('email').strip(),
+                data.get('whatsapp').strip(),
+                data.get('senha'),
+                data.get('cnpjCpf').strip(),
+                data.get('responsavel').strip(),
+                lat,
+                lng,
+            ),
+        )
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Cadastro realizado com sucesso!'})
+    except Exception as e:
+        conn.rollback()
+        err = str(e).lower()
+        if 'duplicate' in err and 'email' in err:
+            msg = 'Este e-mail já está cadastrado.'
+        elif 'duplicate' in err and ('cnpj' in err or 'cpf' in err):
+            msg = 'Este CPF/CNPJ já está cadastrado.'
+        else:
+            msg = str(e)
+        return jsonify({'success': False, 'message': msg}), 400
+    finally:
+        cursor.close()
+        conn.close()
 
 register_extended_api(app)
 
