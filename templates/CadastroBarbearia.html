@@ -794,7 +794,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showSuccessMessage(form, data.message);
+                    showSuccessMessage(form, data.message || 'Cadastro realizado com sucesso!');
                     // Limpar formulário
                     e.target.reset();
                     
@@ -812,12 +812,12 @@
                     }
                     
                     if (msg.includes('cnpj') || msg.includes('cpf') || msg.includes('documento')) {
-                        showFieldError(document.getElementById('cnpjCpf'), data.message);
+                        showFieldError(document.getElementById('cnpjCpf'), data.message || 'Documento inválido ou já cadastrado.');
                         mapped = true;
                     }
                     
                     if (msg.includes('whatsapp') || msg.includes('telefone')) {
-                        showFieldError(document.getElementById('whatsapp'), data.message);
+                        showFieldError(document.getElementById('whatsapp'), data.message || 'WhatsApp inválido ou já cadastrado.');
                         mapped = true;
                     }
                     

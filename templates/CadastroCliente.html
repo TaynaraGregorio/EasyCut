@@ -744,7 +744,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showSuccessMessage(form, data.message);
+                    showSuccessMessage(form, data.message || 'Cadastro realizado com sucesso!');
                     // Limpar formulário
                     e.target.reset();
                     document.getElementById('passwordStrength').textContent = '';
@@ -758,12 +758,12 @@
                     const msg = (data.message || '').toLowerCase();
                     
                     if (msg.includes('email')) {
-                        showFieldError(document.getElementById('email'), data.message);
+                        showFieldError(document.getElementById('email'), data.message || 'Este e-mail já está em uso.');
                         mapped = true;
                     }
                     
                     if (msg.includes('telefone') || msg.includes('celular')) {
-                        showFieldError(document.getElementById('telefone'), data.message);
+                        showFieldError(document.getElementById('telefone'), data.message || 'Telefone inválido ou já cadastrado.');
                         mapped = true;
                     }
                     
