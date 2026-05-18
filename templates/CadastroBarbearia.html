@@ -708,6 +708,34 @@
             });
         }
 
+        /** Normaliza texto para detectar palavras-chave (ex.: "e-mail" → "email"). */
+        function normalizeApiMessage(text) {
+            return (text || '').toLowerCase().replace(/-/g, '').replace(/\s/g, '');
+        }
+
+        function mapApiErrorsToFields(data) {
+            const msg = (data.message || '').toLowerCase();
+            const flat = normalizeApiMessage(data.message);
+            let mapped = false;
+
+            if (flat.includes('email') || msg.includes('e-mail') || msg.includes('e mail')) {
+                showFieldError(document.getElementById('email'), 'Este e-mail já está cadastrado.');
+                mapped = true;
+            }
+
+            if (flat.includes('cnpj') || flat.includes('cpf') || msg.includes('documento')) {
+                showFieldError(document.getElementById('cnpjCpf'), 'Este CPF/CNPJ já está cadastrado.');
+                mapped = true;
+            }
+
+            if (flat.includes('whatsapp') || flat.includes('telefone')) {
+                showFieldError(document.getElementById('whatsapp'), 'Este WhatsApp já está cadastrado.');
+                mapped = true;
+            }
+
+            return mapped;
+        }
+
         // Event listeners
         document.getElementById('cnpjCpf').addEventListener('input', function(e) {
             e.target.value = formatCNPJCPF(e.target.value);
@@ -836,26 +864,16 @@
                         window.location.href = "{{ url_for('login_page') }}";
                     }, 2000);
                 } else {
-                    let mapped = false;
-                    const msg = (data.message || '').toLowerCase();
-
-                    if (msg.includes('email')) {
-                        showFieldError(email, 'Este e-mail já está cadastrado.');
-                        mapped = true;
-                    }
-
-                    if (msg.includes('cnpj') || msg.includes('cpf') || msg.includes('documento')) {
-                        showFieldError(cnpjCpf, 'Este CPF/CNPJ já está cadastrado.');
-                        mapped = true;
-                    }
-
-                    if (msg.includes('whatsapp') || msg.includes('telefone')) {
-                        showFieldError(whatsapp, 'Este WhatsApp já está cadastrado.');
-                        mapped = true;
-                    }
+                    const mapped = mapApiErrorsToFields(data);
 
                     if (!mapped) {
                         showFormError(form, data.message || 'Não foi possível realizar o cadastro.');
+                    } else {
+                        const firstErrorField = form.querySelector('.input-error');
+                        if (firstErrorField) {
+                            firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            firstErrorField.focus();
+                        }
                     }
                 }
             } catch (error) {
