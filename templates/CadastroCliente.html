@@ -611,7 +611,11 @@
 
         // Função para mostrar erro abaixo do campo
         function showFieldError(input, message) {
-            const parent = input.parentElement;
+            let parent = input.parentElement;
+            if (input.type === 'checkbox') {
+                parent = input.closest('.form-group');
+            }
+            
             clearFieldError(input); // Limpa erro anterior antes de adicionar um novo
             
             input.classList.add('input-error');

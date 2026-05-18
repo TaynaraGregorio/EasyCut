@@ -656,37 +656,29 @@
 
         // Função para mostrar erro abaixo do campo
         function showFieldError(input, message) {
-            const parent = input.parentElement;
+            let parent = input.parentElement;
+            if (input.type === 'checkbox') {
+                parent = input.closest('.form-group');
+            }
+            
             // Remove erro anterior se houver
             const existingError = parent.querySelector('.field-error-msg');
             if (existingError) {
                 existingError.remove();
             }
             
-            input.style.borderColor = '#ef4444';
-            input.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+            input.classList.add('input-error');
             
             const msgDiv = document.createElement('div');
             msgDiv.className = 'field-error-msg';
             msgDiv.textContent = message;
-            msgDiv.style.color = '#ef4444';
-            msgDiv.style.fontSize = '0.85rem';
-            msgDiv.style.marginTop = '4px';
-            
-            if (input.nextSibling) {
-                parent.insertBefore(msgDiv, input.nextSibling);
-            } else {
-                parent.appendChild(msgDiv);
-            }
+            parent.appendChild(msgDiv);
         }
 
         function clearFieldErrors() {
             document.querySelectorAll('.field-error-msg, .validation-message').forEach(el => el.remove());
             document.querySelectorAll('input').forEach(input => {
-                if (input.style.borderColor === 'rgb(239, 68, 68)' || input.style.borderColor === '#ef4444') {
-                    input.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                    input.style.boxShadow = 'none';
-                }
+                input.classList.remove('input-error');
             });
         }
 
@@ -759,14 +751,7 @@
             
             // Validação dos termos de uso
             if (!aceitarTermos.checked) {
-                const container = aceitarTermos.closest('.form-group');
-                const msg = document.createElement('div');
-                msg.className = 'field-error-msg';
-                msg.textContent = 'Você precisa aceitar os termos para continuar.';
-                msg.style.color = '#ef4444';
-                msg.style.fontSize = '0.85rem';
-                msg.style.marginTop = '4px';
-                container.appendChild(msg);
+                showFieldError(aceitarTermos, 'Você precisa aceitar os termos para continuar.');
                 hasError = true;
             }
             
