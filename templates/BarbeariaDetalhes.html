@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{{ url_for('static', filename='imagens/favicon001.png') }}" type="image/png">
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
             margin: 0;
             font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
@@ -111,6 +114,12 @@
             color: #fbbf24;
             font-weight: 600;
             margin-top: 8px;
+        }
+        .barbearia-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
         }
         
         /* Indicador de Status */
@@ -857,10 +866,9 @@
         /* Responsivo */
         @media (max-width: 768px) {
             .container {
-                margin: 10px;
+                margin: 10px auto;
                 padding: 28px;
                 border-radius: 20px;
-                max-width: 380px;
             }
             .barbearia-header {
                 flex-direction: column;
@@ -869,6 +877,13 @@
             .barbearia-image {
                 margin-right: 0;
                 margin-bottom: 16px;
+            }
+            .barbearia-title-wrapper {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            .barbearia-rating {
+                justify-content: center;
             }
             
             .status-indicator {
@@ -915,8 +930,8 @@
         @media (max-width: 480px) {
             .container {
                 padding: 20px;
-                margin: 5px;
-                max-width: calc(100vw - 10px);
+                margin: 5px auto;
+                width: 95%;
             }
             .logo {
                 font-size: 1.6rem;
@@ -972,7 +987,7 @@
         }
 
         .image-modal-content {
-            max-width: 600px;
+            max-width: 90%;
             max-height: 80vh;
             border-radius: 8px;
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
@@ -994,6 +1009,17 @@
 
         .image-modal-close:hover {
             color: #bbb;
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
     </style>
 </head>
@@ -1152,7 +1178,7 @@
                         <img src="${barbearia.photos?.[0] || 'https://via.placeholder.com/100x100/3b82f6/ffffff?text=B'}" 
                              alt="${barbearia.name}" class="barbearia-image">
                         <div class="barbearia-info">
-                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                            <div class="barbearia-title-wrapper">
                                 <h1 style="margin: 0;">${barbearia.name}</h1>
                                 ${this.getStatusIndicator(barbearia.opening_hours)}
                             </div>
