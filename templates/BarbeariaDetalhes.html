@@ -1713,9 +1713,11 @@
             }
 
             getMinDate() {
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                return tomorrow.toISOString().split('T')[0];
+                const today = new Date();
+                const y = today.getFullYear();
+                const m = String(today.getMonth() + 1).padStart(2, '0');
+                const d = String(today.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
             }
 
             getMaxDate() {
@@ -1777,14 +1779,28 @@
                     
                     if (data.success) {
                         if (data.slots && data.slots.length > 0) {
-                            timeSlots.innerHTML = data.slots.map(time => `
+                            // Verificar se é hoje para exibir o aviso de antecedência
+                            const todayStr = this.getMinDate();
+                            let hint = '';
+                            if (date === todayStr) {
+                                hint = '<p style="color: #60a5fa; font-size: 0.85rem; margin-bottom: 12px; width: 100%; text-align: center;">💡 Agendamentos para hoje requerem 2h de antecedência.</p>';
+                            }
+
+                            timeSlots.innerHTML = hint + data.slots.map(time => `
                                 <div class="time-slot" onclick="barbeariaDetalhes.selectTime('${time}')">
                                     ${time}
                                 </div>
                             `).join('');
                         } else {
-                            const msg = data.message === 'Fechado neste dia' ? 'Barbearia fechada neste dia' : 'Nenhum horário disponível para esta data';
-                            timeSlots.innerHTML = `<p style="color: #fca5a5; text-align: center; width: 100%; padding: 10px;">${msg}</p>`;
+                            let msg = 'Nenhum horário disponível para esta data.';
+                            if (data.message === 'Fechado neste dia') msg = 'Barbearia fechada neste dia.';
+                            
+                            const todayStr = this.getMinDate();
+                            if (date === todayStr && data.message !== 'Fechado neste dia') {
+                                msg = 'Os horários para hoje já se encerraram ou não possuem a antecedência mínima de 2 horas.';
+                            }
+                            
+                            timeSlots.innerHTML = `<p style="color: #fca5a5; text-align: center; width: 100%; padding: 10px; font-size: 0.9rem;">${msg}</p>`;
                         }
                     } else {
                         timeSlots.innerHTML = `<p style="color: #fca5a5; text-align: center; width: 100%; padding: 10px;">${data.message || 'Erro ao carregar horários'}</p>`;

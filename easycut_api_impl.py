@@ -423,6 +423,17 @@ def register_extended_api(app: Flask) -> None:
         except ValueError:
             return jsonify({"success": False, "message": "Data inválida."}), 400
 
+        # Configurações de antecedência (2 horas)
+        MIN_LEAD_TIME_MINUTES = 120
+        # Ajuste para Horário de Brasília (UTC-3) para servidores em nuvem (Render/Railway)
+        now_utc = datetime.utcnow()
+        now_br = now_utc - timedelta(hours=3)
+        today_br = now_br.date()
+        now_minutes = now_br.hour * 60 + now_br.minute
+
+        if d < today_br:
+            return jsonify({"success": False, "message": "Não é possível agendar para datas passadas."}), 400
+
         conn = _db()
         if not conn:
             return jsonify({"success": False, "message": "Erro DB"}), 500
@@ -470,6 +481,11 @@ def register_extended_api(app: Flask) -> None:
             o1 = _time_to_minutes(_as_hhmm(rng["fim"]))
             t = o0
             while t + duration <= o1:
+                # Bloqueio de antecedência mínima se o agendamento for para hoje
+                if d == today_br and t < (now_minutes + MIN_LEAD_TIME_MINUTES):
+                    t += step
+                    continue
+
                 ok = True
                 for b0, b1 in busy:
                     if _intervals_overlap(t, t + duration, b0, b1):

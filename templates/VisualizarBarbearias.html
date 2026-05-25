@@ -1081,6 +1081,7 @@
                         <option value="">Sem ordenação</option>
                         <option value="rating">⭐ Melhor avaliação</option>
                         <option value="distance">📍 Mais próximo</option>
+                        <option value="relevance">🔥 Mais populares</option>
                     </select>
                 </div>
                 
@@ -2272,7 +2273,8 @@
                 if (this.currentFilters.sort_by) {
                     const sortTexts = {
                         'rating': '⭐ Ordenado por: Melhor avaliação',
-                        'distance': '📍 Ordenado por: Mais próximo'
+                        'distance': '📍 Ordenado por: Mais próximo',
+                        'relevance': '🔥 Ordenado por: Mais populares'
                     };
 
                     const indicatorDiv = document.createElement('div');
@@ -2329,6 +2331,8 @@
                         case 'distance':
                             // A distância agora é um número, a conversão não é mais necessária.
                             return (a.distance || 999) - (b.distance || 999); // Mais próximo primeiro
+                        case 'relevance':
+                            return (b.appointment_count || 0) - (a.appointment_count || 0); // Mais populares primeiro
                         default:
                             return 0;
                     }
