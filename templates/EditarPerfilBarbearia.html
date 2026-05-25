@@ -634,6 +634,12 @@
         .password-container input {
             padding-right: 45px;
         }
+
+        /* Hide native password toggle button for various browsers */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-webkit-password-toggle-button {
+            display: none;
+        }
     </style>
 </head>
 <body>
