@@ -1192,7 +1192,7 @@
 
                     <div class="info-section">
                         <h3>📝 Sobre a Barbearia</h3>
-                        <p>${barbearia.description || 'Barbearia tradicional com mais de 10 anos de experiência no mercado. Oferecemos serviços de qualidade com profissionais especializados em cortes modernos e clássicos.'}</p>
+                        <p>${barbearia.description || 'Descrição não disponível.'}</p>
                     </div>
 
                     <div class="info-section">
@@ -1779,14 +1779,7 @@
                     
                     if (data.success) {
                         if (data.slots && data.slots.length > 0) {
-                            // Verificar se é hoje para exibir o aviso de antecedência
-                            const todayStr = this.getMinDate();
-                            let hint = '';
-                            if (date === todayStr) {
-                                hint = '<p style="color: #60a5fa; font-size: 0.85rem; margin-bottom: 12px; width: 100%; text-align: center;">💡 Agendamentos para hoje requerem 2h de antecedência.</p>';
-                            }
-
-                            timeSlots.innerHTML = hint + data.slots.map(time => `
+                            timeSlots.innerHTML = data.slots.map(time => `
                                 <div class="time-slot" onclick="barbeariaDetalhes.selectTime('${time}')">
                                     ${time}
                                 </div>
