@@ -2135,6 +2135,7 @@
                         if (data.barbearias && data.barbearias.length > 0) {
                             console.log('[DEBUG] Exibindo', data.barbearias.length, 'barbearias');
                             console.log('[DEBUG] Nomes das barbearias:', data.barbearias.map(b => b.name));
+                            this.allBarbearias = data.barbearias;
                             this.displayBarbearias(data.barbearias);
                         } else {
                             const searchQuery = this.searchInput.value.trim();
@@ -2489,9 +2490,6 @@
 
             displayBarbearias(barbearias) {
                 console.log('[DEBUG] displayBarbearias chamado com', barbearias?.length, 'barbearias');
-                // Armazenar todas as barbearias para filtragem
-                this.allBarbearias = barbearias;
-
                 if (!barbearias || barbearias.length === 0) {
                     console.log('[DEBUG] Nenhuma barbearia para exibir');
                     this.barbeariasList.innerHTML = `<div class="info-text" style="text-align:center; padding: 40px;">Nenhuma barbearia encontrada com os critérios selecionados. Tente aumentar o raio da busca.</div>`;
