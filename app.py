@@ -376,7 +376,17 @@ class BarbeariasService:
                 item['id'] = str(bid)
                 item['distance'] = dist
                 item['place_id'] = f"db_{bid}"
+                item['appointment_count'] = r['appointment_count'] # Add appointment count
                 results.append(item)
+            
+            # Sorting logic in Python
+            # The user states: "Quando nenhum filtro estava aplicado E nenhuma pesquisa por nome/localização era feita"
+            # This means if `name` is None AND `lat`/`lng` are None, then sort by appointment_count.
+            if name is None and lat is None and lng is None:
+                results.sort(key=lambda x: x.get('appointment_count', 0), reverse=True)
+            elif lat is not None and lng is not None:
+                # If location is provided, sort by distance first, then by appointment count
+                results.sort(key=lambda x: (x.get('distance', float('inf')), -x.get('appointment_count', 0)))
 
             cursor.close()
             conn.close()
