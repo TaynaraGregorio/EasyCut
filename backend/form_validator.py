@@ -45,6 +45,8 @@ class FormValidator:
         nome_completo = form_data.get('nomeCompleto', '').strip()
         if not nome_completo:
             errors.append("Nome completo é obrigatório")
+        elif len(nome_completo) < 3:
+            errors.append("O nome deve ter pelo menos 3 caracteres.")
         elif len(nome_completo.split()) < 2:
             errors.append("Nome completo deve conter pelo menos nome e sobrenome")
         else:
@@ -119,6 +121,8 @@ class FormValidator:
         nome_barbearia = form_data.get('nomeBarbearia', '').strip()
         if not nome_barbearia:
             errors.append("Nome da barbearia é obrigatório")
+        elif len(nome_barbearia) < 3:
+            errors.append("O nome deve ter pelo menos 3 caracteres.")
         else:
             validated_data['nomeBarbearia'] = nome_barbearia
         
@@ -138,6 +142,8 @@ class FormValidator:
         responsavel = form_data.get('responsavel', '').strip()
         if not responsavel:
             errors.append("Nome do responsável é obrigatório")
+        elif len(responsavel) < 3:
+            errors.append("O nome deve ter pelo menos 3 caracteres.")
         elif len(responsavel.split()) < 2:
             errors.append("Nome do responsável deve conter nome e sobrenome")
         else:

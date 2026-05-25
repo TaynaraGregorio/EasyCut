@@ -666,7 +666,9 @@
 
         // Validação de nome completo
         function validateFullName(name) {
-            const nameParts = name.trim().split(' ');
+            const trimmed = name.trim();
+            if (trimmed.length < 3) return false;
+            const nameParts = trimmed.split(' ');
             return nameParts.length >= 2 && nameParts.every(part => part.length > 0);
         }
 
@@ -813,7 +815,10 @@
                         
                         // Validações
                         if (!validateFullName(payload.nome_completo)) {
-                            throw new Error('Por favor, digite seu nome completo (nome e sobrenome).');
+                            const msg = payload.nome_completo.length < 3 
+                                ? 'O nome deve ter pelo menos 3 caracteres.' 
+                                : 'Por favor, digite seu nome completo (nome e sobrenome).';
+                            throw new Error(msg);
                         }
                         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                         if (!emailRegex.test(payload.email)) {
@@ -921,6 +926,10 @@
         // Validação em tempo real do nome
         document.getElementById('nomeCompleto').addEventListener('blur', function(e) {
             if (e.target.value && !validateFullName(e.target.value)) {
+                const msg = e.target.value.trim().length < 3 
+                    ? 'O nome deve ter pelo menos 3 caracteres.' 
+                    : 'Nome inválido.';
+                alert(msg); // O CSS de erro já é aplicado abaixo
                 e.target.style.borderColor = '#ef4444';
                 e.target.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
             } else {

@@ -616,8 +616,9 @@
         }
 
         function validateFullName(nameValue) {
-            if (!nameValue || !nameValue.trim()) return false;
-            return nameValue.trim().split(/\s+/).length >= 2;
+            const trimmed = (nameValue || "").trim();
+            if (trimmed.length < 3) return false;
+            return trimmed.split(/\s+/).length >= 2;
         }
 
         // Verificação de força da senha
@@ -777,13 +778,17 @@
             const cnpjCpf = document.getElementById('cnpjCpf');
             const aceitarTermos = document.getElementById('aceitarTermos');
 
-            if (!nomeBarbearia.value.trim()) {
-                showFieldError(nomeBarbearia, 'Informe o nome da barbearia.');
+            const nbValue = nomeBarbearia.value.trim();
+            if (nbValue.length < 3) {
+                showFieldError(nomeBarbearia, 'O nome deve ter pelo menos 3 caracteres.');
                 hasError = true;
             }
 
             if (!validateFullName(responsavel.value)) {
-                showFieldError(responsavel, 'Digite o nome completo do responsável (nome e sobrenome).');
+                const msg = responsavel.value.trim().length < 3 
+                    ? 'O nome deve ter pelo menos 3 caracteres.' 
+                    : 'Digite o nome completo do responsável (nome e sobrenome).';
+                showFieldError(responsavel, msg);
                 hasError = true;
             }
             

@@ -1510,12 +1510,12 @@
                         const responsavel = document.getElementById('responsavel').value.trim();
                         clearInputErrors('block-basic-info');
                         
-                        if (!nomeBarbearia) {
-                            showInputError('nomeBarbearia', 'O nome da barbearia é obrigatório.');
+                        if (nomeBarbearia.length < 3) {
+                            showInputError('nomeBarbearia', 'O nome deve ter pelo menos 3 caracteres.');
                             throw new Error('Campo obrigatório vazio.');
                         }
-                        if (!responsavel) {
-                            showInputError('responsavel', 'O nome do responsável é obrigatório.');
+                        if (responsavel.length < 3) {
+                            showInputError('responsavel', 'O nome deve ter pelo menos 3 caracteres.');
                             throw new Error('Campo obrigatório vazio.');
                         }
 

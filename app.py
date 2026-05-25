@@ -800,6 +800,9 @@ def update_barbearia(barbearia_id):
 @app.route('/api/clientes', methods=['POST'])
 def register_client():
     data = request.get_json()
+    nome = str(data.get('nomeCompleto', '')).strip()
+    if len(nome) < 3:
+        return jsonify({'success': False, 'message': 'O nome deve ter pelo menos 3 caracteres.'}), 400
     conn = get_db_connection()
     if not conn:
         return jsonify({'success': False, 'message': 'Erro de conexão com o banco de dados.'}), 500
@@ -814,6 +817,12 @@ def register_client():
 @app.route('/api/barbearias', methods=['POST'])
 def register_barbearia():
     data = request.get_json(silent=True)
+    nb = str(data.get('nomeBarbearia', '')).strip()
+    resp = str(data.get('responsavel', '')).strip()
+    
+    if len(nb) < 3 or len(resp) < 3:
+        return jsonify({'success': False, 'message': 'O nome deve ter pelo menos 3 caracteres.'}), 400
+
     if not data:
         return jsonify({'success': False, 'message': 'Dados inválidos ou ausentes.'}), 400
 

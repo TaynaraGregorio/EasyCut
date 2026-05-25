@@ -653,8 +653,9 @@
 
         // Validação de nome completo
         function validateFullName(name) {
-            if (!name) return false;
-            const nameParts = name.trim().split(' ');
+            const trimmed = name.trim();
+            if (trimmed.length < 3) return false;
+            const nameParts = trimmed.split(' ');
             return nameParts.length >= 2 && nameParts.every(part => part.length > 0);
         }
 
@@ -685,7 +686,10 @@
             
             // Validação do nome completo
             if (!validateFullName(nomeCompleto.value)) {
-                showFieldError(nomeCompleto, 'Digite seu nome completo (nome e sobrenome).');
+                const msg = nomeCompleto.value.trim().length < 3 
+                    ? 'O nome deve ter pelo menos 3 caracteres.' 
+                    : 'Digite seu nome completo (nome e sobrenome).';
+                showFieldError(nomeCompleto, msg);
                 hasError = true;
             }
             
@@ -795,7 +799,10 @@
         document.getElementById('nomeCompleto').addEventListener('blur', function(e) {
             clearFieldError(e.target);
             if (e.target.value && !validateFullName(e.target.value)) {
-                showFieldError(e.target, 'Digite seu nome completo (nome e sobrenome).');
+                const msg = e.target.value.trim().length < 3 
+                    ? 'O nome deve ter pelo menos 3 caracteres.' 
+                    : 'Digite seu nome completo (nome e sobrenome).';
+                showFieldError(e.target, msg);
             }
         });
 
