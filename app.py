@@ -335,10 +335,14 @@ class BarbeariasService:
             return None
         try:
             cursor = conn.cursor(dictionary=True)
-            sql = "SELECT * FROM barbearias"
+            sql = """
+                SELECT b.*,
+                       (SELECT COUNT(*) FROM agendamentos a WHERE a.barbearia_id = b.id) AS appointment_count
+                FROM barbearias b
+            """
             params = []
             if name:
-                sql += " WHERE LOWER(nome_barbearia) LIKE LOWER(%s) OR LOWER(cidade) LIKE LOWER(%s)"
+                sql += " WHERE LOWER(b.nome_barbearia) LIKE LOWER(%s) OR LOWER(b.cidade) LIKE LOWER(%s)"
                 term = f"%{name}%"
                 params = [term, term]
 
@@ -376,28 +380,31 @@ class BarbeariasService:
                 item['id'] = str(bid)
                 item['distance'] = dist
                 item['place_id'] = f"db_{bid}"
-                item['appointment_count'] = r['appointment_count'] # Add appointment count
+                item['appointment_count'] = int(r.get('appointment_count') or 0)
                 results.append(item)
-            
-            # Sorting logic in Python
-            # The user states: "Quando nenhum filtro estava aplicado E nenhuma pesquisa por nome/localização era feita"
-            # This means if `name` is None AND `lat`/`lng` are None, then sort by appointment_count.
+
             if name is None and lat is None and lng is None:
                 results.sort(key=lambda x: x.get('appointment_count', 0), reverse=True)
             elif lat is not None and lng is not None:
-                # If location is provided, sort by distance first, then by appointment count
-                results.sort(key=lambda x: (x.get('distance', float('inf')), -x.get('appointment_count', 0)))
+                results.sort(
+                    key=lambda x: (
+                        x.get('distance') if x.get('distance') is not None else float('inf'),
+                        -x.get('appointment_count', 0),
+                    )
+                )
 
             cursor.close()
             conn.close()
             return results
         except Exception as e:
             print(f"[ERRO] find_nearby_barbearias: {e}")
+            import traceback
+            traceback.print_exc()
             try:
                 conn.close()
             except Exception:
                 pass
-            return None
+            raise
 
 # Inicialização de instâncias globais
 barbearias_service = BarbeariasService()
@@ -537,7 +544,17 @@ def get_nearby_barbearias():
     except (TypeError, ValueError):
         radius = 5.0
 
-    results = barbearias_service.find_nearby_barbearias(lat, lng, radius, name=name)
+    try:
+        results = barbearias_service.find_nearby_barbearias(lat, lng, radius, name=name)
+    except Exception as e:
+        print(f"[ERRO] get_nearby_barbearias: {e}")
+        return jsonify({
+            'success': False,
+            'message': 'Erro ao buscar barbearias. Tente novamente em instantes.',
+            'barbearias': [],
+            'total': 0,
+        }), 500
+
     if results is None:
         return jsonify({
             'success': False,
