@@ -893,11 +893,21 @@
                 
                 showBlockStatus(blockId, '✅ Salvo com sucesso!', 'success');
 
+                // Atualizar dados no localStorage para refletir no Dashboard
+                let storageUpdated = false;
+                if (blockId === 'personal-info' && payload.nome_completo) {
+                    currentUser.nome = payload.nome_completo;
+                    localStorage.setItem('userName', payload.nome_completo);
+                    storageUpdated = true;
+                }
                 if (payload.foto_perfil) {
                     currentUser.foto = payload.foto_perfil;
                     currentUser.foto_perfil = payload.foto_perfil;
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
                     newProfileImageBase64 = null;
+                    storageUpdated = true;
+                }
+                if (storageUpdated) {
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
                 }
                 
                 // Atualizar originalData com os novos valores
