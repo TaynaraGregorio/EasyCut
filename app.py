@@ -684,7 +684,7 @@ def change_password_cliente(cliente_id):
     return jsonify({'success': True, 'message': 'Senha alterada.'})
 
 _BARBEARIA_PUT_FIELDS = frozenset({
-    'nome_barbearia', 'nome_responsavel', 'foto_perfil', 'whatsapp', 'telefone_fixo',
+    'nome_barbearia', 'nome_responsavel', 'email', 'foto_perfil', 'whatsapp', 'telefone_fixo',
     'instagram', 'facebook', 'website', 'descricao', 'cep', 'logradouro', 'numero',
     'complemento', 'bairro', 'cidade', 'estado', 'ponto_referencia', 'latitude', 'longitude',
     'quantidade_barbeiros',
@@ -822,6 +822,41 @@ def update_barbearia(barbearia_id):
         cursor.close()
         conn.close()
         return jsonify({'success': False, 'message': str(e)}), 400
+
+@app.route('/api/barbearias/<int:barbearia_id>/change-password', methods=['PUT'])
+def change_password_barbearia(barbearia_id):
+    """Endpoint exclusivo para alteração de senha da barbearia"""
+    data = request.get_json() or {}
+    atual = data.get('senha_atual')
+    nova = data.get('nova_senha')
+
+    if not atual or not nova:
+        return jsonify({'success': False, 'message': 'Senha atual e nova senha são obrigatórias.'}), 400
+    
+    if len(nova) < 8:
+        return jsonify({'success': False, 'message': 'A nova senha deve ter pelo menos 8 caracteres.'}), 400
+
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False, 'message': 'Erro de conexão com o banco.'}), 500
+        
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute('SELECT senha_hash FROM barbearias WHERE id = %s', (barbearia_id,))
+        row = cursor.fetchone()
+        if not row:
+            return jsonify({'success': False, 'message': 'Barbearia não encontrada.'}), 404
+        if row['senha_hash'] != atual:
+            return jsonify({'success': False, 'message': 'A senha atual está incorreta.'}), 401
+        
+        cursor.execute('UPDATE barbearias SET senha_hash = %s WHERE id = %s', (nova, barbearia_id))
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Senha alterada com sucesso!'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Erro ao processar: {str(e)}'}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 # --- REGISTRO E ATUALIZAÇÃO ---
 @app.route('/api/clientes', methods=['POST'])
