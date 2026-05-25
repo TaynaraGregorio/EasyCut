@@ -346,6 +346,17 @@
             font-style: italic;
         }
         
+        .field-error-msg {
+            color: #ef4444;
+            font-size: 0.85rem;
+            margin-top: 4px;
+            display: none;
+        }
+        input.input-error, textarea.input-error {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+        }
+
         .success-message {
             background: rgba(16, 185, 129, 0.1);
             border: 1px solid rgba(16, 185, 129, 0.3);
@@ -1107,6 +1118,29 @@
             }, 5000);
         }
 
+        function showInputError(inputId, message) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            input.classList.add('input-error');
+            let errorMsg = input.parentElement.querySelector('.field-error-msg');
+            if (!errorMsg) {
+                errorMsg = document.createElement('div');
+                errorMsg.className = 'field-error-msg';
+                const infoText = input.parentElement.querySelector('.info-text');
+                if (infoText) input.parentElement.insertBefore(errorMsg, infoText);
+                else input.parentElement.appendChild(errorMsg);
+            }
+            errorMsg.textContent = message;
+            errorMsg.style.display = 'block';
+        }
+
+        function clearInputErrors(blockId) {
+            const block = document.getElementById(blockId);
+            if (!block) return;
+            block.querySelectorAll('.input-error').forEach(i => i.classList.remove('input-error'));
+            block.querySelectorAll('.field-error-msg').forEach(m => m.style.display = 'none');
+        }
+
         // Carregar dados do usuário
         async function loadUserData() {
             const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
@@ -1472,10 +1506,22 @@
                 
                 switch (blockId) {
                     case 'basic-info':
+                        const nomeBarbearia = document.getElementById('nomeBarbearia').value.trim();
+                        const responsavel = document.getElementById('responsavel').value.trim();
+                        clearInputErrors('block-basic-info');
+                        
+                        if (!nomeBarbearia) {
+                            showInputError('nomeBarbearia', 'O nome da barbearia é obrigatório.');
+                            throw new Error('Campo obrigatório vazio.');
+                        }
+                        if (!responsavel) {
+                            showInputError('responsavel', 'O nome do responsável é obrigatório.');
+                            throw new Error('Campo obrigatório vazio.');
+                        }
+
                         payload = {
-                            nome_barbearia: document.getElementById('nomeBarbearia').value,
-                            nome_responsavel: document.getElementById('responsavel').value
-                            // cnpj_cpf não é atualizável
+                            nome_barbearia: nomeBarbearia,
+                            nome_responsavel: responsavel
                         };
                         
                         if (newProfileImageBase64) {
@@ -1489,8 +1535,23 @@
                         break;
                         
                     case 'contacts':
+                        const emailValue = document.getElementById('email').value.trim();
+                        const whatsappValue = document.getElementById('whatsapp').value.trim();
+                        clearInputErrors('block-contacts');
+
+                        if (!emailValue) {
+                            showInputError('email', 'O e-mail é obrigatório.');
+                            throw new Error('Campo obrigatório vazio.');
+                        }
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(emailValue)) {
+                            showInputError('email', 'Por favor, insira um e-mail válido.');
+                            throw new Error('E-mail inválido.');
+                        }
+
                         payload = {
-                            whatsapp: document.getElementById('whatsapp').value,
+                            email: emailValue,
+                            whatsapp: whatsappValue,
                             telefone_fixo: document.getElementById('phone').value,
                             instagram: document.getElementById('instagram').value,
                             facebook: document.getElementById('facebook').value,
@@ -1498,7 +1559,7 @@
                         };
                         
                         // Validação específica
-                        if (!validatePhoneInput(document.getElementById('whatsapp'))) {
+                        if (whatsappValue && !validatePhoneInput(document.getElementById('whatsapp'))) {
                             throw new Error('WhatsApp inválido');
                         }
                         if (payload.telefone_fixo && !validatePhoneInput(document.getElementById('phone'))) {
@@ -1556,7 +1617,44 @@
                         return; // Retorno antecipado pois a lógica é diferente dos outros blocos
                         
                     case 'security':
-                        throw new Error('Alteração de senha não suportada pelo servidor ainda.');
+                        const senhaAtual = document.getElementById('senhaAtual').value;
+                        const novaSenha = document.getElementById('novaSenha').value;
+                        const confirmarNovaSenha = document.getElementById('confirmarNovaSenha').value;
+                        clearInputErrors('block-security');
+
+                        if (!novaSenha && !confirmarNovaSenha) {
+                            showBlockStatus(blockId, 'ℹ️ Nenhuma alteração para salvar.', 'success');
+                            setButtonLoading(button, false);
+                            return;
+                        }
+                        if (!senhaAtual) {
+                            showInputError('senhaAtual', 'A senha atual é obrigatória.');
+                            throw new Error('Senha atual obrigatória.');
+                        }
+                        if (novaSenha.length < 8) {
+                            showInputError('novaSenha', 'A nova senha deve ter pelo menos 8 caracteres.');
+                            throw new Error('Senha muito curta.');
+                        }
+                        if (novaSenha !== confirmarNovaSenha) {
+                            showInputError('confirmarNovaSenha', 'As senhas não coincidem.');
+                            throw new Error('Senhas não coincidem.');
+                        }
+
+                        const secRes = await fetch(`${API_BASE_URL}/barbearias/${currentUser.id}/change-password`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ senha_atual: senhaAtual, nova_senha: novaSenha })
+                        });
+                        const secData = await secRes.json();
+                        if (!secData.success) throw new Error(secData.message);
+
+                        document.getElementById('senhaAtual').value = '';
+                        document.getElementById('novaSenha').value = '';
+                        document.getElementById('confirmarNovaSenha').value = '';
+                        showBlockStatus(blockId, '✅ Senha alterada com sucesso!', 'success');
+                        setButtonLoading(button, false);
+                        checkBlockChanges();
+                        return;
                 }
                 
                 const response = await fetch(`${API_BASE_URL}/barbearias/${currentUser.id}`, {

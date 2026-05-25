@@ -756,6 +756,14 @@ def update_barbearia(barbearia_id):
         cursor.close()
         conn.close()
         return jsonify({'success': False, 'message': 'Barbearia não encontrada.'}), 404
+    
+    new_email = data.get('email')
+    if new_email and new_email != row['email']:
+        cursor.execute('SELECT id FROM barbearias WHERE email = %s AND id != %s', (new_email, barbearia_id))
+        if cursor.fetchone():
+            cursor.close(); conn.close()
+            return jsonify({'success': False, 'message': 'Este e-mail já está em uso por outra barbearia.'}), 400
+
     merged = dict(row)
     for k, v in data.items():
         if k in _BARBEARIA_PUT_FIELDS:
