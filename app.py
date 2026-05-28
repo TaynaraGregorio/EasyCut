@@ -254,6 +254,12 @@ def init_db():
             except Exception:
                 pass
 
+            try:
+                cursor.execute('ALTER TABLE agendamentos ADD COLUMN duracao_total INT DEFAULT 30 AFTER horario_inicio')
+                conn.commit()
+            except Exception:
+                pass
+
             print("[OK] Tabelas do banco de dados verificadas/criadas.")
             conn.commit()
     except Exception as e:

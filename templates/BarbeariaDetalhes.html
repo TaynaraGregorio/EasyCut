@@ -1882,6 +1882,7 @@
                 }
 
                 const totalPrice = this.calculateTotalPrice();
+                const totalDuration = this.calculateTotalDuration();
                 const payload = {
                     cliente_id: parseInt(currentUser.id, 10),
                     barbearia_id: parseInt(this.barbeariaId, 10),
@@ -1889,6 +1890,7 @@
                     data_agendamento: this.selectedDate,
                     horario_inicio: this.selectedTime,
                     valor_total: totalPrice,
+                    duracao_total: totalDuration,
                     observacoes: this.selectedServices.join(', ')
                 };
 

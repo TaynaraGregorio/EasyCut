@@ -497,13 +497,16 @@ def register_extended_api(app: Flask) -> None:
                     t += step
                     continue
 
-                # 3. Lógica de Capacidade Múltipla:
-                # Conta quantos agendamentos concorrentes existem no intervalo [t, t + duration]
-                overlapping_count = sum(1 for b0, b1 in busy if _intervals_overlap(t, t + duration, b0, b1))
-                
-                # O horário está disponível se o total de ocupações for menor que o número de barbeiros
+                # 3. Lógica de Slots Concorrentes:
+                # Verifica quantos agendamentos existentes conflitam com o intervalo [t, t + duration]
+                conflicts = [b for b in busy if _intervals_overlap(t, t + duration, b[0], b[1])]
+                overlapping_count = len(conflicts)
+
                 if overlapping_count < capacity:
                     slots_out.append(_minutes_to_time(t))
+                else:
+                    # print(f"  X Slot {_minutes_to_time(t)} bloqueado: {overlapping_count}/{capacity} ocupados")
+                    pass
                 else:
                     # Log para monitorar bloqueios por excesso de agendamentos
                     # print(f"[DEBUG] Slot {_minutes_to_time(t)} BLOQUEADO: {overlapping_count} ocupados para {capacity} barbeiros")
@@ -513,6 +516,7 @@ def register_extended_api(app: Flask) -> None:
 
         cur.close()
         conn.close()
+        print(f"  > Resultado: {len(slots_out)} slots disponíveis retornados.")
         return jsonify({"success": True, "slots": slots_out})
 
     @app.route("/api/agendamentos", methods=["POST"])
@@ -535,15 +539,16 @@ def register_extended_api(app: Flask) -> None:
         cur = conn.cursor()
         try:
             cur.execute(
-                """INSERT INTO agendamentos
-                   (cliente_id, barbearia_id, servico_id, data_agendamento, horario_inicio, status, valor_total, observacoes)
-                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",
+                """INSERT INTO agendamentos 
+                   (cliente_id, barbearia_id, servico_id, data_agendamento, horario_inicio, duracao_total, status, valor_total, observacoes)
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                 (
                     int(data["cliente_id"]),
                     int(data["barbearia_id"]),
                     int(data["servico_id"]),
                     data["data_agendamento"],
                     data["horario_inicio"],
+                    int(data.get("duracao_total", 30)),
                     "pendente",
                     data.get("valor_total"),
                     data.get("observacoes"),
