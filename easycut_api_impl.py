@@ -438,6 +438,12 @@ def register_extended_api(app: Flask) -> None:
         if not conn:
             return jsonify({"success": False, "message": "Erro DB"}), 500
         cur = conn.cursor(dictionary=True)
+
+        # 1. Busca a capacidade real da barbearia (quantidade de barbeiros configurada)
+        cur.execute("SELECT quantidade_barbeiros FROM barbearias WHERE id = %s", (barbearia_id,))
+        b_info = cur.fetchone()
+        capacity = int(b_info["quantidade_barbeiros"]) if b_info and b_info.get("quantidade_barbeiros") else 1
+
         day_key = _weekday_key(d)
         cur.execute(
             "SELECT status FROM horarios_status WHERE barbearia_id = %s AND dia_semana = %s",
@@ -459,9 +465,11 @@ def register_extended_api(app: Flask) -> None:
             conn.close()
             return jsonify({"success": True, "slots": [], "message": "Sem horários configurados"})
 
+        # 2. Busca agendamentos com JOIN para obter a duração, essencial para calcular sobreposições
         cur.execute(
-            """SELECT a.horario_inicio, a.servico_id, a.status
+            """SELECT a.horario_inicio, s.duracao_minutos, a.status
                FROM agendamentos a
+               JOIN servicos s ON a.servico_id = s.id
                WHERE a.barbearia_id = %s AND a.data_agendamento = %s
                AND LOWER(a.status) NOT IN ('cancelado','cancelled')""",
             (barbearia_id, date_str),
@@ -471,8 +479,11 @@ def register_extended_api(app: Flask) -> None:
         for br in busy_rows:
             hm = _as_hhmm(br["horario_inicio"])
             t0 = _time_to_minutes(hm)
-            dur = _appointment_duration_minutes(cur, int(br["servico_id"]))
+            dur = int(br["duracao_minutos"] or 30)
             busy.append((t0, t0 + dur))
+
+        print(f"[DEBUG] Disponibilidade | Barbearia: {barbearia_id} | Data: {date_str} | "
+              f"Capacidade: {capacity} barbeiros | Agendamentos existentes: {len(busy)}")
 
         slots_out: List[str] = []
         step = 30
@@ -486,13 +497,18 @@ def register_extended_api(app: Flask) -> None:
                     t += step
                     continue
 
-                ok = True
-                for b0, b1 in busy:
-                    if _intervals_overlap(t, t + duration, b0, b1):
-                        ok = False
-                        break
-                if ok:
+                # 3. Lógica de Capacidade Múltipla:
+                # Conta quantos agendamentos concorrentes existem no intervalo [t, t + duration]
+                overlapping_count = sum(1 for b0, b1 in busy if _intervals_overlap(t, t + duration, b0, b1))
+                
+                # O horário está disponível se o total de ocupações for menor que o número de barbeiros
+                if overlapping_count < capacity:
                     slots_out.append(_minutes_to_time(t))
+                else:
+                    # Log para monitorar bloqueios por excesso de agendamentos
+                    # print(f"[DEBUG] Slot {_minutes_to_time(t)} BLOQUEADO: {overlapping_count} ocupados para {capacity} barbeiros")
+                    pass
+
                 t += step
 
         cur.close()
