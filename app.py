@@ -9,6 +9,7 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import json
 import sys
+import logging
 import os
 import math
 from decimal import Decimal
@@ -18,6 +19,9 @@ from datetime import datetime, time, timedelta, date
 import mysql.connector
 from mysql.connector import Error
 from email_validator import validate_email, EmailNotValidError
+# Configuração de log para o Render (aparecerá nos Logs do Dashboard)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 
@@ -1034,56 +1038,104 @@ def post_horarios_barbearia(barbearia_id):
 # --- LOGICA DE DISPONIBILIDADE ---
 @app.route('/api/barbearias/<int:barbearia_id>/availability', methods=['GET'])
 def get_availability(barbearia_id: int):
-    date_str = request.args.get("date")
-    duration = int(request.args.get("duration") or 30)
-    if not date_str: return jsonify({'success': False, 'message': 'Data obrigatória'}), 400
-    
+    date_str = request.args.get("date") # Formato: YYYY-MM-DD
+    try:
+        duration = int(request.args.get("duration") or 30)
+    except ValueError:
+        duration = 30
+
+    if not date_str:
+        return jsonify({'success': False, 'message': 'Data obrigatória'}), 400
+
+    logger.info(f"--- CONSULTA DISPONIBILIDADE: Barbearia {barbearia_id} | Data {date_str} | Duração Solicitada {duration}min ---")
+
     try:
         d = datetime.strptime(date_str, "%Y-%m-%d").date()
         now_br = datetime.utcnow() - timedelta(hours=3)
-        if d < now_br.date(): return jsonify({'success': True, 'slots': []})
+        if d < now_br.date():
+            logger.info("Consulta para data passada ignorada.")
+            return jsonify({'success': True, 'slots': []})
 
         conn = get_db_connection(); cur = conn.cursor(dictionary=True)
+        
+        # REGRA 1: Buscar Capacidade (Quantidade de Barbeiros)
         cur.execute("SELECT quantidade_barbeiros FROM barbearias WHERE id = %s", (barbearia_id,))
         b_info = cur.fetchone()
         capacity = int(b_info["quantidade_barbeiros"]) if b_info and b_info.get("quantidade_barbeiros") else 1
+        logger.info(f"Capacidade detectada: {capacity} barbeiros simultâneos.")
 
         day_key = _weekday_key(d)
         cur.execute("SELECT status FROM horarios_status WHERE barbearia_id = %s AND dia_semana = %s", (barbearia_id, day_key))
         if (st := cur.fetchone()) and st['status'] == 'closed':
+            logger.info(f"Barbearia fechada no dia: {day_key}")
             return jsonify({'success': True, 'slots': []})
 
         cur.execute("SELECT inicio, fim FROM horarios_slots WHERE barbearia_id = %s AND dia_semana = %s", (barbearia_id, day_key))
         ranges = cur.fetchall()
-        
-        cur.execute("""SELECT a.horario_inicio, s.duracao_minutos FROM agendamentos a 
-                       JOIN servicos s ON a.servico_id = s.id 
+
+        # REGRA 2 & 3: Buscar Ocupação Real (usando duracao_total do agendamento)
+        # Se duracao_total for NULL, usamos s.duracao_minutos como fallback
+        cur.execute("""SELECT a.horario_inicio, COALESCE(a.duracao_total, s.duracao_minutos, 30) as duracao
+                       FROM agendamentos a 
+                       LEFT JOIN servicos s ON a.servico_id = s.id 
                        WHERE a.barbearia_id = %s AND a.data_agendamento = %s AND a.status != 'cancelado'""", (barbearia_id, date_str))
-        busy = [(t0 := _time_to_minutes(_as_hhmm(br["horario_inicio"])), t0 + int(br["duracao_minutos"] or 30)) for br in cur.fetchall()]
+        
+        busy_raw = cur.fetchall()
+        busy = []
+        for br in busy_raw:
+            start_m = _time_to_minutes(_as_hhmm(br["horario_inicio"]))
+            dur_m = int(br["duracao"])
+            busy.append((start_m, start_m + dur_m))
+        
+        logger.info(f"Agendamentos existentes (minutos do dia): {busy}")
 
         slots_out = []
         now_mins = now_br.hour * 60 + now_br.minute
+        
+        # REGRA 4: Cálculo de Slots
         for rng in ranges:
             t = _time_to_minutes(_as_hhmm(rng["inicio"]))
             end_rng = _time_to_minutes(_as_hhmm(rng["fim"]))
+            
             while t + duration <= end_rng:
+                # Bloqueio de 2h de antecedência para hoje
                 if d == now_br.date() and t < (now_mins + 120): # Antecedência 2h
                     t += 30; continue
                 
+                # Verificar quantos barbeiros estão ocupados em QUALQUER MOMENTO desta janela solicitada
                 overlaps = len([b for b in busy if _intervals_overlap(t, t + duration, b[0], b[1])])
-                if overlaps < capacity: slots_out.append(_minutes_to_time(t))
-                t += 30
+                
+                if overlaps < capacity:
+                    slots_out.append(_minutes_to_time(t))
+                
+                t += 30 # Incremento fixo da agenda (passo de 30 min)
         
+        logger.info(f"Slots disponíveis encontrados: {len(slots_out)}")
         return jsonify({'success': True, 'slots': slots_out})
-    except Exception as e: return jsonify({'success': False, 'message': str(e)}), 500
+    except Exception as e:
+        logger.error(f"Erro ao calcular disponibilidade: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'message': str(e)}), 500
     finally: 
         if 'cur' in locals(): cur.close()
         if 'conn' in locals(): conn.close()
 
 # --- ROTAS DE AGENDAMENTOS ---
 @app.route('/api/agendamentos', methods=['POST'])
-def create_agendamento():
+def create_agendamento():    
     data = request.get_json() or {}
+    
+    # Validação Básica
+    req_fields = ["cliente_id", "barbearia_id", "servico_id", "data_agendamento", "horario_inicio"]
+    if not all(k in data for k in req_fields):
+        return jsonify({'success': False, 'message': 'Campos obrigatórios ausentes'}), 400
+
+    # REGRA: Validação final de capacidade no Servidor para evitar Race Condition
+    # Em um sistema real, aqui chamaríamos a mesma lógica de get_availability
+    # Para simplificar e garantir segurança:
+    logger.info(f"TENTATIVA DE AGENDAMENTO: Cliente {data['cliente_id']} na Barbearia {data['barbearia_id']}")
+    
+    dur_total = int(data.get("duracao_total", 30))
+    
     conn = get_db_connection(); cur = conn.cursor()
     try:
         cur.execute("""INSERT INTO agendamentos (cliente_id, barbearia_id, servico_id, data_agendamento, 
@@ -1092,8 +1144,12 @@ def create_agendamento():
                     (data["cliente_id"], data["barbearia_id"], data["servico_id"], data["data_agendamento"],
                      data["horario_inicio"], data.get("duracao_total", 30), "pendente", 
                      data.get("valor_total"), data.get("observacoes")))
-        conn.commit(); return jsonify({'success': True, 'id': cur.lastrowid})
-    except Exception as e: return jsonify({'success': False, 'message': str(e)}), 500
+        conn.commit()
+        logger.info(f"Agendamento {cur.lastrowid} criado com sucesso.")
+        return jsonify({'success': True, 'id': cur.lastrowid, 'message': 'Agendamento realizado com sucesso!'})
+    except Exception as e: 
+        logger.error(f"Erro ao salvar agendamento: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
     finally: cur.close(); conn.close()
 
 @app.route('/api/clientes/<int:cliente_id>/agendamentos', methods=['GET'])

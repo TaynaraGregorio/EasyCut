@@ -1743,13 +1743,13 @@
                     const service = this.barbeariaServicos.find(s => s.name === serviceName);
                     
                     if (service && service.duration) {
-                        totalDuration += service.duration;
+                        totalDuration += parseInt(service.duration);
                     } else {
                         // Fallback: tentar estimar ou usar padrão de 30 min
                         totalDuration += 30;
                     }
                 });
-                
+                console.log("[DEBUG] Duração Total Calculada:", totalDuration);
                 return totalDuration;
             }
 
