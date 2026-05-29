@@ -11,16 +11,15 @@ import json
 import sys
 import os
 import math
-from typing import Dict, List, Any, Optional
+from decimal import Decimal
+from typing import Dict, List, Any, Optional, Callable, Tuple
 from dataclasses import dataclass, asdict, replace
-from datetime import datetime, time, timedelta
+from datetime import datetime, time, timedelta, date
 import mysql.connector
 from mysql.connector import Error
 from email_validator import validate_email, EmailNotValidError
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
-
-from easycut_api_impl import register_extended_api, serialize_barbearia_for_template
 
 # --- AJUSTE DE PATH PARA DEPLOY (Render/Railway) ---
 # Adiciona o diretório 'backend' ao sys.path para que as importações funcionem corretamente
@@ -307,6 +306,107 @@ def _geocode_address(data):
         if location: return location.latitude, location.longitude
     except Exception: pass
     return None, None
+
+# --- UTILITÁRIOS DE SERIALIZAÇÃO E TEMPO (MIGRADOS) ---
+def _json_safe(v: Any) -> Any:
+    if isinstance(v, Decimal): return float(v)
+    if isinstance(v, (datetime, date)): return v.isoformat()
+    if isinstance(v, timedelta):
+        total = int(v.total_seconds())
+        return f"{total // 3600:02d}:{(total % 3600) // 60:02d}"
+    if isinstance(v, bytes): return v.decode("utf-8", errors="replace")
+    return v
+
+def _as_hhmm(val: Any) -> str:
+    if val is None: return "00:00"
+    if isinstance(val, timedelta):
+        total = int(val.total_seconds()) % 86400
+        return f"{total // 3600:02d}:{(total % 3600) // 60:02d}"
+    s = str(val)
+    return s[:5] if len(s) >= 5 else s
+
+def _time_to_minutes(hhmm: str) -> int:
+    parts = hhmm.split(":")
+    return int(parts[0]) * 60 + int(parts[1])
+
+def _minutes_to_time(m: int) -> str:
+    m = max(0, m) % (24 * 60)
+    return f"{m // 60:02d}:{m % 60:02d}"
+
+def _weekday_key(d: date) -> str:
+    return ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"][d.weekday()]
+
+def db_status_to_api(s: Optional[str]) -> str:
+    m = {"pendente": "pending", "confirmado": "confirmed", "cancelado": "cancelled", "concluido": "completed"}
+    return m.get(str(s or "").lower().strip(), "pending")
+
+def api_status_to_db(s: str) -> str:
+    m = {"pending": "pendente", "confirmed": "confirmado", "cancelled": "cancelado", "completed": "concluido"}
+    return m.get(str(s or "").lower().strip(), "pendente")
+
+def servico_db_status_to_api(status: Optional[str]) -> str:
+    return "active" if str(status or "").lower() in ("ativo", "active") else "inactive"
+
+def servico_api_status_to_db(status: Optional[str]) -> str:
+    return "ativo" if (status or "active").lower() in ("active", "ativo") else "inativo"
+
+def format_barbearia_address(row: Dict[str, Any]) -> str:
+    parts = [row.get("logradouro"), row.get("numero"), row.get("bairro"), row.get("cidade"), row.get("estado")]
+    return ", ".join(str(p) for p in parts if p)
+
+def serialize_barbearia_for_template(cursor, row: Dict[str, Any], barbearia_id: int, fetch_hours_fn) -> Dict[str, Any]:
+    out = {k: _json_safe(v) for k, v in row.items()}
+    out["name"] = row.get("nome_barbearia") or ""
+    out["address"] = format_barbearia_address(row)
+    out["phone"] = row.get("whatsapp") or row.get("telefone_fixo") or ""
+    out["description"] = row.get("descricao") or ""
+    out["opening_hours"] = fetch_hours_fn(cursor, barbearia_id)
+    
+    cursor.execute("SELECT nome_servico FROM servicos WHERE barbearia_id = %s AND status = 'ativo'", (barbearia_id,))
+    out["services"] = [r['nome_servico'] if isinstance(r, dict) else r[0] for r in cursor.fetchall()]
+    
+    photos = [str(row["foto_perfil"])] if row.get("foto_perfil") else []
+    cursor.execute("SELECT foto FROM barbearia_fotos WHERE barbearia_id = %s LIMIT 20", (barbearia_id,))
+    for r in cursor.fetchall():
+        f = r['foto'] if isinstance(r, dict) else r[0]
+        if f and str(f) not in photos: photos.append(str(f))
+    out["photos"] = photos
+
+    cursor.execute("SELECT AVG(avaliacao_nota) FROM agendamentos WHERE barbearia_id = %s AND avaliacao_nota IS NOT NULL", (barbearia_id,))
+    avg_row = cursor.fetchone()
+    res = avg_row['AVG(avaliacao_nota)'] if isinstance(avg_row, dict) else (avg_row[0] if avg_row else None)
+    out["rating"] = float(res) if res is not None else 5.0
+    out["price_level"] = 2
+    return out
+
+# --- HELPERS DE AGENDAMENTO ---
+def _intervals_overlap(a0: int, a1: int, b0: int, b1: int) -> bool:
+    return a0 < b1 and b0 < a1
+
+def _serialize_review_row(r: Dict[str, Any], for_barber: bool) -> Dict[str, Any]:
+    nome = r.get("nome_cliente") or "Cliente"
+    base = {
+        "id": r["id"],
+        "clientName": nome,
+        "clientInitial": (nome[0] or "?").upper(),
+        "service": r.get("nome_servico") or "",
+        "text": r.get("avaliacao_comentario") or "",
+        "rating": int(float(r["avaliacao_nota"])) if r.get("avaliacao_nota") is not None else 0,
+        "date": str(r.get("data_agendamento") or "")[:10],
+        "hasResponse": bool(r.get("resposta_barbearia")),
+        "response": r.get("resposta_barbearia"),
+        "responseDate": r.get("data_resposta"),
+    }
+    if not for_barber:
+        return {
+            "clientName": base["clientName"],
+            "rating": base["rating"],
+            "text": base["text"],
+            "hasResponse": base["hasResponse"],
+            "response": base["response"],
+            "responseDate": base["responseDate"],
+        }
+    return base
 
 # --- MODELOS E SERVIÇOS ---
 @dataclass
@@ -864,6 +964,235 @@ def change_password_barbearia(barbearia_id):
         cursor.close()
         conn.close()
 
+# --- ROTAS DE SERVIÇOS ---
+@app.route('/api/barbearias/<int:barbearia_id>/servicos', methods=['GET'])
+def list_servicos_barbearia(barbearia_id):
+    conn = get_db_connection()
+    if not conn: return jsonify({'success': False}), 500
+    cur = conn.cursor(dictionary=True)
+    cur.execute("SELECT * FROM servicos WHERE barbearia_id = %s", (barbearia_id,))
+    rows = cur.fetchall()
+    cur.close(); conn.close()
+    servicos = [{
+        "id": r["id"], "name": r["nome_servico"], "price": float(r["preco"] or 0),
+        "duration": int(r["duracao_minutos"] or 30), "category": r.get("categoria") or "",
+        "description": r.get("descricao") or "", "status": servico_db_status_to_api(r.get("status"))
+    } for r in rows]
+    return jsonify({'success': True, 'servicos': servicos})
+
+@app.route('/api/barbearias/<int:barbearia_id>/servicos', methods=['POST'])
+def create_servico_barbearia(barbearia_id):
+    data = request.get_json() or {}
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""INSERT INTO servicos (barbearia_id, nome_servico, preco, duracao_minutos, categoria, descricao, status)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s)""",
+                    (barbearia_id, data.get("name"), data.get("price"), data.get("duration"), 
+                     data.get("category"), data.get("description"), servico_api_status_to_db(data.get("status"))))
+        conn.commit(); nid = cur.lastrowid
+        return jsonify({'success': True, 'id': nid})
+    except Exception as e: return jsonify({'success': False, 'message': str(e)}), 400
+    finally: cur.close(); conn.close()
+
+# --- ROTAS DE HORÁRIOS ---
+@app.route('/api/barbearias/<int:barbearia_id>/horarios', methods=['GET'])
+def get_horarios_barbearia(barbearia_id):
+    conn = get_db_connection()
+    cur = conn.cursor(dictionary=True)
+    cur.execute("SELECT dia_semana, status FROM horarios_status WHERE barbearia_id = %s", (barbearia_id,))
+    status_map = {r["dia_semana"]: r["status"] for r in cur.fetchall()}
+    cur.execute("SELECT id, dia_semana, inicio, fim FROM horarios_slots WHERE barbearia_id = %s", (barbearia_id,))
+    slots_rows = cur.fetchall()
+    cur.close(); conn.close()
+    schedule = {day: {"status": status_map.get(day, "closed"), "slots": []} 
+                for day in ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]}
+    for r in slots_rows:
+        if r["dia_semana"] in schedule:
+            schedule[r["dia_semana"]]["slots"].append({"id": r["id"], "start": _as_hhmm(r["inicio"]), "end": _as_hhmm(r["fim"])})
+    return jsonify({'success': True, 'schedule': schedule})
+
+@app.route('/api/barbearias/<int:barbearia_id>/horarios', methods=['POST'])
+def post_horarios_barbearia(barbearia_id):
+    data = request.get_json() or {}
+    schedule = data.get("schedule") or {}
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("DELETE FROM horarios_slots WHERE barbearia_id = %s", (barbearia_id,))
+        cur.execute("DELETE FROM horarios_status WHERE barbearia_id = %s", (barbearia_id,))
+        for day, block in schedule.items():
+            st = block.get("status", "closed")
+            cur.execute("INSERT INTO horarios_status (barbearia_id, dia_semana, status) VALUES (%s,%s,%s)", (barbearia_id, day, st))
+            if st == "open":
+                for slot in block.get("slots", []):
+                    cur.execute("INSERT INTO horarios_slots (barbearia_id, dia_semana, inicio, fim) VALUES (%s,%s,%s,%s)",
+                                (barbearia_id, day, slot.get("start"), slot.get("end")))
+        conn.commit(); return jsonify({'success': True})
+    except Exception as e: return jsonify({'success': False, 'message': str(e)}), 400
+    finally: cur.close(); conn.close()
+
+# --- LOGICA DE DISPONIBILIDADE ---
+@app.route('/api/barbearias/<int:barbearia_id>/availability', methods=['GET'])
+def get_availability(barbearia_id: int):
+    date_str = request.args.get("date")
+    duration = int(request.args.get("duration") or 30)
+    if not date_str: return jsonify({'success': False, 'message': 'Data obrigatória'}), 400
+    
+    try:
+        d = datetime.strptime(date_str, "%Y-%m-%d").date()
+        now_br = datetime.utcnow() - timedelta(hours=3)
+        if d < now_br.date(): return jsonify({'success': True, 'slots': []})
+
+        conn = get_db_connection(); cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT quantidade_barbeiros FROM barbearias WHERE id = %s", (barbearia_id,))
+        b_info = cur.fetchone()
+        capacity = int(b_info["quantidade_barbeiros"]) if b_info and b_info.get("quantidade_barbeiros") else 1
+
+        day_key = _weekday_key(d)
+        cur.execute("SELECT status FROM horarios_status WHERE barbearia_id = %s AND dia_semana = %s", (barbearia_id, day_key))
+        if (st := cur.fetchone()) and st['status'] == 'closed':
+            return jsonify({'success': True, 'slots': []})
+
+        cur.execute("SELECT inicio, fim FROM horarios_slots WHERE barbearia_id = %s AND dia_semana = %s", (barbearia_id, day_key))
+        ranges = cur.fetchall()
+        
+        cur.execute("""SELECT a.horario_inicio, s.duracao_minutos FROM agendamentos a 
+                       JOIN servicos s ON a.servico_id = s.id 
+                       WHERE a.barbearia_id = %s AND a.data_agendamento = %s AND a.status != 'cancelado'""", (barbearia_id, date_str))
+        busy = [(t0 := _time_to_minutes(_as_hhmm(br["horario_inicio"])), t0 + int(br["duracao_minutos"] or 30)) for br in cur.fetchall()]
+
+        slots_out = []
+        now_mins = now_br.hour * 60 + now_br.minute
+        for rng in ranges:
+            t = _time_to_minutes(_as_hhmm(rng["inicio"]))
+            end_rng = _time_to_minutes(_as_hhmm(rng["fim"]))
+            while t + duration <= end_rng:
+                if d == now_br.date() and t < (now_mins + 120): # Antecedência 2h
+                    t += 30; continue
+                
+                overlaps = len([b for b in busy if _intervals_overlap(t, t + duration, b[0], b[1])])
+                if overlaps < capacity: slots_out.append(_minutes_to_time(t))
+                t += 30
+        
+        return jsonify({'success': True, 'slots': slots_out})
+    except Exception as e: return jsonify({'success': False, 'message': str(e)}), 500
+    finally: 
+        if 'cur' in locals(): cur.close()
+        if 'conn' in locals(): conn.close()
+
+# --- ROTAS DE AGENDAMENTOS ---
+@app.route('/api/agendamentos', methods=['POST'])
+def create_agendamento():
+    data = request.get_json() or {}
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("""INSERT INTO agendamentos (cliente_id, barbearia_id, servico_id, data_agendamento, 
+                       horario_inicio, duracao_total, status, valor_total, observacoes)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                    (data["cliente_id"], data["barbearia_id"], data["servico_id"], data["data_agendamento"],
+                     data["horario_inicio"], data.get("duracao_total", 30), "pendente", 
+                     data.get("valor_total"), data.get("observacoes")))
+        conn.commit(); return jsonify({'success': True, 'id': cur.lastrowid})
+    except Exception as e: return jsonify({'success': False, 'message': str(e)}), 500
+    finally: cur.close(); conn.close()
+
+@app.route('/api/clientes/<int:cliente_id>/agendamentos', methods=['GET'])
+def list_agendamentos_cliente(cliente_id):
+    conn = get_db_connection(); cur = conn.cursor(dictionary=True)
+    cur.execute("""SELECT a.*, b.nome_barbearia, s.nome_servico, s.duracao_minutos FROM agendamentos a
+                   JOIN barbearias b ON b.id = a.barbearia_id JOIN servicos s ON s.id = a.servico_id
+                   WHERE a.cliente_id = %s ORDER BY a.data_agendamento DESC""", (cliente_id,))
+    rows = cur.fetchall(); cur.close(); conn.close()
+    out = [{
+        "id": r["id"], "barbearia": r["nome_barbearia"], "service": r["nome_servico"],
+        "date": str(r["data_agendamento"]), "time": _as_hhmm(r["horario_inicio"]),
+        "status": db_status_to_api(r["status"]), "price": float(r["valor_total"] or 0)
+    } for r in rows]
+    return jsonify({'success': True, 'agendamentos': out})
+
+@app.route('/api/barbearias/<int:barbearia_id>/agendamentos', methods=['GET'])
+def list_agendamentos_barbearia(barbearia_id):
+    conn = get_db_connection(); cur = conn.cursor(dictionary=True)
+    cur.execute("""SELECT a.*, c.nome_completo, c.telefone FROM agendamentos a
+                   JOIN clientes c ON c.id = a.cliente_id WHERE a.barbearia_id = %s
+                   ORDER BY a.data_agendamento DESC""", (barbearia_id,))
+    rows = cur.fetchall(); cur.close(); conn.close()
+    out = [{
+        "id": r["id"], "clientName": r["nome_completo"], "clientPhone": r["telefone"],
+        "date": str(r["data_agendamento"]), "time": _as_hhmm(r["horario_inicio"]),
+        "status": db_status_to_api(r["status"]), "totalPrice": float(r["valor_total"] or 0)
+    } for r in rows]
+    return jsonify({'success': True, 'agendamentos': out})
+
+@app.route('/api/agendamentos/<int:agendamento_id>', methods=['PUT'])
+def update_agendamento(agendamento_id):
+    data = request.get_json() or {}
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        if 'status' in data:
+            cur.execute("UPDATE agendamentos SET status = %s WHERE id = %s", (api_status_to_db(data['status']), agendamento_id))
+            conn.commit()
+        return jsonify({'success': True})
+    except Exception as e: return jsonify({'success': False, 'message': str(e)}), 400
+    finally: cur.close(); conn.close()
+
+# --- AVALIAÇÕES E FAVORITOS ---
+@app.route('/api/agendamentos/<int:agendamento_id>/avaliacao', methods=['POST'])
+def post_avaliacao(agendamento_id):
+    data = request.get_json() or {}
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("UPDATE agendamentos SET avaliacao_nota = %s, avaliacao_comentario = %s WHERE id = %s",
+                    (data.get('rating'), data.get('comment'), agendamento_id))
+        conn.commit(); return jsonify({'success': True})
+    except Exception as e: return jsonify({'success': False, 'message': str(e)}), 400
+    finally: cur.close(); conn.close()
+
+@app.route('/api/barbearias/<int:barbearia_id>/avaliacoes', methods=['GET'])
+def list_avaliacoes(barbearia_id):
+    conn = get_db_connection(); cur = conn.cursor(dictionary=True)
+    cur.execute("""SELECT a.*, c.nome_completo as nome_cliente, s.nome_servico FROM agendamentos a
+                   JOIN clientes c ON c.id = a.cliente_id JOIN servicos s ON s.id = a.servico_id
+                   WHERE a.barbearia_id = %s AND a.avaliacao_nota IS NOT NULL""", (barbearia_id,))
+    reviews = [_serialize_review_row(r, True) for r in cur.fetchall()]
+    cur.close(); conn.close()
+    return jsonify({'success': True, 'reviews': reviews})
+
+@app.route('/api/clientes/<int:cliente_id>/favoritos', methods=['GET'])
+def list_favoritos(cliente_id):
+    conn = get_db_connection(); cur = conn.cursor(dictionary=True)
+    cur.execute("""SELECT b.* FROM cliente_favoritos f JOIN barbearias b ON b.id = f.barbearia_id
+                   WHERE f.cliente_id = %s""", (cliente_id,))
+    rows = cur.fetchall()
+    favoritos = []
+    for r in rows:
+        bid = r['id']
+        cur.execute("SELECT nome_servico FROM servicos WHERE barbearia_id = %s AND status = 'ativo' LIMIT 3", (bid,))
+        svcs = [s['nome_servico'] if isinstance(s, dict) else s[0] for s in cur.fetchall()]
+        favoritos.append({
+            "id": str(bid), "name": r["nome_barbearia"], "address": format_barbearia_address(r),
+            "rating": 4.5, "phone": r["whatsapp"], "services": svcs
+        })
+    cur.close(); conn.close()
+    return jsonify({'success': True, 'favoritos': favoritos})
+
+@app.route('/api/clientes/<int:cliente_id>/favoritos', methods=['POST'])
+def add_favorito(cliente_id):
+    data = request.get_json() or {}
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("INSERT IGNORE INTO cliente_favoritos (cliente_id, barbearia_id) VALUES (%s,%s)", (cliente_id, data.get('barbearia_id')))
+        conn.commit(); return jsonify({'success': True})
+    except Exception as e: return jsonify({'success': False, 'message': str(e)}), 400
+    finally: cur.close(); conn.close()
+
+@app.route('/api/clientes/<int:cliente_id>/favoritos/<int:barbearia_id>', methods=['DELETE'])
+def remove_favorito(cliente_id, barbearia_id):
+    conn = get_db_connection(); cur = conn.cursor()
+    cur.execute("DELETE FROM cliente_favoritos WHERE cliente_id = %s AND barbearia_id = %s", (cliente_id, barbearia_id))
+    conn.commit(); cur.close(); conn.close()
+    return jsonify({'success': True})
+
 # --- REGISTRO E ATUALIZAÇÃO ---
 @app.route('/api/clientes', methods=['POST'])
 def register_client():
@@ -937,8 +1266,6 @@ def register_barbearia():
     finally:
         cursor.close()
         conn.close()
-
-register_extended_api(app)
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
