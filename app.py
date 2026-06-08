@@ -1169,14 +1169,17 @@ def list_agendamentos_cliente(cliente_id):
 @app.route('/api/barbearias/<int:barbearia_id>/agendamentos', methods=['GET'])
 def list_agendamentos_barbearia(barbearia_id):
     conn = get_db_connection(); cur = conn.cursor(dictionary=True)
-    cur.execute("""SELECT a.*, c.nome_completo, c.telefone FROM agendamentos a
-                   JOIN clientes c ON c.id = a.cliente_id WHERE a.barbearia_id = %s
+    cur.execute("""SELECT a.*, c.nome_completo, c.telefone, s.nome_servico, s.preco FROM agendamentos a
+                   JOIN clientes c ON c.id = a.cliente_id
+                   JOIN servicos s ON s.id = a.servico_id
+                   WHERE a.barbearia_id = %s
                    ORDER BY a.data_agendamento DESC""", (barbearia_id,))
     rows = cur.fetchall(); cur.close(); conn.close()
     out = [{
-        "id": r["id"], "clientName": r["nome_completo"], "clientPhone": r["telefone"],
-        "date": str(r["data_agendamento"]), "time": _as_hhmm(r["horario_inicio"]),
-        "status": db_status_to_api(r["status"]), "totalPrice": float(r["valor_total"] or 0)
+        "id": r["id"], "clientName": r["nome_completo"], "clientPhone": r["telefone"], "barbearia_id": r["barbearia_id"],
+        "date": str(r["data_agendamento"]), "time": _as_hhmm(r["horario_inicio"]), "service": r["nome_servico"],
+        "status": db_status_to_api(r["status"]), "totalPrice": float(r["valor_total"] or 0),
+        "notes": r["observacoes"] # Adicionado para a lista completa de serviços
     } for r in rows]
     return jsonify({'success': True, 'agendamentos': out})
 

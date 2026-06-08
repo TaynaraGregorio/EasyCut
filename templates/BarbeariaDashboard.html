@@ -955,8 +955,13 @@
                 document.getElementById('todayAppointments').textContent = todayCount;
 
                 // Receita Mensal (apenas concluídos)
+                // Certifique-se de que 'totalPrice' é um número antes de somar
                 const monthlyRevenue = appointments.reduce((acc, curr) => {
-                    const apptDate = new Date(curr.date);
+                    // Garante que a data seja interpretada corretamente para evitar problemas de fuso horário
+                    const dateParts = curr.date.split('-');
+                    const apptDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+
+                    // Verifica se o agendamento foi concluído e está no mês/ano atual
                     const isCompleted = curr.status === 'completed' || curr.status === 'concluído';
                     const isThisMonth = apptDate.getMonth() === currentMonth && apptDate.getFullYear() === currentYear;
                     
@@ -990,7 +995,7 @@
                 appointments.forEach(appt => {
                     const dateParts = appt.date.split('-');
                     const timeParts = (appt.time || '00:00').split(':');
-                    // Cria a data localmente para evitar o deslocamento de fuso horário (UTC)
+                    // Cria a data localmente para evitar o deslocamento de fuso horário
                     const dateTime = new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1]);
 
                     let title = 'Novo agendamento';
@@ -1006,8 +1011,8 @@
 
                     activities.push({
                         date: dateTime,
-                        title: title,
-                        description: `${appt.clientName} - ${appt.services.join(', ')}`,
+                        title: title, // Use appt.notes para a lista completa de serviços, ou appt.service para o principal
+                        description: `${appt.clientName} - ${appt.notes || appt.service}`,
                         icon: icon
                     });
                 });
