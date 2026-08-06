@@ -1,8 +1,8 @@
 # 💈 EasyCut
 
 Sistema web desenvolvido para conectar usuários a barbearias próximas, permitindo agendamentos de serviços de forma prática, rápida e intuitiva.
-
 ---
+## Teste o sistema em: https://easycut.onrender.com/
 
 ## 📌 Sobre o Projeto
 
