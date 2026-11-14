@@ -37,11 +37,20 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
                         0 0 0 1px rgba(255, 255, 255, 0.05);
             padding: 40px;
-            max-width: 600px;
+            max-width: 1200px;
             width: 100%;
             position: relative;
             z-index: 1;
-            margin: 20px auto;
+            margin: 32px auto;
+        }
+        .details-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        .details-aside .btn {
+            margin: 12px 0 0 0;
         }
         .header {
             text-align: center;
@@ -86,6 +95,7 @@
             background: rgba(30, 41, 59, 0.3);
             border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
         }
         .barbearia-image {
             width: 100px;
@@ -552,7 +562,7 @@
         /* Galeria de Fotos */
         .photos-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 12px;
             margin-top: 12px;
         }
@@ -864,11 +874,43 @@
         }
         
         /* Responsivo */
+        @media (min-width: 900px) {
+            .details-layout {
+                grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.85fr);
+                gap: 28px;
+            }
+            .details-aside {
+                position: sticky;
+                top: 24px;
+            }
+            .hours-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .photos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+            .time-slots {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1280px;
+                padding: 48px;
+                margin: 40px auto;
+            }
+            .photos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+        }
+
         @media (max-width: 768px) {
             .container {
-                margin: 10px auto;
-                padding: 28px;
+                margin: 16px auto;
+                padding: 28px 20px;
                 border-radius: 20px;
+                max-width: calc(100% - 24px);
             }
             .barbearia-header {
                 flex-direction: column;
@@ -929,9 +971,10 @@
         
         @media (max-width: 480px) {
             .container {
-                padding: 20px;
-                margin: 5px auto;
-                width: 95%;
+                padding: 20px 16px;
+                margin: 8px auto;
+                max-width: calc(100% - 16px);
+                width: 100%;
             }
             .logo {
                 font-size: 1.6rem;
@@ -1171,6 +1214,8 @@
 
             displayBarbeariaDetails(barbearia) {
                 this.barbeariaContent.innerHTML = `
+                    <div class="details-layout">
+                    <div class="details-main">
                     <div class="barbearia-header">
                         <button class="favorite-btn" id="favoriteBtn" onclick="barbeariaDetalhes.toggleFavorite()" title="Adicionar aos favoritos">
                             <span class="favorite-icon">🤍</span>
@@ -1212,6 +1257,36 @@
                         </button>
                     </div>
 
+                    <div class="info-section">
+                        <h3>📞 Contato</h3>
+                        ${barbearia.phone ? `<p><strong>📞 Telefone:</strong> ${barbearia.phone}</p>` : ''}
+                        ${barbearia.email ? `<p><strong>📧 Email:</strong> ${barbearia.email}</p>` : ''}
+                        ${barbearia.website ? `<p><strong>🌐 Website:</strong> <a href="${barbearia.website}" target="_blank" style="color: #3b82f6;">${barbearia.website}</a></p>` : ''}
+                        ${barbearia.whatsapp ? `<p><strong>💬 WhatsApp:</strong> <a href="https://wa.me/${barbearia.whatsapp}" target="_blank" style="color: #25D366;">${barbearia.whatsapp}</a></p>` : ''}
+                    </div>
+
+                    ${barbearia.photos && barbearia.photos.length > 0 ? `
+                    <div class="info-section">
+                        <h3>📸 Galeria de Fotos</h3>
+                        <div class="photos-grid">
+                            ${barbearia.photos.map((photo, index) => 
+                                `<div class="photo-item" onclick="barbeariaDetalhes.openPhotoByIndex(${index})">
+                                    <img src="${photo}" alt="Foto da barbearia">
+                                </div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <div class="info-section">
+                        <h3>⭐ Avaliações</h3>
+                        <div class="reviews-section">
+                            ${this.renderReviews(barbearia.reviews)}
+                        </div>
+                    </div>
+                    </div>
+
+                    <aside class="details-aside">
                     <div class="info-section scheduling-section">
                         <h3>📅 Agendar Horário</h3>
                         
@@ -1241,33 +1316,7 @@
                     <button class="btn btn-secondary" onclick="barbeariaDetalhes.compartilharBarbearia()">
                         <span>📤</span> Compartilhar Barbearia
                     </button>
-
-                    <div class="info-section">
-                        <h3>📞 Contato</h3>
-                        ${barbearia.phone ? `<p><strong>📞 Telefone:</strong> ${barbearia.phone}</p>` : ''}
-                        ${barbearia.email ? `<p><strong>📧 Email:</strong> ${barbearia.email}</p>` : ''}
-                        ${barbearia.website ? `<p><strong>🌐 Website:</strong> <a href="${barbearia.website}" target="_blank" style="color: #3b82f6;">${barbearia.website}</a></p>` : ''}
-                        ${barbearia.whatsapp ? `<p><strong>💬 WhatsApp:</strong> <a href="https://wa.me/${barbearia.whatsapp}" target="_blank" style="color: #25D366;">${barbearia.whatsapp}</a></p>` : ''}
-                    </div>
-
-                    ${barbearia.photos && barbearia.photos.length > 0 ? `
-                    <div class="info-section">
-                        <h3>📸 Galeria de Fotos</h3>
-                        <div class="photos-grid">
-                            ${barbearia.photos.map((photo, index) => 
-                                `<div class="photo-item" onclick="barbeariaDetalhes.openPhotoByIndex(${index})">
-                                    <img src="${photo}" alt="Foto da barbearia">
-                                </div>`
-                            ).join('')}
-                        </div>
-                    </div>
-                    ` : ''}
-
-                    <div class="info-section">
-                        <h3>⭐ Avaliações</h3>
-                        <div class="reviews-section">
-                            ${this.renderReviews(barbearia.reviews)}
-                        </div>
+                    </aside>
                     </div>
                 `;
                 

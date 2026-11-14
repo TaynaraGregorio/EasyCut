@@ -6,15 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{{ url_for('static', filename='imagens/favicon001.png') }}" type="image/png">
     <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
         body {
             margin: 0;
             font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
             color: #fff;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             position: relative;
             overflow-x: hidden;
         }
@@ -37,11 +37,16 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
                         0 0 0 1px rgba(255, 255, 255, 0.05);
             padding: 40px;
-            max-width: 450px;
+            max-width: 1200px;
             width: 100%;
             position: relative;
             z-index: 1;
-            margin: 20px;
+            margin: 32px auto;
+        }
+        .search-toolbar {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
         }
         .header {
             text-align: center;
@@ -221,13 +226,24 @@
         }
         .barbearias-list {
             margin-top: 24px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        .barbearias-list > .loading,
+        .barbearias-list > .error-message,
+        .barbearias-list > .success-message,
+        .barbearias-list > .info-text {
+            grid-column: 1 / -1;
         }
         .barbearia-card {
             background: rgba(30, 41, 59, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
             padding: 20px;
-            margin-bottom: 16px;
+            margin-bottom: 0;
+            height: 100%;
+            cursor: pointer;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
         }
@@ -250,6 +266,10 @@
             margin-right: 16px;
             background: rgba(59, 130, 246, 0.2);
             border: 2px solid rgba(59, 130, 246, 0.3);
+        }
+        .barbearia-info {
+            min-width: 0;
+            flex: 1;
         }
         .barbearia-info h3 {
             font-size: 1.1rem;
@@ -727,7 +747,11 @@
         }
         
         .filters-content {
+            display: none;
             animation: slideDown 0.3s ease;
+        }
+        .filters-content.is-open {
+            display: block;
         }
         
         @keyframes slideDown {
@@ -865,21 +889,68 @@
             font-size: 0.95rem;
         }
         
-        /* Tablets e telas médias */
-        @media (max-width: 1024px) {
+        @media (min-width: 768px) {
+            .search-toolbar {
+                grid-template-columns: minmax(180px, 240px) 1fr;
+                align-items: end;
+            }
+            .search-toolbar .form-group {
+                margin-bottom: 0;
+            }
+            .filters-content.is-open {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px 20px;
+            }
+            .filter-group {
+                margin-bottom: 0;
+            }
+            .filter-actions {
+                grid-column: 1 / -1;
+            }
+            .barbearias-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 18px;
+            }
+            #locationButton {
+                width: auto;
+                min-width: 280px;
+                display: inline-flex;
+                padding-left: 28px;
+                padding-right: 28px;
+            }
+        }
+
+        @media (min-width: 1024px) {
             .container {
-                max-width: 400px;
-                margin: 15px;
+                max-width: 1200px;
+                padding: 44px 48px;
+                margin: 40px auto;
+            }
+            .filters-content.is-open {
+                grid-template-columns: 1fr 1fr 1.2fr auto;
+            }
+            .barbearias-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 20px;
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .container {
+                max-width: 1280px;
+            }
+            .barbearias-list {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
             }
         }
         
-        /* Tablets pequenos */
         @media (max-width: 768px) {
             .container {
-                margin: 10px;
-                padding: 28px;
+                margin: 16px auto;
+                padding: 28px 20px;
                 border-radius: 20px;
-                max-width: 380px;
+                max-width: calc(100% - 24px);
             }
             .logo {
                 font-size: 1.9rem;
@@ -891,37 +962,22 @@
                 padding: 14px 0;
                 font-size: 1.05rem;
             }
-        }
-        
-        /* Smartphones grandes */
-        @media (max-width: 600px) {
-            .container {
-                margin: 8px;
-                padding: 24px;
-                max-width: calc(100vw - 16px);
+            .barbearia-header {
+                flex-wrap: wrap;
             }
-            .logo {
-                font-size: 1.7rem;
-            }
-            .form-group {
-                margin-bottom: 18px;
-            }
-            input {
-                padding: 12px 14px;
-                font-size: 0.98rem;
-            }
-            .btn {
-                padding: 14px 0;
-                margin: 20px 0 14px 0;
+            .barbearia-hours {
+                margin-left: 66px;
+                text-align: left;
+                width: 100%;
+                margin-top: 8px;
             }
         }
         
-        /* Smartphones médios */
         @media (max-width: 480px) {
             .container {
-                padding: 20px;
-                margin: 5px;
-                max-width: calc(100vw - 10px);
+                padding: 20px 16px;
+                margin: 8px auto;
+                max-width: calc(100% - 16px);
             }
             .logo {
                 font-size: 1.6rem;
@@ -931,7 +987,7 @@
                 font-size: 0.9rem;
             }
             .header {
-                margin-bottom: 28px;
+                margin-bottom: 24px;
             }
             input {
                 padding: 11px 13px;
@@ -942,71 +998,12 @@
                 font-size: 1rem;
                 margin: 18px 0 12px 0;
             }
-            .form-group {
-                margin-bottom: 16px;
-            }
             .back-link {
                 font-size: 0.9rem;
                 margin-bottom: 20px;
             }
-            .info-text {
-                font-size: 0.85rem;
-            }
-        }
-        
-        /* Smartphones pequenos */
-        @media (max-width: 360px) {
-            .container {
-                padding: 16px;
-                margin: 3px;
-                max-width: calc(100vw - 6px);
-            }
-            .logo {
-                font-size: 1.4rem;
-            }
-            .subtitle {
-                font-size: 0.85rem;
-            }
-            input {
-                padding: 10px 12px;
-                font-size: 0.9rem;
-            }
-            .btn {
-                padding: 12px 0;
-                font-size: 0.95rem;
-            }
-            .form-group {
-                margin-bottom: 14px;
-            }
-            .header {
-                margin-bottom: 24px;
-            }
-        }
-        
-        /* Orientação landscape em smartphones */
-        @media (max-height: 500px) and (orientation: landscape) {
-            .container {
-                margin: 5px;
-                padding: 16px;
-                max-height: calc(100vh - 10px);
-                overflow-y: auto;
-            }
-            .header {
-                margin-bottom: 16px;
-            }
-            .logo {
-                font-size: 1.4rem;
-                margin-bottom: 4px;
-            }
-            .subtitle {
-                font-size: 0.8rem;
-            }
-            .form-group {
-                margin-bottom: 12px;
-            }
-            .btn {
-                padding: 10px 0;
-                margin: 12px 0 8px 0;
+            .barbearias-list {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -1030,9 +1027,10 @@
         </div>
 
         <!-- Seção de Busca Unificada -->
+        <div class="search-toolbar">
         <div class="form-group">
             <label for="searchMode">Tipo de busca</label>
-            <select id="searchMode" style="margin-bottom: 12px;">
+            <select id="searchMode">
                 <option value="name">🔍 Nome da barbearia</option>
                 <option value="location">📍 Localização/Endereço</option>
             </select>
@@ -1052,6 +1050,7 @@
             </div>
             <div class="info-text" id="searchHint">Digite o nome da barbearia desejada</div>
         </div>
+        </div>
 
         <button id="locationButton" class="btn btn-primary" style="display: none;">
             📍 Usar minha localização
@@ -1063,7 +1062,7 @@
                 <h3>Filtros</h3>
                 <button id="toggleFilters" class="btn-toggle">🔽</button>
             </div>
-            <div id="filtersContent" class="filters-content" style="display: none;">
+            <div id="filtersContent" class="filters-content">
                 <div class="filter-group">
                     <label>Avaliação mínima</label>
                     <select id="minRating">
@@ -1216,7 +1215,7 @@
                     this.searchLabel.textContent = 'Digite o endereço';
                     this.searchInput.placeholder = 'Ex: Rua das Flores, 123, Centro, Ipatinga - MG';
                     this.searchHint.textContent = 'Digite pelo menos 3 caracteres para ver sugestões • Clique na lupa ou pressione Enter para buscar';
-                    this.locationButton.style.display = 'block';
+                    this.locationButton.style.display = 'inline-flex';
                 }
             }
 
@@ -2179,8 +2178,8 @@
             }
 
             toggleFiltersPanel() {
-                const isVisible = this.filtersContent.style.display !== 'none';
-                this.filtersContent.style.display = isVisible ? 'none' : 'block';
+                const isVisible = this.filtersContent.classList.contains('is-open');
+                this.filtersContent.classList.toggle('is-open', !isVisible);
                 this.toggleFilters.textContent = isVisible ? '🔽' : '🔼';
             }
 
